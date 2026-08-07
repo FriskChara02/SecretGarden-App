@@ -6,12 +6,16 @@
 //
 
 import SwiftUI
+import CoreModels
+import CoreNetworking
+import CoreStorage
+import DesignSystem
 
 @main
 struct SecretGardenApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            Text("CoreModels version: \(CoreModelsPlaceholder.version)")
         }
     }
 }
