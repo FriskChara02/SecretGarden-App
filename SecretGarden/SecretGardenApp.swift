@@ -15,7 +15,12 @@ import DesignSystem
 struct SecretGardenApp: App {
     var body: some Scene {
         WindowGroup {
-            Text("CoreModels version: \(CoreModelsPlaceholder.version)")
+            VStack(spacing: 8) {
+                Text("Environment: \(AppConfig.environment.rawValue)")
+                Text("API Base URL: \(AppConfig.apiBaseURL.absoluteString)")
+                Text("CoreModels version: \(CoreModelsPlaceholder.version)")
+            }
+            .padding()
         }
     }
 }
