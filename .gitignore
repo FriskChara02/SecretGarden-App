@@ -41,3 +41,6 @@ fastlane/test_output
 
 # SwiftLint cache
 .swiftlint_cache/
+
+# SwiftFormat cache
+.swiftformat_cache/

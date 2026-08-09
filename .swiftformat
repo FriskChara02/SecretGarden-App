@@ -1,0 +1,34 @@
+# .swiftformat
+# SwiftFormat configuration for the SecretGarden project
+
+--swiftversion 5.10
+
+# Indent 4 spaces, no tabs
+--indent 4
+--tabwidth 4
+
+# Same-line opening brace (standard Swift convention)
+--allman false
+
+# Sort imports alphabetically
+--importgrouping alphabetized
+
+# Whitespace around the operator
+--operatorfunc spaced
+
+# Use self only when necessary (do not force self. everywhere)
+--self remove
+
+# Maximum consecutive empty lines
+--maxblanklines 1
+
+# Trailing comma in multi-line collection literals
+--commas always
+
+# Do not abbreviate Void to ()
+--voidtype void
+
+# Exclude rule that do not apply (retain the familiar style)
+--disable redundantSelf, andOperator, wrapMultilineStatementBraces
+
+--exclude Packages/*/.build,.build,DerivedData

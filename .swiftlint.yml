@@ -1,0 +1,69 @@
+# SwiftLint configuration for the SecretGarden project
+
+# Directories to exclude from linting (third-party source code, build artifacts)
+excluded:
+  - Packages/*/.build
+  - DerivedData
+  - .build
+
+# Enable additional non-default rules that are useful for a clean MVVM architecture
+opt_in_rules:
+  - explicit_init
+  - closure_spacing
+  - empty_count
+  - fatal_error_message
+  - first_where
+  - force_unwrapping
+  - implicitly_unwrapped_optional
+  - joined_default_parameter
+  - legacy_random
+  - modifier_order
+  - operator_usage_whitespace
+  - overridden_super_call
+  - prohibited_super_call
+  - redundant_nil_coalescing
+  - sorted_first_last
+  - toggle_bool
+  - unneeded_parentheses_in_closure_argument
+  - vertical_whitespace_closing_braces
+
+# Disable default rules that do not align with the project's style
+disabled_rules:
+  - todo
+
+# Adjust the thresholds for a few default rules
+line_length:
+  warning: 130
+  error: 160
+  ignores_comments: true
+  ignores_urls: true
+
+type_body_length:
+  warning: 300
+  error: 400
+
+file_length:
+  warning: 400
+  error: 500
+  ignore_comment_only_lines: true
+
+function_body_length:
+  warning: 50
+  error: 80
+
+cyclomatic_complexity:
+  warning: 12
+  error: 18
+
+identifier_name:
+  min_length: 2
+  max_length: 50
+  excluded:
+    - id
+    - x
+    - y
+
+# The "force_unwrapping" and "force_cast" rules are important for production projects
+# -> Do NOT disable them; keep the default warning setting to help prevent runtime crashes
+
+reporter: "xcode"
