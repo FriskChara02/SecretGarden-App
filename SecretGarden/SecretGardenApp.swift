@@ -10,6 +10,7 @@ import CoreModels
 import CoreNetworking
 import CoreStorage
 import DesignSystem
+import CoreArchitecture
 
 @main
 struct SecretGardenApp: App {
@@ -17,8 +18,7 @@ struct SecretGardenApp: App {
         WindowGroup {
             VStack(spacing: 8) {
                 Text("Environment: \(AppConfig.environment.rawValue)")
-                Text("API Base URL: \(AppConfig.apiBaseURL.absoluteString)")
-                Text("CoreModels version: \(CoreModelsPlaceholder.version)")
+                Text("Test AppError: \(AppError.unauthorized.localizedDescription)")
             }
             .padding()
         }
