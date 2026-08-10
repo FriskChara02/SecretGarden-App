@@ -13,6 +13,8 @@
 		7A0AC60E30264A8F0042775A /* DesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = 7A0AC60D30264A8F0042775A /* DesignSystem */; };
 		7AFB86A630283F6B003895FE /* .swiftlint.yml in Resources */ = {isa = PBXBuildFile; fileRef = 7AFB86A530283F68003895FE /* .swiftlint.yml */; };
 		7AFB86A830284044003895FE /* .swiftformat in Resources */ = {isa = PBXBuildFile; fileRef = 7AFB86A730284041003895FE /* .swiftformat */; };
+		7AFB86C13028C870003895FE /* CoreArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = 7AFB86C03028C870003895FE /* CoreArchitecture */; };
+		7AFB86D73028C940003895FE /* CoreArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = 7AFB86D63028C940003895FE /* CoreArchitecture */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -45,6 +47,18 @@
 			path = Configs;
 			sourceTree = "<group>";
 		};
+		7AFB86E230297D48003895FE /* Sources */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			name = Sources;
+			path = Packages/CoreModels/Sources;
+			sourceTree = "<group>";
+		};
+		7AFB88513029BDDB003895FE /* Sources */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			name = Sources;
+			path = Packages/CoreArchitecture/Sources;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -52,10 +66,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7AFB86D73028C940003895FE /* CoreArchitecture in Frameworks */,
 				7A0AC609302648A30042775A /* CoreStorage in Frameworks */,
 				7A0AC6033026487D0042775A /* CoreModels in Frameworks */,
 				7A0AC606302648940042775A /* CoreNetworking in Frameworks */,
 				7A0AC60E30264A8F0042775A /* DesignSystem in Frameworks */,
+				7AFB86C13028C870003895FE /* CoreArchitecture in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +81,8 @@
 		7A21DC263025DFFB00AB92DD = {
 			isa = PBXGroup;
 			children = (
+				7AFB88513029BDDB003895FE /* Sources */,
+				7AFB86E230297D48003895FE /* Sources */,
 				7AFB86A730284041003895FE /* .swiftformat */,
 				7AFB86A530283F68003895FE /* .swiftlint.yml */,
 				7A48FA8D302743E3001AC9C9 /* Configs */,
@@ -108,6 +126,8 @@
 			fileSystemSynchronizedGroups = (
 				7A21DC313025DFFB00AB92DD /* SecretGarden */,
 				7A48FA8D302743E3001AC9C9 /* Configs */,
+				7AFB86E230297D48003895FE /* Sources */,
+				7AFB88513029BDDB003895FE /* Sources */,
 			);
 			name = SecretGarden;
 			packageProductDependencies = (
@@ -115,6 +135,8 @@
 				7A0AC605302648940042775A /* CoreNetworking */,
 				7A0AC608302648A30042775A /* CoreStorage */,
 				7A0AC60D30264A8F0042775A /* DesignSystem */,
+				7AFB86C03028C870003895FE /* CoreArchitecture */,
+				7AFB86D63028C940003895FE /* CoreArchitecture */,
 			);
 			productName = SecretGarden;
 			productReference = 7A21DC2F3025DFFB00AB92DD /* SecretGarden.app */;
@@ -151,6 +173,7 @@
 				7A0AC60C30264A8F0042775A /* XCLocalSwiftPackageReference "Packages/DesignSystem" */,
 				7AFB868E302836DC003895FE /* XCRemoteSwiftPackageReference "SwiftLint" */,
 				7AFB86BF30284C1B003895FE /* XCRemoteSwiftPackageReference "SwiftFormat" */,
+				7AFB86D53028C940003895FE /* XCLocalSwiftPackageReference "Packages/CoreArchitecture" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 7A21DC303025DFFB00AB92DD /* Products */;
@@ -825,6 +848,10 @@
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/DesignSystem;
 		};
+		7AFB86D53028C940003895FE /* XCLocalSwiftPackageReference "Packages/CoreArchitecture" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/CoreArchitecture;
+		};
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCRemoteSwiftPackageReference section */
@@ -867,6 +894,15 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 7AFB868E302836DC003895FE /* XCRemoteSwiftPackageReference "SwiftLint" */;
 			productName = "plugin:SwiftLintBuildToolPlugin";
+		};
+		7AFB86C03028C870003895FE /* CoreArchitecture */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7AFB86BF30284C1B003895FE /* XCRemoteSwiftPackageReference "SwiftFormat" */;
+			productName = CoreArchitecture;
+		};
+		7AFB86D63028C940003895FE /* CoreArchitecture */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = CoreArchitecture;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
