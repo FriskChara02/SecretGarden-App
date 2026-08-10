@@ -19,6 +19,7 @@ struct SecretGardenApp: App {
             VStack(spacing: 8) {
                 Text("Environment: \(AppConfig.environment.rawValue)")
                 Text("Test AppError: \(AppError.unauthorized.localizedDescription)")
+                Text("Test Model: \(SeriesType.manga.rawValue) / \(ReadingStatus.reading.rawValue)")
             }
             .padding()
         }
