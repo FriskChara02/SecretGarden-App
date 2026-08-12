@@ -46,5 +46,3 @@ public extension View {
         self.shadow(color: style.color, radius: style.radius, x: style.x, y: style.y)
     }
 }
-
-
