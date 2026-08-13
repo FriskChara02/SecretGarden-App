@@ -3,21 +3,19 @@ import PackageDescription
 
 let package = Package(
     name: "CoreArchitecture",
-    platforms: [.iOS(.v17), .macOS(.v14)],
+    platforms: [.iOS(.v17)],
     products: [
         .library(name: "CoreArchitecture", targets: ["CoreArchitecture"])
     ],
     dependencies: [
-        .package(path: "../CoreModels")
+        .package(path: "../CoreModels"),
+        .package(path: "../DesignSystem")
     ],
     targets: [
         .target(
             name: "CoreArchitecture",
-            dependencies: ["CoreModels"]
+            dependencies: ["CoreModels", "DesignSystem"]
         ),
-        .testTarget(
-            name: "CoreArchitectureTests",
-            dependencies: ["CoreArchitecture"]
-        )
+        .testTarget(name: "CoreArchitectureTests", dependencies: ["CoreArchitecture"])
     ]
 )
