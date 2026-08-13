@@ -5,8 +5,8 @@
 //  Created by Loi Nguyen on 12/8/26.
 //
 
-// Typography scale — every .font() in the Feature MUST use .dsFont(_:)
-// instead of directly using .font(.system(size:)), to ensure Dynamic Type works correctly.
+// Typography scale using the custom Quicksand font (registered via DSFontRegistrar).
+// All features MUST use .dsFont(_:), do not call .font(.custom(...)) directly.
 
 import SwiftUI
 import UIKit
@@ -39,11 +39,14 @@ public enum DSFontToken: CaseIterable {
         }
     }
 
-    var weight: Font.Weight {
+    /// The PostScript name of the Quicksand font corresponding to the desired weight.
+    /// Quicksand is used for both headings and body text - maintaining consistency with a single font family.
+    var fontName: String {
         switch self {
-        case .largeTitle, .title1: return .bold
-        case .title2, .title3, .headline: return .semibold
-        case .body, .callout, .subheadline, .footnote, .caption: return .regular
+        case .largeTitle, .title1, .title2, .title3: return "Quicksand-Bold"
+        case .headline: return "Quicksand-SemiBold"
+        case .body, .callout: return "Quicksand-Medium"
+        case .subheadline, .footnote, .caption: return "Quicksand-Regular"
         }
     }
 
@@ -67,34 +70,22 @@ public enum DSFontToken: CaseIterable {
 
 public enum DSFont {
 
-    /// Returns a SwiftUI Font scaled correctly according to Dynamic Type, based on UIFontMetrics.
+    /// Returns a SwiftUI Font using Quicksand, scaled correctly for Dynamic Type via UIFontMetrics.
+    /// If the font fails to register for any reason, it falls back to the system font
+    /// with an equivalent size and weight instead of crashing - preventing app failure due to font errors.
     public static func font(_ token: DSFontToken) -> Font {
-        let baseFont = UIFont.systemFont(ofSize: token.size, weight: token.weight.uiKitWeight)
+        guard let baseFont = UIFont(name: token.fontName, size: token.size) else {
+            assertionFailure("Font '\(token.fontName)' chưa được đăng ký — kiểm tra DSFontRegistrar.registerFonts() đã gọi chưa.")
+            let fallback = UIFont.systemFont(ofSize: token.size, weight: .regular)
+            let scaledFallback = UIFontMetrics(forTextStyle: token.metricsTextStyle).scaledFont(for: fallback)
+            return Font(scaledFallback)
+        }
         let scaledFont = UIFontMetrics(forTextStyle: token.metricsTextStyle).scaledFont(for: baseFont)
         return Font(scaledFont)
     }
 }
 
-// MARK: - Font.Weight -> UIFont.Weight bridge
-
-private extension Font.Weight {
-    var uiKitWeight: UIFont.Weight {
-        switch self {
-        case .bold: return .bold
-        case .semibold: return .semibold
-        case .regular: return .regular
-        case .medium: return .medium
-        case .light: return .light
-        case .heavy: return .heavy
-        case .black: return .black
-        case .thin: return .thin
-        case .ultraLight: return .ultraLight
-        default: return .regular
-        }
-    }
-}
-
-// MARK: - ViewModifier + helper function
+// MARK: - ViewModifier
 
 private struct DSFontModifier: ViewModifier {
     let token: DSFontToken
