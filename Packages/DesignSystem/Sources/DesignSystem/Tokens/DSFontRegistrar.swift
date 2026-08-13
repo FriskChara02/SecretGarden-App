@@ -27,7 +27,7 @@ public enum DSFontRegistrar {
         didRegister = true
 
         for name in fontFileNames {
-            guard let url = Bundle.module.url(forResource: name, withExtension: "ttf") else {
+            guard let url = Bundle.designSystemModule.url(forResource: name, withExtension: "ttf") else {
                 assertionFailure("Không tìm thấy file font '\(name).ttf' trong bundle DesignSystem.")
                 continue
             }

@@ -15,6 +15,8 @@
 		7AFB86A830284044003895FE /* .swiftformat in Resources */ = {isa = PBXBuildFile; fileRef = 7AFB86A730284041003895FE /* .swiftformat */; };
 		7AFB86C13028C870003895FE /* CoreArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = 7AFB86C03028C870003895FE /* CoreArchitecture */; };
 		7AFB86D73028C940003895FE /* CoreArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = 7AFB86D63028C940003895FE /* CoreArchitecture */; };
+		7AFB885C3029CB89003895FE /* Repositories in Frameworks */ = {isa = PBXBuildFile; productRef = 7AFB885B3029CB89003895FE /* Repositories */; };
+		7AFB88D3302AD106003895FE /* FactoryKit in Frameworks */ = {isa = PBXBuildFile; productRef = 7AFB88D2302AD106003895FE /* FactoryKit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -47,16 +49,10 @@
 			path = Configs;
 			sourceTree = "<group>";
 		};
-		7AFB86E230297D48003895FE /* Sources */ = {
+		7A79F554302D62DC002BBDDE /* Sources */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			name = Sources;
-			path = Packages/CoreModels/Sources;
-			sourceTree = "<group>";
-		};
-		7AFB88513029BDDB003895FE /* Sources */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			name = Sources;
-			path = Packages/CoreArchitecture/Sources;
+			path = Packages/DesignSystem/Sources;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -66,7 +62,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7AFB885C3029CB89003895FE /* Repositories in Frameworks */,
 				7AFB86D73028C940003895FE /* CoreArchitecture in Frameworks */,
+				7AFB88D3302AD106003895FE /* FactoryKit in Frameworks */,
 				7A0AC609302648A30042775A /* CoreStorage in Frameworks */,
 				7A0AC6033026487D0042775A /* CoreModels in Frameworks */,
 				7A0AC606302648940042775A /* CoreNetworking in Frameworks */,
@@ -81,8 +79,7 @@
 		7A21DC263025DFFB00AB92DD = {
 			isa = PBXGroup;
 			children = (
-				7AFB88513029BDDB003895FE /* Sources */,
-				7AFB86E230297D48003895FE /* Sources */,
+				7A79F554302D62DC002BBDDE /* Sources */,
 				7AFB86A730284041003895FE /* .swiftformat */,
 				7AFB86A530283F68003895FE /* .swiftlint.yml */,
 				7A48FA8D302743E3001AC9C9 /* Configs */,
@@ -126,8 +123,7 @@
 			fileSystemSynchronizedGroups = (
 				7A21DC313025DFFB00AB92DD /* SecretGarden */,
 				7A48FA8D302743E3001AC9C9 /* Configs */,
-				7AFB86E230297D48003895FE /* Sources */,
-				7AFB88513029BDDB003895FE /* Sources */,
+				7A79F554302D62DC002BBDDE /* Sources */,
 			);
 			name = SecretGarden;
 			packageProductDependencies = (
@@ -137,6 +133,8 @@
 				7A0AC60D30264A8F0042775A /* DesignSystem */,
 				7AFB86C03028C870003895FE /* CoreArchitecture */,
 				7AFB86D63028C940003895FE /* CoreArchitecture */,
+				7AFB885B3029CB89003895FE /* Repositories */,
+				7AFB88D2302AD106003895FE /* FactoryKit */,
 			);
 			productName = SecretGarden;
 			productReference = 7A21DC2F3025DFFB00AB92DD /* SecretGarden.app */;
@@ -174,6 +172,8 @@
 				7AFB868E302836DC003895FE /* XCRemoteSwiftPackageReference "SwiftLint" */,
 				7AFB86BF30284C1B003895FE /* XCRemoteSwiftPackageReference "SwiftFormat" */,
 				7AFB86D53028C940003895FE /* XCLocalSwiftPackageReference "Packages/CoreArchitecture" */,
+				7AFB885A3029CB89003895FE /* XCLocalSwiftPackageReference "Packages/Repositories" */,
+				7AFB88D1302AD106003895FE /* XCRemoteSwiftPackageReference "Factory" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 7A21DC303025DFFB00AB92DD /* Products */;
@@ -852,6 +852,10 @@
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/CoreArchitecture;
 		};
+		7AFB885A3029CB89003895FE /* XCLocalSwiftPackageReference "Packages/Repositories" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/Repositories;
+		};
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCRemoteSwiftPackageReference section */
@@ -869,6 +873,14 @@
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 0.62.1;
+			};
+		};
+		7AFB88D1302AD106003895FE /* XCRemoteSwiftPackageReference "Factory" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/hmlongco/Factory";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.3.2;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
@@ -903,6 +915,15 @@
 		7AFB86D63028C940003895FE /* CoreArchitecture */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = CoreArchitecture;
+		};
+		7AFB885B3029CB89003895FE /* Repositories */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Repositories;
+		};
+		7AFB88D2302AD106003895FE /* FactoryKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7AFB88D1302AD106003895FE /* XCRemoteSwiftPackageReference "Factory" */;
+			productName = FactoryKit;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

@@ -22,19 +22,13 @@ struct SecretGardenApp: App {
         WindowGroup {
             VStack(alignment: .leading, spacing: DSSpacing.sm) {
                 Text("SecretGarden")
-                    .dsFont(.largeTitle)
+                    .dsFont(DSFontToken.largeTitle)
                     .foregroundStyle(DSColor.brandPrimary)
                 Text("Sayonara, Watashi no Cramer")
-                    .dsFont(.title3)
+                    .dsFont(DSFontToken.title3)
                     .foregroundStyle(DSColor.textPrimary)
                 Text("Nhóm dịch: Yuri no Sono")
-                    .dsFont(.subheadline)
-                    .foregroundStyle(DSColor.textSecondary)
-                Text("Chưa có mô tả")
-                    .dsFont(.subheadline)
-                    .foregroundStyle(DSColor.textSecondary)
-                Text("Mạng xã hội - Trang chủ - Cá nhân")
-                    .dsFont(.subheadline)
+                    .dsFont(DSFontToken.subheadline)
                     .foregroundStyle(DSColor.textSecondary)
             }
             .padding(DSSpacing.lg)

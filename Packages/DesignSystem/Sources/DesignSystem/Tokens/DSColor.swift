@@ -10,18 +10,30 @@
 
 import SwiftUI
 
+private final class DesignSystemBundleFinder {}
+
+extension Bundle {
+    static var designSystemModule: Bundle {
+        #if SWIFT_PACKAGE
+        return Bundle.module
+        #else
+        return Bundle(for: DesignSystemBundleFinder.self)
+        #endif
+    }
+}
+
 public enum DSColor {
-    public static let brandPrimary = Color("BrandPrimary", bundle: .module)
-    public static let brandSecondary = Color("BrandSecondary", bundle: .module)
+    public static let brandPrimary = Color("BrandPrimary", bundle: .designSystemModule)
+    public static let brandSecondary = Color("BrandSecondary", bundle: .designSystemModule)
 
-    public static let backgroundPrimary = Color("BackgroundPrimary", bundle: .module)
-    public static let backgroundSecondary = Color("BackgroundSecondary", bundle: .module)
+    public static let backgroundPrimary = Color("BackgroundPrimary", bundle: .designSystemModule)
+    public static let backgroundSecondary = Color("BackgroundSecondary", bundle: .designSystemModule)
 
-    public static let textPrimary = Color("TextPrimary", bundle: .module)
-    public static let textSecondary = Color("TextSecondary", bundle: .module)
+    public static let textPrimary = Color("TextPrimary", bundle: .designSystemModule)
+    public static let textSecondary = Color("TextSecondary", bundle: .designSystemModule)
 
-    public static let borderDefault = Color("BorderDefault", bundle: .module)
+    public static let borderDefault = Color("BorderDefault", bundle: .designSystemModule)
 
-    public static let statusError = Color("StatusError", bundle: .module)
-    public static let statusSuccess = Color("StatusSuccess", bundle: .module)
+    public static let statusError = Color("StatusError", bundle: .designSystemModule)
+    public static let statusSuccess = Color("StatusSuccess", bundle: .designSystemModule)
 }
