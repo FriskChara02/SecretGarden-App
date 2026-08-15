@@ -5,10 +5,10 @@
 //  Created by Loi Nguyen on 9/8/26.
 //
 
-// Đọc các giá trị environment đã cấu hình qua .xcconfig -> Info.plist
-// Đây là NƠI DUY NHẤT trong toàn app được phép đọc trực tiếp Bundle.main
-// cho mục đích environment config -- các Feature khác PHẢI dùng qua AppConfig,
-// không tự đọc Info.plist riêng lẻ (tránh rải rác, khó kiểm soát).
+// Read environment values ​​configured via .xcconfig -> Info.plist.
+// This is the ONLY place in the entire app permitted to read directly from Bundle.main
+// for environment configuration purposes -- other features MUST use AppConfig
+// rather than reading Info.plist individually (to avoid scattered, hard-to-manage code).
 
 import Foundation
 
@@ -34,7 +34,7 @@ enum AppConfigError: Error, LocalizedError {
 
 enum AppConfig {
 
-    /// Base URL của API, đọc từ key "APIBaseURL" trong Info.plist.
+    /// The API base URL, read from the "APIBaseURL" key in Info.plist.
     static var apiBaseURL: URL = {
         guard let urlString = Bundle.main.object(forInfoDictionaryKey: "APIBaseURL") as? String,
               !urlString.isEmpty else {
@@ -46,7 +46,7 @@ enum AppConfig {
         return url
     }()
 
-    /// Environment hiện tại (development/staging/production), đọc từ key "EnvironmentName".
+    /// Current environment (development/staging/production), read from the "EnvironmentName" key.
     static var environment: AppEnvironment = {
         guard let rawValue = Bundle.main.object(forInfoDictionaryKey: "EnvironmentName") as? String else {
             fatalError(AppConfigError.missingKey("EnvironmentName").localizedDescription)
@@ -57,7 +57,7 @@ enum AppConfig {
         return env
     }()
 
-    /// Cờ tiện ích, dùng để show/hide debug menu, log chi tiết, v.v.
+    /// Utility flag used to show/hide the debug menu, detailed logs, ....
     static var isDebugEnvironment: Bool {
         environment != .production
     }

@@ -17,8 +17,9 @@ import FactoryKit
 import Repositories
 
 extension Container {
+    @MainActor
     var seriesRepository: Factory<SeriesRepositoryProtocol> {
-        self { SeriesRepository() }
+        self { SeriesRepository(apiClient: self.apiClient()) }
             .singleton
         // .singleton: shares a single instance throughout the app's lifecycle — appropriate because
         // the Repository here does not maintain state specific to individual callers.
