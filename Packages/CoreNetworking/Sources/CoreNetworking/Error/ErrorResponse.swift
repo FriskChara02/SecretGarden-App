@@ -10,7 +10,12 @@
 
 import Foundation
 
-public struct ErrorResponse: Codable, Sendable {
+public struct ErrorResponse: Codable, Sendable, Equatable {
     public let message: String
     public let code: String?
+
+    public init(message: String, code: String? = nil) {
+        self.message = message
+        self.code = code
+    }
 }
