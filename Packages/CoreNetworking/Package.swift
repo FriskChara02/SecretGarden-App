@@ -9,12 +9,13 @@ let package = Package(
     ],
     dependencies: [
         .package(path: "../CoreModels"),
-        .package(path: "../CoreArchitecture")
+        .package(path: "../CoreArchitecture"),
+        .package(path: "../CoreStorage")
     ],
     targets: [
         .target(
             name: "CoreNetworking",
-            dependencies: ["CoreModels", "CoreArchitecture"]
+            dependencies: ["CoreModels", "CoreArchitecture", "CoreStorage"]
         ),
         .testTarget(name: "CoreNetworkingTests", dependencies: ["CoreNetworking"])
     ]

@@ -18,6 +18,7 @@ final class StubURLProtocol: URLProtocol {
     static var stubStatusCode: Int = 200
     static var stubError: Error?
     static var lastRequest: URLRequest?
+    static var callCount = 0
 
     override class func canInit(with request: URLRequest) -> Bool {
         return true
@@ -28,6 +29,7 @@ final class StubURLProtocol: URLProtocol {
     }
 
     override func startLoading() {
+        Self.callCount += 1
         Self.lastRequest = request
 
         if let error = Self.stubError {

@@ -18,15 +18,19 @@ public final class APIClient: APIClientProtocol {
     /// Current Access Token provider — to be properly implemented in (AuthInterceptor).
     /// Temporarily accepts a closure to avoid blocking and the need to rewrite APIClient.
     private let accessTokenProvider: @Sendable () async -> String?
+    /// If nil, the APIClient does not automatically retry on a 401 response (used for public/test endpoints).
+    private let authInterceptor: AuthInterceptor?
 
     public init(
         baseURL: URL,
         session: URLSession = .shared,
-        accessTokenProvider: @escaping @Sendable () async -> String? = { nil }
+        accessTokenProvider: @escaping @Sendable () async -> String? = { nil },
+        authInterceptor: AuthInterceptor? = nil
     ) {
         self.baseURL = baseURL
         self.session = session
         self.accessTokenProvider = accessTokenProvider
+        self.authInterceptor = authInterceptor
 
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
@@ -35,7 +39,7 @@ public final class APIClient: APIClientProtocol {
     }
 
     public func request<T: Decodable>(_ endpoint: APIEndpoint) async throws -> T {
-        let data = try await performRequest(endpoint)
+        let data = try await performRequest(endpoint, isRetry: false)
         do {
             return try decoder.decode(T.self, from: data)
         } catch {
@@ -44,12 +48,12 @@ public final class APIClient: APIClientProtocol {
     }
 
     public func requestWithoutResponse(_ endpoint: APIEndpoint) async throws {
-        _ = try await performRequest(endpoint)
+        _ = try await performRequest(endpoint, isRetry: false)
     }
 
     // MARK: - Private
 
-    private func performRequest(_ endpoint: APIEndpoint) async throws -> Data {
+    private func performRequest(_ endpoint: APIEndpoint, isRetry: Bool = false) async throws -> Data {
         var request: URLRequest
         do {
             request = try APIEndpointBuilder.buildRequest(for: endpoint, baseURL: baseURL)
@@ -74,6 +78,12 @@ public final class APIClient: APIClientProtocol {
 
         guard let httpResponse = response as? HTTPURLResponse else {
             throw NetworkError.invalidResponse.asAppError()
+        }
+        
+        // Handle 401 specifically: if an AuthInterceptor is present and this is the first attempt (no retry yet), try refreshing the token and retrying exactly once.
+        if httpResponse.statusCode == 401, let interceptor = authInterceptor, endpoint.requiresAuth, !isRetry {
+            _ = try await interceptor.refreshAccessToken() // Throw AppError.unauthorized if refresh fails -> stop immediately, do not retry.
+            return try await performRequest(endpoint, isRetry: true) // retry exactly once with the new token
         }
 
         guard (200...299).contains(httpResponse.statusCode) else {
