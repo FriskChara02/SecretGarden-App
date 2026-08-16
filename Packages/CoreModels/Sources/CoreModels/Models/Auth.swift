@@ -9,7 +9,7 @@
 
 import Foundation
 
-public struct LoginRequest: Codable, Equatable {
+public struct LoginRequest: Codable, Equatable, Sendable {
     public var email: String
     public var password: String
     public var rememberMe: Bool
@@ -21,7 +21,7 @@ public struct LoginRequest: Codable, Equatable {
     }
 }
 
-public struct RegisterRequest: Codable, Equatable {
+public struct RegisterRequest: Codable, Equatable, Sendable {
     public var username: String
     public var email: String
     public var password: String
@@ -35,7 +35,7 @@ public struct RegisterRequest: Codable, Equatable {
     }
 }
 
-public struct ForgotPasswordRequest: Codable, Equatable {
+public struct ForgotPasswordRequest: Codable, Equatable, Sendable {
     public var email: String
 
     public init(email: String) {
@@ -43,7 +43,7 @@ public struct ForgotPasswordRequest: Codable, Equatable {
     }
 }
 
-public struct ResetPasswordRequest: Codable, Equatable {
+public struct ResetPasswordRequest: Codable, Equatable, Sendable {
     public var token: String
     public var newPassword: String
 
@@ -53,7 +53,7 @@ public struct ResetPasswordRequest: Codable, Equatable {
     }
 }
 
-public struct AuthResponse: Codable, Equatable {
+public struct AuthResponse: Codable, Equatable, Sendable {
     public var accessToken: String
     public var refreshToken: String
     public var user: User
@@ -67,7 +67,7 @@ public struct AuthResponse: Codable, Equatable {
 
 // MARK: - Change Password (Account Settings)
 
-public struct ChangePasswordRequest: Codable, Equatable {
+public struct ChangePasswordRequest: Codable, Equatable, Sendable {
     public var oldPassword: String
     public var newPassword: String
 
@@ -79,7 +79,7 @@ public struct ChangePasswordRequest: Codable, Equatable {
 
 // MARK: - Google OAuth
 
-public struct GoogleLoginRequest: Codable, Equatable {
+public struct GoogleLoginRequest: Codable, Equatable, Sendable {
     /// ID Token received from ASWebAuthenticationSession after the user authenticates with Google.
     public var idToken: String
 
