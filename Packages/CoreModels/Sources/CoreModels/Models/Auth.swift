@@ -64,3 +64,26 @@ public struct AuthResponse: Codable, Equatable {
         self.user = user
     }
 }
+
+// MARK: - Change Password (Account Settings)
+
+public struct ChangePasswordRequest: Codable, Equatable {
+    public var oldPassword: String
+    public var newPassword: String
+
+    public init(oldPassword: String, newPassword: String) {
+        self.oldPassword = oldPassword
+        self.newPassword = newPassword
+    }
+}
+
+// MARK: - Google OAuth
+
+public struct GoogleLoginRequest: Codable, Equatable {
+    /// ID Token received from ASWebAuthenticationSession after the user authenticates with Google.
+    public var idToken: String
+
+    public init(idToken: String) {
+        self.idToken = idToken
+    }
+}

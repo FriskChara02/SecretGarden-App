@@ -11,6 +11,8 @@
 		7A0AC606302648940042775A /* CoreNetworking in Frameworks */ = {isa = PBXBuildFile; productRef = 7A0AC605302648940042775A /* CoreNetworking */; };
 		7A0AC609302648A30042775A /* CoreStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 7A0AC608302648A30042775A /* CoreStorage */; };
 		7A0AC60E30264A8F0042775A /* DesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = 7A0AC60D30264A8F0042775A /* DesignSystem */; };
+		7A3C55983031543A00B5A993 /* AuthFeature in Frameworks */ = {isa = PBXBuildFile; productRef = 7A3C55973031543A00B5A993 /* AuthFeature */; };
+		7A8873053030DFD7003813B2 /* AuthFeature in Frameworks */ = {isa = PBXBuildFile; productRef = 7A8873043030DFD7003813B2 /* AuthFeature */; };
 		7AFB86A630283F6B003895FE /* .swiftlint.yml in Resources */ = {isa = PBXBuildFile; fileRef = 7AFB86A530283F68003895FE /* .swiftlint.yml */; };
 		7AFB86A830284044003895FE /* .swiftformat in Resources */ = {isa = PBXBuildFile; fileRef = 7AFB86A730284041003895FE /* .swiftformat */; };
 		7AFB86C13028C870003895FE /* CoreArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = 7AFB86C03028C870003895FE /* CoreArchitecture */; };
@@ -56,6 +58,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7A8873053030DFD7003813B2 /* AuthFeature in Frameworks */,
+				7A3C55983031543A00B5A993 /* AuthFeature in Frameworks */,
 				7AFB885C3029CB89003895FE /* Repositories in Frameworks */,
 				7AFB86D73028C940003895FE /* CoreArchitecture in Frameworks */,
 				7AFB88D3302AD106003895FE /* FactoryKit in Frameworks */,
@@ -127,6 +131,8 @@
 				7AFB86D63028C940003895FE /* CoreArchitecture */,
 				7AFB885B3029CB89003895FE /* Repositories */,
 				7AFB88D2302AD106003895FE /* FactoryKit */,
+				7A8873043030DFD7003813B2 /* AuthFeature */,
+				7A3C55973031543A00B5A993 /* AuthFeature */,
 			);
 			productName = SecretGarden;
 			productReference = 7A21DC2F3025DFFB00AB92DD /* SecretGarden.app */;
@@ -166,6 +172,7 @@
 				7AFB86D53028C940003895FE /* XCLocalSwiftPackageReference "Packages/CoreArchitecture" */,
 				7AFB885A3029CB89003895FE /* XCLocalSwiftPackageReference "Packages/Repositories" */,
 				7AFB88D1302AD106003895FE /* XCRemoteSwiftPackageReference "Factory" */,
+				7A3C55963031543A00B5A993 /* XCLocalSwiftPackageReference "Packages/AuthFeature" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 7A21DC303025DFFB00AB92DD /* Products */;
@@ -864,6 +871,10 @@
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/DesignSystem;
 		};
+		7A3C55963031543A00B5A993 /* XCLocalSwiftPackageReference "Packages/AuthFeature" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/AuthFeature;
+		};
 		7AFB86D53028C940003895FE /* XCLocalSwiftPackageReference "Packages/CoreArchitecture" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/CoreArchitecture;
@@ -917,6 +928,15 @@
 		7A0AC60D30264A8F0042775A /* DesignSystem */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = DesignSystem;
+		};
+		7A3C55973031543A00B5A993 /* AuthFeature */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = AuthFeature;
+		};
+		7A8873043030DFD7003813B2 /* AuthFeature */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7AFB88D1302AD106003895FE /* XCRemoteSwiftPackageReference "Factory" */;
+			productName = AuthFeature;
 		};
 		7AFB868F30283704003895FE /* SwiftLintBuildToolPlugin */ = {
 			isa = XCSwiftPackageProductDependency;

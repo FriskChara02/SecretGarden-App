@@ -20,19 +20,7 @@ struct SecretGardenApp: App {
 
     var body: some Scene {
         WindowGroup {
-            VStack(alignment: .leading, spacing: DSSpacing.sm) {
-                Text("SecretGarden")
-                    .dsFont(DSFontToken.largeTitle)
-                    .foregroundStyle(DSColor.brandPrimary)
-                Text("Sayonara, Watashi no Cramer")
-                    .dsFont(DSFontToken.title3)
-                    .foregroundStyle(DSColor.textPrimary)
-                Text("Nhóm dịch: Yuri no Sono")
-                    .dsFont(DSFontToken.subheadline)
-                    .foregroundStyle(DSColor.textSecondary)
-            }
-            .padding(DSSpacing.lg)
-            .background(DSColor.backgroundPrimary)
+            DesignSystemCatalogView()
         }
     }
 }

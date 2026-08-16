@@ -24,4 +24,9 @@ extension Container {
         // .singleton: shares a single instance throughout the app's lifecycle — appropriate because
         // the Repository here does not maintain state specific to individual callers.
     }
+    @MainActor
+    var authRepository: Factory<AuthRepositoryProtocol> {
+        self { AuthRepositoryStub() }
+            .singleton
+    }
 }
