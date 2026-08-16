@@ -12,13 +12,12 @@
 		7A0AC609302648A30042775A /* CoreStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 7A0AC608302648A30042775A /* CoreStorage */; };
 		7A0AC60E30264A8F0042775A /* DesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = 7A0AC60D30264A8F0042775A /* DesignSystem */; };
 		7A3C55983031543A00B5A993 /* AuthFeature in Frameworks */ = {isa = PBXBuildFile; productRef = 7A3C55973031543A00B5A993 /* AuthFeature */; };
-		7A8873053030DFD7003813B2 /* AuthFeature in Frameworks */ = {isa = PBXBuildFile; productRef = 7A8873043030DFD7003813B2 /* AuthFeature */; };
+		7A97F446303222DF0078EE73 /* Repositories in Frameworks */ = {isa = PBXBuildFile; productRef = 7A97F445303222DF0078EE73 /* Repositories */; };
+		7A97F449303224370078EE73 /* FactoryKit in Frameworks */ = {isa = PBXBuildFile; productRef = 7A97F448303224370078EE73 /* FactoryKit */; };
 		7AFB86A630283F6B003895FE /* .swiftlint.yml in Resources */ = {isa = PBXBuildFile; fileRef = 7AFB86A530283F68003895FE /* .swiftlint.yml */; };
 		7AFB86A830284044003895FE /* .swiftformat in Resources */ = {isa = PBXBuildFile; fileRef = 7AFB86A730284041003895FE /* .swiftformat */; };
 		7AFB86C13028C870003895FE /* CoreArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = 7AFB86C03028C870003895FE /* CoreArchitecture */; };
 		7AFB86D73028C940003895FE /* CoreArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = 7AFB86D63028C940003895FE /* CoreArchitecture */; };
-		7AFB885C3029CB89003895FE /* Repositories in Frameworks */ = {isa = PBXBuildFile; productRef = 7AFB885B3029CB89003895FE /* Repositories */; };
-		7AFB88D3302AD106003895FE /* FactoryKit in Frameworks */ = {isa = PBXBuildFile; productRef = 7AFB88D2302AD106003895FE /* FactoryKit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -46,11 +45,6 @@
 			path = SecretGarden;
 			sourceTree = "<group>";
 		};
-		7A48FA8D302743E3001AC9C9 /* Configs */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Configs;
-			sourceTree = "<group>";
-		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,13 +52,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7A8873053030DFD7003813B2 /* AuthFeature in Frameworks */,
 				7A3C55983031543A00B5A993 /* AuthFeature in Frameworks */,
-				7AFB885C3029CB89003895FE /* Repositories in Frameworks */,
 				7AFB86D73028C940003895FE /* CoreArchitecture in Frameworks */,
-				7AFB88D3302AD106003895FE /* FactoryKit in Frameworks */,
 				7A0AC609302648A30042775A /* CoreStorage in Frameworks */,
+				7A97F449303224370078EE73 /* FactoryKit in Frameworks */,
 				7A0AC6033026487D0042775A /* CoreModels in Frameworks */,
+				7A97F446303222DF0078EE73 /* Repositories in Frameworks */,
 				7A0AC606302648940042775A /* CoreNetworking in Frameworks */,
 				7A0AC60E30264A8F0042775A /* DesignSystem in Frameworks */,
 				7AFB86C13028C870003895FE /* CoreArchitecture in Frameworks */,
@@ -79,7 +72,6 @@
 			children = (
 				7AFB86A730284041003895FE /* .swiftformat */,
 				7AFB86A530283F68003895FE /* .swiftlint.yml */,
-				7A48FA8D302743E3001AC9C9 /* Configs */,
 				7A21DC313025DFFB00AB92DD /* SecretGarden */,
 				7AFB86A9302845E8003895FE /* Frameworks */,
 				7A21DC303025DFFB00AB92DD /* Products */,
@@ -119,7 +111,6 @@
 			);
 			fileSystemSynchronizedGroups = (
 				7A21DC313025DFFB00AB92DD /* SecretGarden */,
-				7A48FA8D302743E3001AC9C9 /* Configs */,
 			);
 			name = SecretGarden;
 			packageProductDependencies = (
@@ -129,10 +120,9 @@
 				7A0AC60D30264A8F0042775A /* DesignSystem */,
 				7AFB86C03028C870003895FE /* CoreArchitecture */,
 				7AFB86D63028C940003895FE /* CoreArchitecture */,
-				7AFB885B3029CB89003895FE /* Repositories */,
-				7AFB88D2302AD106003895FE /* FactoryKit */,
-				7A8873043030DFD7003813B2 /* AuthFeature */,
 				7A3C55973031543A00B5A993 /* AuthFeature */,
+				7A97F445303222DF0078EE73 /* Repositories */,
+				7A97F448303224370078EE73 /* FactoryKit */,
 			);
 			productName = SecretGarden;
 			productReference = 7A21DC2F3025DFFB00AB92DD /* SecretGarden.app */;
@@ -171,8 +161,8 @@
 				7AFB86BF30284C1B003895FE /* XCRemoteSwiftPackageReference "SwiftFormat" */,
 				7AFB86D53028C940003895FE /* XCLocalSwiftPackageReference "Packages/CoreArchitecture" */,
 				7AFB885A3029CB89003895FE /* XCLocalSwiftPackageReference "Packages/Repositories" */,
-				7AFB88D1302AD106003895FE /* XCRemoteSwiftPackageReference "Factory" */,
 				7A3C55963031543A00B5A993 /* XCLocalSwiftPackageReference "Packages/AuthFeature" */,
+				7A97F447303224370078EE73 /* XCRemoteSwiftPackageReference "Factory" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 7A21DC303025DFFB00AB92DD /* Products */;
@@ -216,8 +206,6 @@
 /* Begin XCBuildConfiguration section */
 		7A4800E230279B54001AC9C9 /* Debug-Dev */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReferenceAnchor = 7A48FA8D302743E3001AC9C9 /* Configs */;
-			baseConfigurationReferenceRelativePath = Development.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -282,8 +270,6 @@
 		};
 		7A4800E330279B54001AC9C9 /* Debug-Dev */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReferenceAnchor = 7A48FA8D302743E3001AC9C9 /* Configs */;
-			baseConfigurationReferenceRelativePath = Development.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -321,8 +307,6 @@
 		};
 		7A4800E430279B60001AC9C9 /* Debug-Staging */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReferenceAnchor = 7A48FA8D302743E3001AC9C9 /* Configs */;
-			baseConfigurationReferenceRelativePath = Staging.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -387,8 +371,6 @@
 		};
 		7A4800E530279B60001AC9C9 /* Debug-Staging */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReferenceAnchor = 7A48FA8D302743E3001AC9C9 /* Configs */;
-			baseConfigurationReferenceRelativePath = Staging.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -426,8 +408,6 @@
 		};
 		7A4800E630279B6A001AC9C9 /* Debug-Production */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReferenceAnchor = 7A48FA8D302743E3001AC9C9 /* Configs */;
-			baseConfigurationReferenceRelativePath = Production.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -492,8 +472,6 @@
 		};
 		7A4800E730279B6A001AC9C9 /* Debug-Production */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReferenceAnchor = 7A48FA8D302743E3001AC9C9 /* Configs */;
-			baseConfigurationReferenceRelativePath = Production.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -531,8 +509,6 @@
 		};
 		7A4800E830279B76001AC9C9 /* Release-Dev */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReferenceAnchor = 7A48FA8D302743E3001AC9C9 /* Configs */;
-			baseConfigurationReferenceRelativePath = Development.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -590,8 +566,6 @@
 		};
 		7A4800E930279B76001AC9C9 /* Release-Dev */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReferenceAnchor = 7A48FA8D302743E3001AC9C9 /* Configs */;
-			baseConfigurationReferenceRelativePath = Development.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -629,8 +603,6 @@
 		};
 		7A4800EA30279B7D001AC9C9 /* Release-Staging */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReferenceAnchor = 7A48FA8D302743E3001AC9C9 /* Configs */;
-			baseConfigurationReferenceRelativePath = Staging.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -688,8 +660,6 @@
 		};
 		7A4800EB30279B7D001AC9C9 /* Release-Staging */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReferenceAnchor = 7A48FA8D302743E3001AC9C9 /* Configs */;
-			baseConfigurationReferenceRelativePath = Staging.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -727,8 +697,6 @@
 		};
 		7A4800EC30279B87001AC9C9 /* Release-Production */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReferenceAnchor = 7A48FA8D302743E3001AC9C9 /* Configs */;
-			baseConfigurationReferenceRelativePath = Production.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -786,8 +754,6 @@
 		};
 		7A4800ED30279B87001AC9C9 /* Release-Production */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReferenceAnchor = 7A48FA8D302743E3001AC9C9 /* Configs */;
-			baseConfigurationReferenceRelativePath = Production.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -886,6 +852,14 @@
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		7A97F447303224370078EE73 /* XCRemoteSwiftPackageReference "Factory" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/hmlongco/Factory";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.3.2;
+			};
+		};
 		7AFB868E302836DC003895FE /* XCRemoteSwiftPackageReference "SwiftLint" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/realm/SwiftLint";
@@ -900,14 +874,6 @@
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 0.62.1;
-			};
-		};
-		7AFB88D1302AD106003895FE /* XCRemoteSwiftPackageReference "Factory" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/hmlongco/Factory";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 3.3.2;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
@@ -933,10 +899,15 @@
 			isa = XCSwiftPackageProductDependency;
 			productName = AuthFeature;
 		};
-		7A8873043030DFD7003813B2 /* AuthFeature */ = {
+		7A97F445303222DF0078EE73 /* Repositories */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 7AFB88D1302AD106003895FE /* XCRemoteSwiftPackageReference "Factory" */;
-			productName = AuthFeature;
+			package = 7AFB885A3029CB89003895FE /* XCLocalSwiftPackageReference "Packages/Repositories" */;
+			productName = Repositories;
+		};
+		7A97F448303224370078EE73 /* FactoryKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7A97F447303224370078EE73 /* XCRemoteSwiftPackageReference "Factory" */;
+			productName = FactoryKit;
 		};
 		7AFB868F30283704003895FE /* SwiftLintBuildToolPlugin */ = {
 			isa = XCSwiftPackageProductDependency;
@@ -951,15 +922,6 @@
 		7AFB86D63028C940003895FE /* CoreArchitecture */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = CoreArchitecture;
-		};
-		7AFB885B3029CB89003895FE /* Repositories */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = Repositories;
-		};
-		7AFB88D2302AD106003895FE /* FactoryKit */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 7AFB88D1302AD106003895FE /* XCRemoteSwiftPackageReference "Factory" */;
-			productName = FactoryKit;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

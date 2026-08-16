@@ -12,7 +12,6 @@ let package = Package(
         .package(path: "../CoreArchitecture"),
         .package(path: "../DesignSystem"),
         .package(path: "../Repositories"),
-        .package(url: "https://github.com/hmlongco/Factory", from: "2.3.0")
     ],
     targets: [
         .target(
@@ -22,7 +21,6 @@ let package = Package(
                 "CoreArchitecture",
                 "DesignSystem",
                 "Repositories",
-                .product(name: "FactoryKit", package: "Factory")
             ]
         ),
         .testTarget(

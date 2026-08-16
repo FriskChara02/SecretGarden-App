@@ -9,26 +9,18 @@
 // Each action (login, register, forgotPassword) has its own @Published state (FormSubmissionState).
 // Since the three views are independent, they shouldn't share a single state (a failed login
 // shouldn't trigger an error display in the RegisterView).
-//
-// We use @Injected (rather than initializer injection) because AuthViewModel is instantiated
-// directly by LoginView/RegisterView using @StateObject (bypassing Container resolution, unlike
-// Repositories). This follows the standard Factory pattern for ViewModels: Repositories are
-// resolved via the Container, whereas the View owns the ViewModel's lifecycle (managed by
-// SwiftUI), only dependencies *inside* the ViewModel require @Injected.
 
 import CoreArchitecture
 import CoreModels
-import FactoryKit
 import Foundation
 import Repositories
 
 @MainActor
 public final class AuthViewModel: BaseViewModel {
 
-    @Injected(\.authRepository) private var repository
+    private let repository: AuthRepositoryProtocol
 
     // MARK: - Login form
-
     @Published public var loginEmail = ""
     @Published public var loginPassword = ""
     @Published public var rememberMe = false
@@ -37,7 +29,6 @@ public final class AuthViewModel: BaseViewModel {
     @Published public private(set) var loginPasswordError: String?
 
     // MARK: - Register form
-
     @Published public var registerUsername = ""
     @Published public var registerEmail = ""
     @Published public var registerPassword = ""
@@ -49,17 +40,16 @@ public final class AuthViewModel: BaseViewModel {
     @Published public private(set) var registerConfirmPasswordError: String?
 
     // MARK: - Forgot password form
-
     @Published public var forgotPasswordEmail = ""
     @Published public private(set) var forgotPasswordState: FormSubmissionState = .idle
     @Published public private(set) var forgotPasswordEmailError: String?
 
-    override public init() {
+    public init(repository: AuthRepositoryProtocol) {
+        self.repository = repository
         super.init()
     }
 
     // MARK: - Login
-
     public func login() {
         loginEmailError = AuthValidator.validateEmail(loginEmail)
         loginPasswordError = AuthValidator.validatePassword(loginPassword)
@@ -80,7 +70,6 @@ public final class AuthViewModel: BaseViewModel {
     }
 
     // MARK: - Register
-
     public func register() {
         registerUsernameError = AuthValidator.validateUsername(registerUsername)
         registerEmailError = AuthValidator.validateEmail(registerEmail)
@@ -111,7 +100,6 @@ public final class AuthViewModel: BaseViewModel {
     }
 
     // MARK: - Forgot Password
-
     public func forgotPassword() {
         forgotPasswordEmailError = AuthValidator.validateEmail(forgotPasswordEmail)
         guard forgotPasswordEmailError == nil else { return }
