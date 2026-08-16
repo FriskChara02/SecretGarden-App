@@ -74,6 +74,13 @@ public enum DSFont {
     /// If the font fails to register for any reason, it falls back to the system font
     /// with an equivalent size and weight instead of crashing - preventing app failure due to font errors.
     public static func font(_ token: DSFontToken) -> Font {
+        // Register automatically if not already done — independent of whether the caller (App init) has run.
+        // Important for Xcode Previews: XCPreviewAgent runs in a separate process
+        // and does NOT call SecretGardenApp.init(), so we cannot assume the font is ready.
+        if UIFont(name: token.fontName, size: token.size) == nil {
+            DSFontRegistrar.registerFonts()
+        }
+
         guard let baseFont = UIFont(name: token.fontName, size: token.size) else {
             assertionFailure("Font '\(token.fontName)' chưa được đăng ký — kiểm tra DSFontRegistrar.registerFonts() đã gọi chưa.")
             let fallback = UIFont.systemFont(ofSize: token.size, weight: .regular)
