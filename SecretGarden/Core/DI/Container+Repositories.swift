@@ -26,7 +26,12 @@ extension Container {
     }
     @MainActor
     var authRepository: Factory<AuthRepositoryProtocol> {
-        self { AuthRepositoryStub() }
-            .singleton
+        self {
+            AuthRepository(
+                apiClient: self.apiClient(),
+                keychainManager: self.keychainManager()
+            )
+        }
+        .singleton
     }
 }

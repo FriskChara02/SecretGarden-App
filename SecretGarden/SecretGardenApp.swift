@@ -10,6 +10,7 @@ import CoreModels
 import CoreNetworking
 import CoreStorage
 import DesignSystem
+import AuthFeature
 
 @main
 struct SecretGardenApp: App {
