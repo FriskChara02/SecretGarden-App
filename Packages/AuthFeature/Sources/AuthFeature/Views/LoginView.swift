@@ -18,20 +18,18 @@ public struct LoginView: View {
     private let onLoginSuccess: () -> Void
     private let onNavigateToRegister: () -> Void
     private let onNavigateToForgotPassword: () -> Void
-    private let onGoogleLoginTapped: () -> Void
 
     public init(
         repository: AuthRepositoryProtocol,
+        googleAuthService: GoogleAuthServicing,
         onLoginSuccess: @escaping () -> Void,
         onNavigateToRegister: @escaping () -> Void,
-        onNavigateToForgotPassword: @escaping () -> Void,
-        onGoogleLoginTapped: @escaping () -> Void
+        onNavigateToForgotPassword: @escaping () -> Void
     ) {
-        _viewModel = StateObject(wrappedValue: AuthViewModel(repository: repository))
+        _viewModel = StateObject(wrappedValue: AuthViewModel(repository: repository, googleAuthService: googleAuthService))
         self.onLoginSuccess = onLoginSuccess
         self.onNavigateToRegister = onNavigateToRegister
         self.onNavigateToForgotPassword = onNavigateToForgotPassword
-        self.onGoogleLoginTapped = onGoogleLoginTapped
     }
 
     public var body: some View {
@@ -89,12 +87,8 @@ public struct LoginView: View {
 
                 Divider()
 
-                DSButton(
-                    "Đăng nhập bằng Google",
-                    variant: .outline,
-                    isLoading: false
-                ) {
-                    onGoogleLoginTapped()
+                DSButton("Đăng nhập bằng Google", variant: .outline) {
+                    viewModel.loginWithGoogle()
                 }
                 .disabled(viewModel.loginState.isSubmitting)
 
@@ -123,9 +117,9 @@ public struct LoginView: View {
 #Preview("LoginView") {
     LoginView(
         repository: AuthRepositoryMock(),
+        googleAuthService: GoogleAuthServiceMock(),
         onLoginSuccess: {},
         onNavigateToRegister: {},
-        onNavigateToForgotPassword: {},
-        onGoogleLoginTapped: {}
+        onNavigateToForgotPassword: {}
     )
 }

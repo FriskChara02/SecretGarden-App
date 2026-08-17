@@ -61,4 +61,22 @@ enum AppConfig {
     static var isDebugEnvironment: Bool {
         environment != .production
     }
+
+    /// Google OAuth Client ID, read from the "GoogleClientID" key.
+    static var googleClientID: String = {
+        guard let value = Bundle.main.object(forInfoDictionaryKey: "GoogleClientID") as? String,
+              !value.isEmpty else {
+            fatalError(AppConfigError.missingKey("GoogleClientID").localizedDescription)
+        }
+        return value
+    }()
+
+    /// Redirect URL scheme for Google OAuth callback, read from the "GoogleRedirectScheme" key.
+    static var googleRedirectURIScheme: String = {
+        guard let value = Bundle.main.object(forInfoDictionaryKey: "GoogleRedirectScheme") as? String,
+              !value.isEmpty else {
+            fatalError(AppConfigError.missingKey("GoogleRedirectScheme").localizedDescription)
+        }
+        return value
+    }()
 }

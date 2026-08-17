@@ -1,0 +1,17 @@
+//
+//  Staging.xcconfig
+//  SecretGarden
+//
+//  Created by Loi Nguyen on 18/8/26.
+//
+
+#include "Base.xcconfig"
+
+PRODUCT_BUNDLE_IDENTIFIER = $(BASE_BUNDLE_ID).staging
+APP_DISPLAY_NAME = SecretGarden Staging
+API_BASE_URL = https://staging-api.secretgarden.example.com
+ENVIRONMENT_NAME = staging
+
+// Google OAuth Config
+GOOGLE_CLIENT_ID = YOUR_CLIENT_ID.apps.googleusercontent.com
+GOOGLE_REDIRECT_SCHEME = com.yourname.secretgarden.staging

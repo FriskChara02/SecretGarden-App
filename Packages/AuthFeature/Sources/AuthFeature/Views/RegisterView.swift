@@ -18,10 +18,16 @@ public struct RegisterView: View {
 
     public init(
         repository: AuthRepositoryProtocol,
+        googleAuthService: GoogleAuthServicing,
         onRegisterSuccess: @escaping () -> Void,
         onNavigateToLogin: @escaping () -> Void
     ) {
-        _viewModel = StateObject(wrappedValue: AuthViewModel(repository: repository))
+        _viewModel = StateObject(
+            wrappedValue: AuthViewModel(
+                repository: repository,
+                googleAuthService: googleAuthService
+            )
+        )
         self.onRegisterSuccess = onRegisterSuccess
         self.onNavigateToLogin = onNavigateToLogin
     }
@@ -112,6 +118,7 @@ public struct RegisterView: View {
 #Preview("RegisterView") {
     RegisterView(
         repository: AuthRepositoryMock(),
+        googleAuthService: GoogleAuthServiceMock(),
         onRegisterSuccess: {},
         onNavigateToLogin: {}
     )

@@ -1,0 +1,17 @@
+//
+//  Production.xcconfig
+//  SecretGarden
+//
+//  Created by Loi Nguyen on 18/8/26.
+//
+
+#include "Base.xcconfig"
+
+PRODUCT_BUNDLE_IDENTIFIER = $(BASE_BUNDLE_ID)
+APP_DISPLAY_NAME = SecretGarden
+API_BASE_URL = https://api.secretgarden.example.com
+ENVIRONMENT_NAME = production
+
+// Google OAuth Config
+GOOGLE_CLIENT_ID = YOUR_CLIENT_ID.apps.googleusercontent.com
+GOOGLE_REDIRECT_SCHEME = com.yourname.secretgarden

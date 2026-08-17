@@ -1,0 +1,14 @@
+//
+//  Base.xcconfig
+//  SecretGarden
+//
+
+// Base.xcconfig
+SWIFT_VERSION = 5.0
+IPHONEOS_DEPLOYMENT_TARGET = 17.0
+CODE_SIGN_STYLE = Automatic
+ENABLE_BITCODE = NO
+
+BASE_BUNDLE_ID = com.yourname.secretgarden
+MARKETING_VERSION = 1.0.0
+CURRENT_PROJECT_VERSION = 1

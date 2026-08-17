@@ -28,7 +28,7 @@ Pods/
 .DS_Store
 
 # Environment / Secrets
-*.xcconfig
+# *.xcconfig
 !Config/Base.xcconfig.example
 Secrets.swift
 GoogleService-Info.plist

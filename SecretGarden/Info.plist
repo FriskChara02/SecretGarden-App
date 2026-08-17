@@ -2,11 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>CFBundleURLTypes</key>
-	<array>
-		<dict/>
-	</array>
-    
     <key>APIBaseURL</key>
     <string>$(API_BASE_URL)</string>
     
@@ -16,5 +11,22 @@
     <key>CFBundleDisplayName</key>
     <string>$(APP_DISPLAY_NAME)</string>
     
+    <key>GoogleClientID</key>
+    <string>$(GOOGLE_CLIENT_ID)</string>
+    
+    <key>GoogleRedirectScheme</key>
+    <string>$(GOOGLE_REDIRECT_SCHEME)</string>
+    
+    <key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleTypeRole</key>
+            <string>Editor</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>$(GOOGLE_REDIRECT_SCHEME)</string>
+            </array>
+        </dict>
+    </array>
 </dict>
 </plist>

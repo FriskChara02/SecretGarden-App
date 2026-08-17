@@ -14,7 +14,7 @@ public actor KeychainManager {
 
     public static let shared = KeychainManager()
 
-    private let service = "com.tranvana.secretgarden"
+    private let service = "com.yourname.secretgarden"
 
     public init() {}
 

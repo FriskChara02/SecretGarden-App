@@ -19,6 +19,7 @@ import Repositories
 public final class AuthViewModel: BaseViewModel {
 
     private let repository: AuthRepositoryProtocol
+    private let googleAuthService: GoogleAuthServicing
 
     // MARK: - Login form
     @Published public var loginEmail = ""
@@ -44,8 +45,9 @@ public final class AuthViewModel: BaseViewModel {
     @Published public private(set) var forgotPasswordState: FormSubmissionState = .idle
     @Published public private(set) var forgotPasswordEmailError: String?
 
-    public init(repository: AuthRepositoryProtocol) {
+    public init(repository: AuthRepositoryProtocol, googleAuthService: GoogleAuthServicing) {
         self.repository = repository
+        self.googleAuthService = googleAuthService
         super.init()
     }
 
@@ -61,6 +63,22 @@ public final class AuthViewModel: BaseViewModel {
             { [weak self] in
                 guard let self else { return }
                 _ = try await self.repository.login(request)
+                self.loginState = .succeeded
+            },
+            onError: { [weak self] appError in
+                self?.loginState = .failed(appError)
+            }
+        )
+    }
+
+    // MARK: - Google Login
+    public func loginWithGoogle() {
+        loginState = .submitting
+        runTask(
+            { [weak self] in
+                guard let self else { return }
+                let idToken = try await self.googleAuthService.signIn()
+                _ = try await self.repository.loginWithGoogle(GoogleLoginRequest(idToken: idToken))
                 self.loginState = .succeeded
             },
             onError: { [weak self] appError in
