@@ -9,7 +9,7 @@
 
 PRODUCT_BUNDLE_IDENTIFIER = $(BASE_BUNDLE_ID)
 APP_DISPLAY_NAME = SecretGarden
-API_BASE_URL = https://api.secretgarden.example.com
+API_BASE_URL = https:/$()/dev-api.secretgarden.example.com
 ENVIRONMENT_NAME = production
 
 // Google OAuth Config

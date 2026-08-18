@@ -206,6 +206,8 @@
 /* Begin XCBuildConfiguration section */
 		7A4800E230279B54001AC9C9 /* Debug-Dev */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 7A21DC313025DFFB00AB92DD /* SecretGarden */;
+			baseConfigurationReferenceRelativePath = Configs/Development.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -270,6 +272,8 @@
 		};
 		7A4800E330279B54001AC9C9 /* Debug-Dev */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 7A21DC313025DFFB00AB92DD /* SecretGarden */;
+			baseConfigurationReferenceRelativePath = Configs/Development.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -307,6 +311,8 @@
 		};
 		7A4800E430279B60001AC9C9 /* Debug-Staging */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 7A21DC313025DFFB00AB92DD /* SecretGarden */;
+			baseConfigurationReferenceRelativePath = Configs/Staging.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -371,6 +377,8 @@
 		};
 		7A4800E530279B60001AC9C9 /* Debug-Staging */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 7A21DC313025DFFB00AB92DD /* SecretGarden */;
+			baseConfigurationReferenceRelativePath = Configs/Staging.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -408,6 +416,8 @@
 		};
 		7A4800E630279B6A001AC9C9 /* Debug-Production */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 7A21DC313025DFFB00AB92DD /* SecretGarden */;
+			baseConfigurationReferenceRelativePath = Configs/Production.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -472,6 +482,8 @@
 		};
 		7A4800E730279B6A001AC9C9 /* Debug-Production */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 7A21DC313025DFFB00AB92DD /* SecretGarden */;
+			baseConfigurationReferenceRelativePath = Configs/Production.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -509,6 +521,8 @@
 		};
 		7A4800E830279B76001AC9C9 /* Release-Dev */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 7A21DC313025DFFB00AB92DD /* SecretGarden */;
+			baseConfigurationReferenceRelativePath = Configs/Development.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -566,6 +580,8 @@
 		};
 		7A4800E930279B76001AC9C9 /* Release-Dev */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 7A21DC313025DFFB00AB92DD /* SecretGarden */;
+			baseConfigurationReferenceRelativePath = Configs/Development.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -603,6 +619,8 @@
 		};
 		7A4800EA30279B7D001AC9C9 /* Release-Staging */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 7A21DC313025DFFB00AB92DD /* SecretGarden */;
+			baseConfigurationReferenceRelativePath = Configs/Staging.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -660,6 +678,8 @@
 		};
 		7A4800EB30279B7D001AC9C9 /* Release-Staging */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 7A21DC313025DFFB00AB92DD /* SecretGarden */;
+			baseConfigurationReferenceRelativePath = Configs/Staging.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -697,6 +717,8 @@
 		};
 		7A4800EC30279B87001AC9C9 /* Release-Production */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 7A21DC313025DFFB00AB92DD /* SecretGarden */;
+			baseConfigurationReferenceRelativePath = Configs/Production.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -754,6 +776,8 @@
 		};
 		7A4800ED30279B87001AC9C9 /* Release-Production */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 7A21DC313025DFFB00AB92DD /* SecretGarden */;
+			baseConfigurationReferenceRelativePath = Configs/Production.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
