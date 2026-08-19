@@ -10,13 +10,14 @@ import DesignSystem
 
 @main
 struct SecretGardenApp: App {
+
     init() {
         DSFontRegistrar.registerFonts()
     }
 
     var body: some Scene {
         WindowGroup {
-            AppRootView()
+            RootView()
         }
     }
 }
