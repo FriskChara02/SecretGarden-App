@@ -15,24 +15,20 @@ import CoreArchitecture
 final class MainTabCoordinator {
 
     var selectedTab: MainTab = .home
-    var isSideMenuPresented = false
 
     let homeCoordinator = Coordinator<HomeRoute>()
     let searchCoordinator = Coordinator<SearchRoute>()
     let notificationsCoordinator = Coordinator<NotificationsRoute>()
     let profileCoordinator = Coordinator<ProfileRoute>()
+    let sideMenuCoordinator = SideMenuCoordinator()
 
-    init() {}
+    init() {
+        sideMenuCoordinator.onNavigateToProfileTab = { [weak self] in
+            self?.selectedTab = .profile
+        }
+    }
 
     func selectTab(_ tab: MainTab) {
         selectedTab = tab
-    }
-
-    func presentSideMenu() {
-        isSideMenuPresented = true
-    }
-
-    func dismissSideMenu() {
-        isSideMenuPresented = false
     }
 }

@@ -31,15 +31,11 @@ struct MainTabView: View {
                 .tabItem { Label(MainTab.profile.title, systemImage: MainTab.profile.systemImage) }
                 .tag(MainTab.profile)
         }
-        .sheet(isPresented: $coordinator.isSideMenuPresented) {
-            VStack(spacing: DSSpacing.lg) {
-                Text("Side Menu — Step 7.5").dsFont(.title1)
-                DSButton("Đăng xuất", variant: .outline) {
-                    coordinator.dismissSideMenu()
-                    onLogout()
-                }
-            }
-            .padding(DSSpacing.lg)
+        .sheet(isPresented: Binding(
+            get: { coordinator.sideMenuCoordinator.isPresented },
+            set: { coordinator.sideMenuCoordinator.isPresented = $0 }
+        )) {
+            SideMenuView(coordinator: coordinator.sideMenuCoordinator)
         }
     }
 
@@ -52,7 +48,7 @@ struct MainTabView: View {
                     .dsFont(.headline)
 
                 DSButton("Mở Side Menu", variant: .outline) {
-                    coordinator.presentSideMenu()
+                    coordinator.sideMenuCoordinator.present()
                 }
 
                 DSButton("Xem demo Series Detail", variant: .primary) {
