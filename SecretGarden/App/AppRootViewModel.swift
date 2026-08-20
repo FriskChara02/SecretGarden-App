@@ -41,7 +41,7 @@ final class AppRootViewModel: ObservableObject {
         sessionState = .authenticated
     }
 
-    /// Called when the user clicks Log Out (tested in MainPlaceholderView).
+    /// Called when the user clicks Log Out.
     func markUnauthenticated() {
         sessionState = .unauthenticated
     }

@@ -31,7 +31,7 @@ struct RootView: View {
                     appRootViewModel.markAuthenticated()
                 })
             case .main:
-                MainPlaceholderView(onLogout: {
+                MainTabView(onLogout: {
                     Task {
                         try? await Container.shared.authRepository().logout()
                         appRootViewModel.markUnauthenticated()
@@ -52,28 +52,5 @@ struct RootView: View {
                 rootCoordinator.switchToAuth()
             }
         }
-    }
-}
-
-private struct MainPlaceholderView: View {
-    let onLogout: () -> Void
-
-    var body: some View {
-        VStack(spacing: 16) {
-            Text("🎉 Đã đăng nhập thành công")
-                .font(.title)
-                .bold()
-            
-            Text("Màn hình Home thật sẽ được xây dựng ở Step 7.3")
-                .font(.subheadline)
-                .foregroundColor(.gray)
-            
-            Button("Đăng xuất") {
-                onLogout()
-            }
-            .buttonStyle(.borderedProminent)
-            .tint(.red)
-        }
-        .padding()
     }
 }
