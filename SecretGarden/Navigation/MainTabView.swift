@@ -15,34 +15,25 @@ struct MainTabView: View {
 
     var body: some View {
         TabView(selection: $coordinator.selectedTab) {
-            tabStack(for: .home, coordinator: coordinator.homeCoordinator) {
-                homeDemoContent
-            }
-            .tabItem { Label(MainTab.home.title, systemImage: MainTab.home.systemImage) }
-            .tag(MainTab.home)
+            homeTab
+                .tabItem { Label(MainTab.home.title, systemImage: MainTab.home.systemImage) }
+                .tag(MainTab.home)
 
-            tabStack(for: .search, coordinator: coordinator.searchCoordinator) {
-                demoContent(title: "Tìm kiếm — Step 7.4")
-            }
-            .tabItem { Label(MainTab.search.title, systemImage: MainTab.search.systemImage) }
-            .tag(MainTab.search)
+            searchTab
+                .tabItem { Label(MainTab.search.title, systemImage: MainTab.search.systemImage) }
+                .tag(MainTab.search)
 
-            tabStack(for: .notifications, coordinator: coordinator.notificationsCoordinator) {
-                demoContent(title: "Thông báo — Step 7.4")
-            }
-            .tabItem { Label(MainTab.notifications.title, systemImage: MainTab.notifications.systemImage) }
-            .tag(MainTab.notifications)
+            notificationsTab
+                .tabItem { Label(MainTab.notifications.title, systemImage: MainTab.notifications.systemImage) }
+                .tag(MainTab.notifications)
 
-            tabStack(for: .profile, coordinator: coordinator.profileCoordinator) {
-                demoContent(title: "Cá nhân — Step 7.4")
-            }
-            .tabItem { Label(MainTab.profile.title, systemImage: MainTab.profile.systemImage) }
-            .tag(MainTab.profile)
+            profileTab
+                .tabItem { Label(MainTab.profile.title, systemImage: MainTab.profile.systemImage) }
+                .tag(MainTab.profile)
         }
         .sheet(isPresented: $coordinator.isSideMenuPresented) {
-            // Placeholder — SideMenuCoordinator thật sẽ thay
             VStack(spacing: DSSpacing.lg) {
-                Text("Side Menu — Step 7.5").dsFont(.title2)
+                Text("Side Menu — Step 7.5").dsFont(.title1)
                 DSButton("Đăng xuất", variant: .outline) {
                     coordinator.dismissSideMenu()
                     onLogout()
@@ -52,48 +43,117 @@ struct MainTabView: View {
         }
     }
 
-    // MARK: - Reusable per-tab NavigationStack wrapper
+    // MARK: - Home Tab
 
-    @ViewBuilder
-    private func tabStack<Content: View>(
-        for tab: MainTab,
-        coordinator: Coordinator<PlaceholderRoute>,
-        @ViewBuilder content: () -> Content
-    ) -> some View {
-        NavigationStack(path: Binding(
+    private var homeTab: some View {
+        NavigationStack(path: pathBinding(for: coordinator.homeCoordinator)) {
+            VStack(spacing: DSSpacing.lg) {
+                Text("Trang chủ — Step 8 sẽ thay bằng HomeView thật")
+                    .dsFont(.headline)
+
+                DSButton("Mở Side Menu", variant: .outline) {
+                    coordinator.presentSideMenu()
+                }
+
+                DSButton("Xem demo Series Detail", variant: .primary) {
+                    coordinator.homeCoordinator.push(.seriesDetail(id: "demo-001"))
+                }
+            }
+            .padding(DSSpacing.lg)
+            .navigationDestination(for: HomeRoute.self) { route in
+                switch route {
+                case .seriesDetail(let id):
+                    Text("Series Detail (demo) — id: \(id)")
+                        .dsFont(.title1)
+                }
+            }
+        }
+    }
+
+    // MARK: - Search Tab
+
+    private var searchTab: some View {
+        NavigationStack(path: pathBinding(for: coordinator.searchCoordinator)) {
+            VStack(spacing: DSSpacing.lg) {
+                Text("Tìm kiếm — Step 9 sẽ thay bằng SearchView thật")
+                    .dsFont(.headline)
+
+                DSButton("Xem demo Search Results", variant: .primary) {
+                    coordinator.searchCoordinator.push(.searchResults(query: "yuri"))
+                }
+            }
+            .padding(DSSpacing.lg)
+            .navigationDestination(for: SearchRoute.self) { route in
+                switch route {
+                case .searchResults(let query):
+                    Text("Search Results (demo) — query: \(query)")
+                        .dsFont(.title1)
+                case .seriesDetail(let id):
+                    Text("Series Detail (demo) — id: \(id)")
+                        .dsFont(.title1)
+                }
+            }
+        }
+    }
+
+    // MARK: - Notifications Tab
+
+    private var notificationsTab: some View {
+        NavigationStack(path: pathBinding(for: coordinator.notificationsCoordinator)) {
+            VStack(spacing: DSSpacing.lg) {
+                Text("Thông báo — Phase tương ứng sẽ thay bằng NotificationListView thật")
+                    .dsFont(.headline)
+
+                DSButton("Xem demo Notification Settings", variant: .primary) {
+                    coordinator.notificationsCoordinator.push(.notificationSettings)
+                }
+            }
+            .padding(DSSpacing.lg)
+            .navigationDestination(for: NotificationsRoute.self) { route in
+                switch route {
+                case .notificationSettings:
+                    Text("Notification Settings (demo)")
+                        .dsFont(.title1)
+                case .seriesDetail(let id):
+                    Text("Series Detail (demo) — id: \(id)")
+                        .dsFont(.title1)
+                }
+            }
+        }
+    }
+
+    // MARK: - Profile Tab
+
+    private var profileTab: some View {
+        NavigationStack(path: pathBinding(for: coordinator.profileCoordinator)) {
+            VStack(spacing: DSSpacing.lg) {
+                Text("Cá nhân — Phase 12 sẽ thay bằng ProfileView thật")
+                    .dsFont(.headline)
+
+                DSButton("Xem demo Edit Profile", variant: .primary) {
+                    coordinator.profileCoordinator.push(.editProfile)
+                }
+            }
+            .padding(DSSpacing.lg)
+            .navigationDestination(for: ProfileRoute.self) { route in
+                switch route {
+                case .editProfile:
+                    Text("Edit Profile (demo)")
+                        .dsFont(.title1)
+                case .accountSettings:
+                    Text("Account Settings (demo)")
+                        .dsFont(.title1)
+                }
+            }
+        }
+    }
+
+    // MARK: - Helper
+
+    private func pathBinding<Route: Hashable>(for coordinator: Coordinator<Route>) -> Binding<NavigationPath> {
+        Binding(
             get: { coordinator.path },
             set: { coordinator.path = $0 }
-        )) {
-            content()
-                .navigationDestination(for: PlaceholderRoute.self) { route in
-                    switch route {
-                    case .demoDetail(let text):
-                        Text("Demo detail: \(text)")
-                            .dsFont(.title2)
-                    }
-                }
-        }
-    }
-
-    // MARK: - Demo content (chứng minh state riêng từng tab — xoá ở Step 7.4)
-
-    private var homeDemoContent: some View {
-        VStack(spacing: DSSpacing.lg) {
-            Text("Trang chủ — Step 7.4 sẽ thay bằng HomeView thật")
-                .dsFont(.headline)
-
-            DSButton("Mở Side Menu", variant: .outline) {
-                coordinator.presentSideMenu()
-            }
-
-            DSButton("Push demo screen (test NavigationStack)", variant: .primary) {
-                coordinator.homeCoordinator.push(.demoDetail("Từ Home"))
-            }
-        }
-        .padding(DSSpacing.lg)
-    }
-
-    private func demoContent(title: String) -> some View {
-        Text(title).dsFont(.headline)
+        )
     }
 }

@@ -5,12 +5,7 @@
 //  Created by Loi Nguyen on 20/8/26.
 //
 
-// Level 2 Coordinator: manages the currently selected tab and
-// the Side Menu display flag — the actual SideMenuCoordinator will replace `isSideMenuPresented: Bool`
-// with a specific route; this is just a temporary hook for the hamburger button on the Home screen.
-//
-// Each tab owns its OWN Coordinator<PlaceholderRoute> (4 independent instances) —
-// this is the mechanism that preserves separate state when switching between tabs.
+// Each tab now has its own Route enum
 
 import Foundation
 import Observation
@@ -20,14 +15,12 @@ import CoreArchitecture
 final class MainTabCoordinator {
 
     var selectedTab: MainTab = .home
-
-    // placeholder — not yet using the actual SideMenuCoordinator.
     var isSideMenuPresented = false
 
-    let homeCoordinator = Coordinator<PlaceholderRoute>()
-    let searchCoordinator = Coordinator<PlaceholderRoute>()
-    let notificationsCoordinator = Coordinator<PlaceholderRoute>()
-    let profileCoordinator = Coordinator<PlaceholderRoute>()
+    let homeCoordinator = Coordinator<HomeRoute>()
+    let searchCoordinator = Coordinator<SearchRoute>()
+    let notificationsCoordinator = Coordinator<NotificationsRoute>()
+    let profileCoordinator = Coordinator<ProfileRoute>()
 
     init() {}
 
