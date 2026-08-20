@@ -5,54 +5,53 @@
 //  Created by Loi Nguyen on 18/8/26.
 //
 
-// Coordinates the Login, Register, and ForgotPassword screens using a simple state enum.
-// TEMPORARY — will be replaced by a proper Coordinator/NavigationStack.
-// This is NOT the project's official navigation architecture.
-
 import AuthFeature
 import FactoryKit
 import Repositories
 import SwiftUI
-
-private enum AuthScreen {
-    case login
-    case register
-    case forgotPassword
-}
+import CoreArchitecture
 
 struct AuthFlowView: View {
-    @State private var screen: AuthScreen = .login
+    @State private var authCoordinator = AuthCoordinator()
     let onAuthenticated: () -> Void
 
     var body: some View {
-        switch screen {
-        case .login:
+        NavigationStack(path: pathBinding) {
             LoginView(
                 repository: Container.shared.authRepository(),
                 googleAuthService: makeGoogleAuthService(),
                 onLoginSuccess: onAuthenticated,
-                onNavigateToRegister: { screen = .register },
-                onNavigateToForgotPassword: { screen = .forgotPassword }
+                onNavigateToRegister: { authCoordinator.show(.register) },
+                onNavigateToForgotPassword: { authCoordinator.show(.forgotPassword) }
             )
-        case .register:
-            RegisterView(
-                repository: Container.shared.authRepository(),
-                googleAuthService: makeGoogleAuthService(),
-                onRegisterSuccess: onAuthenticated,
-                onNavigateToLogin: { screen = .login }
-            )
-        case .forgotPassword:
-            ForgotPasswordView(
-                repository: Container.shared.authRepository(),
-                googleAuthService: makeGoogleAuthService(),
-                onLoginSuccess: onAuthenticated,
-                onNavigateBackToLogin: { screen = .login }
-            )
+            .navigationDestination(for: AuthRoute.self) { route in
+                switch route {
+                case .register:
+                    RegisterView(
+                        repository: Container.shared.authRepository(),
+                        googleAuthService: makeGoogleAuthService(),
+                        onRegisterSuccess: onAuthenticated,
+                        onNavigateToLogin: { authCoordinator.showLogin() }
+                    )
+                case .forgotPassword:
+                    ForgotPasswordView(
+                        repository: Container.shared.authRepository(),
+                        googleAuthService: makeGoogleAuthService(),
+                        onLoginSuccess: onAuthenticated,
+                        onNavigateBackToLogin: { authCoordinator.showLogin() }
+                    )
+                }
+            }
         }
     }
 
-    /// Create a new instance whenever needed - ASWebAuthenticationSession is designed for single use per login session,
-    /// so there is no need to retain or reuse the instance (unlike AuthRepository/APIClient, which are app-wide singletons).
+    private var pathBinding: Binding<NavigationPath> {
+        Binding(
+            get: { authCoordinator.coordinator.path },
+            set: { authCoordinator.coordinator.path = $0 }
+        )
+    }
+
     private func makeGoogleAuthService() -> GoogleAuthService {
         GoogleAuthService(
             clientID: AppConfig.googleClientID,
