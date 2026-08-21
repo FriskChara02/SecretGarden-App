@@ -5,7 +5,6 @@
 //  Created by Loi Nguyen on 10/8/26.
 //
 
-// SeriesRepository.swift
 // Actual implementation of SeriesRepositoryProtocol.
 // Networking — receive APIClientProtocol via constructor injection,
 // do NOT instantiate APIClient() internally (makes testing difficult, violates Dependency Inversion).
