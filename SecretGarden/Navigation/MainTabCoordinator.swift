@@ -10,6 +10,7 @@
 import Foundation
 import Observation
 import CoreArchitecture
+import HomeFeature
 
 @Observable
 final class MainTabCoordinator {

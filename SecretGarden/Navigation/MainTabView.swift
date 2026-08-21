@@ -8,6 +8,7 @@
 import SwiftUI
 import DesignSystem
 import CoreArchitecture
+import HomeFeature
 
 struct MainTabView: View {
     @State private var coordinator = MainTabCoordinator()
