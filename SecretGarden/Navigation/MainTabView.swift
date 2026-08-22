@@ -44,19 +44,9 @@ struct MainTabView: View {
 
     private var homeTab: some View {
         NavigationStack(path: pathBinding(for: coordinator.homeCoordinator)) {
-            VStack(spacing: DSSpacing.lg) {
-                Text("Trang chủ — Step 8 sẽ thay bằng HomeView thật")
-                    .dsFont(.headline)
-
-                DSButton("Mở Side Menu", variant: .outline) {
-                    coordinator.sideMenuCoordinator.present()
-                }
-
-                DSButton("Xem demo Series Detail", variant: .primary) {
-                    coordinator.homeCoordinator.push(.seriesDetail(id: "demo-001"))
-                }
+            HomeView { seriesId in
+                coordinator.homeCoordinator.push(.seriesDetail(id: seriesId))
             }
-            .padding(DSSpacing.lg)
             .navigationDestination(for: HomeRoute.self) { route in
                 switch route {
                 case .seriesDetail(let id):
