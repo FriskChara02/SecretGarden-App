@@ -7,6 +7,7 @@
 
 // Toggle "Yuri Manga" ⟷ "Yuri Novel".
 
+import CoreModels
 import DesignSystem
 import SwiftUI
 
@@ -32,6 +33,18 @@ public struct ContentTypeToggle: View {
         }
         .pickerStyle(.segmented)
         .padding(.horizontal, DSSpacing.md)
+    }
+}
+
+extension HomeContentType {
+    /// Map the UI toggle (Manga/Novel) to the actual `SeriesType` domain for client-side filtering.
+    /// Note: `.doujinshi` does not fall under either of these two toggle options - consistent with
+    /// the system design (the toggle only switches between "Yurineko Manga" and "Yurineko Novel", Doujinshi has its own tab).
+    var seriesType: SeriesType {
+        switch self {
+        case .manga: return .manga
+        case .novel: return .novel
+        }
     }
 }
 

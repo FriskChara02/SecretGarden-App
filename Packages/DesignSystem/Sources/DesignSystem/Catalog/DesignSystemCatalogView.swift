@@ -154,9 +154,10 @@ public struct DesignSystemCatalogView: View {
                 id: "1",
                 coverURL: nil,
                 title: "Ngày Tôi Quyết Định Yêu Cậu Ấy Lần Nữa",
-                subtitle: "Nhóm dịch: Yuri no Sono",
-                tag: "Doujins",
-                metaInfo: "Chương 18 · 3 tháng trước",
+                authorName: "Yasaka Shuu",
+                groupName: "Yuri no Sono",
+                genres: ["Doujins", "Slice of Life"],
+                metaInfo: "Cập nhật 3 tháng trước",
                 isCompleted: true
             )
             SeriesCardView(data: sample, layout: .list)

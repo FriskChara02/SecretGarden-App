@@ -52,7 +52,14 @@ public struct HomeView: View {
                     onItemTapped: { seriesId in onSeriesSelected(seriesId) }
                 )
 
-                Text("Các section tiếp theo (Mới cập nhật, Xếp hạng, Bình luận) sẽ được thêm ở Step 8.6 – 8.8.")
+                LatestUpdatesSection(
+                    state: viewModel.latestUpdatesState,
+                    contentType: selectedContentType,
+                    onRetry: { viewModel.loadHome() },
+                    onSeriesSelected: { seriesId in onSeriesSelected(seriesId) }
+                )
+
+                Text("Các section tiếp theo (Xếp hạng, Bình luận)")
                     .dsFont(.footnote)
                     .foregroundStyle(DSColor.textSecondary)
                     .padding(.horizontal, DSSpacing.md)
