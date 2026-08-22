@@ -66,10 +66,7 @@ public struct HomeView: View {
                     onSeriesSelected: { seriesId in onSeriesSelected(seriesId) }
                 )
 
-                Text("Section tiếp theo (Bình luận ngẫu nhiên)")
-                    .dsFont(.footnote)
-                    .foregroundStyle(DSColor.textSecondary)
-                    .padding(.horizontal, DSSpacing.md)
+                RandomCommentsSection(state: viewModel.randomCommentsState)
             }
             .padding(.vertical, DSSpacing.lg)
         }

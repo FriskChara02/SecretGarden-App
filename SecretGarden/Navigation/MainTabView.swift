@@ -54,8 +54,7 @@ struct MainTabView: View {
             .navigationDestination(for: HomeRoute.self) { route in
                 switch route {
                 case .seriesDetail(let id):
-                    Text("Series Detail (demo) — id: \(id)")
-                        .dsFont(.title1)
+                    SeriesDetailPlaceholderView(seriesId: id)
                 }
             }
         }
