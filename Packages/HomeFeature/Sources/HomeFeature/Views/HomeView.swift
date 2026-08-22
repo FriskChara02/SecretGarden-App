@@ -59,7 +59,14 @@ public struct HomeView: View {
                     onSeriesSelected: { seriesId in onSeriesSelected(seriesId) }
                 )
 
-                Text("Các section tiếp theo (Xếp hạng, Bình luận)")
+                RankingSection(
+                    state: viewModel.rankingState,
+                    selectedRange: viewModel.selectedRankingRange,
+                    onRangeSelected: { range in viewModel.reloadRanking(range: range) },
+                    onSeriesSelected: { seriesId in onSeriesSelected(seriesId) }
+                )
+
+                Text("Section tiếp theo (Bình luận ngẫu nhiên)")
                     .dsFont(.footnote)
                     .foregroundStyle(DSColor.textSecondary)
                     .padding(.horizontal, DSSpacing.md)
