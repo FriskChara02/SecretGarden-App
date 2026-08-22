@@ -9,10 +9,13 @@
 // `onSeriesSelected` is passed in from outside (App target) rather than being called directly by HomeView.
 // Direct Coordinator usage — adhering to the "View emits intent, Coordinator handles navigation" pattern.
 
+import CoreModels
 import DesignSystem
+import Repositories
 import SwiftUI
 
 public struct HomeView: View {
+    @StateObject private var viewModel: HomeViewModel
     @State private var selectedContentType: HomeContentType = .manga
 
     private let onSeriesSelected: (String) -> Void
@@ -32,7 +35,8 @@ public struct HomeView: View {
         )
     ]
 
-    public init(onSeriesSelected: @escaping (String) -> Void) {
+    public init(repository: HomeRepositoryProtocol, onSeriesSelected: @escaping (String) -> Void) {
+        self._viewModel = StateObject(wrappedValue: HomeViewModel(repository: repository))
         self.onSeriesSelected = onSeriesSelected
     }
 
@@ -43,27 +47,28 @@ public struct HomeView: View {
 
                 ContentTypeToggle(selection: $selectedContentType)
 
-                // Placeholder tạm cho các section chưa dựng — sẽ bị thay thế hoàn toàn
-                // ở Step 8.5-8.8, không phải nợ kỹ thuật, chỉ là mốc kế hoạch rõ ràng.
-                Text("Các section tiếp theo (Tiếp tục đọc, Mới cập nhật, Xếp hạng, Bình luận) sẽ được thêm ở Step 8.5 – 8.8.")
+                ContinueReadingSection(
+                    state: viewModel.continueReadingState,
+                    onItemTapped: { seriesId in onSeriesSelected(seriesId) }
+                )
+
+                Text("Các section tiếp theo (Mới cập nhật, Xếp hạng, Bình luận) sẽ được thêm ở Step 8.6 – 8.8.")
                     .dsFont(.footnote)
                     .foregroundStyle(DSColor.textSecondary)
                     .padding(.horizontal, DSSpacing.md)
-
-                DSButton("Xem demo Series Detail", variant: .outline) {
-                    onSeriesSelected("demo-001")
-                }
-                .padding(.horizontal, DSSpacing.md)
             }
             .padding(.vertical, DSSpacing.lg)
         }
         .background(DSColor.backgroundPrimary)
         .navigationTitle("Trang chủ")
+        .task {
+            viewModel.loadHome()
+        }
     }
 }
 
 #Preview {
     NavigationStack {
-        HomeView(onSeriesSelected: { _ in })
+        HomeView(repository: HomeRepositoryMock(), onSeriesSelected: { _ in })
     }
 }

@@ -34,4 +34,18 @@ extension Container {
         }
         .singleton
     }
+
+    /// Home uses HomeRepositoryMock in Debug/Staging (to avoid "-1003 DNS" errors when the backend
+    /// does not yet exist) and the real HomeRepository in Production.
+    @MainActor
+    var homeRepository: Factory<HomeRepositoryProtocol> {
+        self {
+            if AppConfig.isDebugEnvironment {
+                return HomeRepositoryMock()
+            } else {
+                return HomeRepository(apiClient: self.apiClient())
+            }
+        }
+        .singleton
+    }
 }

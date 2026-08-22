@@ -9,6 +9,7 @@ import SwiftUI
 import DesignSystem
 import CoreArchitecture
 import HomeFeature
+import FactoryKit
 
 struct MainTabView: View {
     @State private var coordinator = MainTabCoordinator()
@@ -44,9 +45,12 @@ struct MainTabView: View {
 
     private var homeTab: some View {
         NavigationStack(path: pathBinding(for: coordinator.homeCoordinator)) {
-            HomeView { seriesId in
-                coordinator.homeCoordinator.push(.seriesDetail(id: seriesId))
-            }
+            HomeView(
+                repository: Container.shared.homeRepository(),
+                onSeriesSelected: { seriesId in
+                    coordinator.homeCoordinator.push(.seriesDetail(id: seriesId))
+                }
+            )
             .navigationDestination(for: HomeRoute.self) { route in
                 switch route {
                 case .seriesDetail(let id):
