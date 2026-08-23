@@ -6,8 +6,6 @@
 //
 
 // Card displaying a single story — shared across Home, Search, Category and Favorites.
-// This component has NO knowledge of the `Series` struct (CoreModels) — it only accepts
-// raw `SeriesCardData`, adhering to the Design System principle of absolute independence.
 
 import SwiftUI
 
@@ -23,7 +21,7 @@ public struct SeriesCardData: Identifiable, Equatable {
     public let authorName: String?
     public let groupName: String?
     public let genres: [String]
-    public let metaInfo: String        // e.g. "Updated 1 hour ago"
+    public let metaInfo: String
     public let isCompleted: Bool
 
     public init(
@@ -52,8 +50,12 @@ public struct SeriesCardView: View {
     private let layout: SeriesCardLayout
     private let onTap: (() -> Void)?
 
-    @State private var isPreviewShowing = false
-    @State private var pressTask: Task<Void, Never>?
+    @State private var isRevealed = false
+    @State private var didLongPress = false
+    @State private var autoDismissTask: Task<Void, Never>?
+
+    private let gridCardAspectRatio: CGFloat = 0.62
+    private let listCardHeight: CGFloat = 160
 
     public init(data: SeriesCardData, layout: SeriesCardLayout = .grid, onTap: (() -> Void)? = nil) {
         self.data = data
@@ -71,19 +73,34 @@ public struct SeriesCardView: View {
     // MARK: - Grid layout
 
     private var gridBody: some View {
-        VStack(alignment: .leading, spacing: DSSpacing.xs) {
-            fixedRatioCoverImage(ratio: 2 / 3)
-                .overlay(alignment: .topLeading) {
-                    if let firstGenre = data.genres.first {
-                        DSTag(firstGenre).padding(DSSpacing.xs)
-                    }
-                }
-                .overlay(alignment: .bottomTrailing) {
-                    if data.isCompleted {
-                        DSTag("Hoàn thành", color: DSColor.statusSuccess).padding(DSSpacing.xs)
-                    }
-                }
+        GeometryReader { proxy in
+            ZStack(alignment: .bottomLeading) {
+                coverImageFill(width: proxy.size.width, height: proxy.size.height)
 
+                if isRevealed {
+                    revealedOverlayGrid.transition(.opacity)
+                } else {
+                    normalOverlayGrid.transition(.opacity)
+                }
+            }
+            .frame(width: proxy.size.width, height: proxy.size.height)
+            .overlay(alignment: .topLeading) {
+                if let firstGenre = data.genres.first, !isRevealed {
+                    DSTag(firstGenre, color: DSColor.tagNeutral).padding(DSSpacing.xs)
+                }
+            }
+        }
+        .aspectRatio(gridCardAspectRatio, contentMode: .fit)
+        .clipShape(RoundedRectangle(cornerRadius: DSRadius.lg))
+        .overlay {
+            RoundedRectangle(cornerRadius: DSRadius.lg).strokeBorder(cardBorderGradient, lineWidth: 2)
+        }
+        .animation(.easeInOut(duration: 0.25), value: isRevealed)
+        .revealInteractions(isRevealed: $isRevealed, didLongPress: $didLongPress, autoDismissTask: $autoDismissTask, onTap: onTap)
+    }
+
+    private var normalOverlayGrid: some View {
+        VStack(alignment: .leading, spacing: DSSpacing.xxs) {
             HStack(spacing: DSSpacing.xxs) {
                 Image(systemName: "clock.arrow.circlepath").font(.caption2)
                 Text(data.metaInfo)
@@ -98,139 +115,18 @@ public struct SeriesCardView: View {
                 .lineLimit(1)
                 .truncationMode(.tail)
 
-            HStack(spacing: DSSpacing.xxs) {
-                Image(systemName: "bookmark.fill").foregroundStyle(Color.orange)
-                Text(data.isCompleted ? "Hoàn thành" : "Đang cập nhật")
+            if !data.genres.isEmpty {
+                genreTagsView(maxVisible: 2)
             }
-            .dsFont(DSFontToken.subheadline)
-            .foregroundStyle(DSColor.textPrimary)
-            .padding(.top, DSSpacing.xxs)
         }
         .padding(DSSpacing.sm)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .background(DSColor.backgroundPrimary)
-        .clipShape(RoundedRectangle(cornerRadius: DSRadius.lg))
-        .overlay {
-            RoundedRectangle(cornerRadius: DSRadius.lg)
-                .strokeBorder(cardBorderGradient, lineWidth: 2)
-        }
     }
 
-    // MARK: - List layout
-
-    private var listBody: some View {
-        HStack(alignment: .top, spacing: DSSpacing.sm) {
-            fixedRatioCoverImage(ratio: 2 / 3)
-                .frame(width: 88, height: 132)
-
-            VStack(alignment: .leading, spacing: DSSpacing.xxs) {
-                HStack(spacing: DSSpacing.xxs) {
-                    Image(systemName: "clock.arrow.circlepath").font(.caption2)
-                    Text(data.metaInfo)
-                }
-                .dsFont(DSFontToken.caption)
-                .foregroundStyle(DSColor.textSecondary)
-
-                Text(data.title)
-                    .dsFont(DSFontToken.title3)
-                    .foregroundStyle(DSColor.textPrimary)
-                    .lineLimit(1)
-                    .truncationMode(.tail)
-
-                if let authorName = data.authorName {
-                    HStack(spacing: DSSpacing.xxs) {
-                        Image(systemName: "person.fill").font(.caption2)
-                        // TODO: DesignSystem does not yet have DSColor.info — using the system's Color.blue for now.
-                        Text("Tác giả: \(authorName)").foregroundStyle(Color.blue)
-                    }
-                    .dsFont(DSFontToken.caption)
-                }
-
-                if let groupName = data.groupName {
-                    HStack(spacing: DSSpacing.xxs) {
-                        Image(systemName: "flag.fill").font(.caption2).foregroundStyle(DSColor.brandPrimary)
-                        Text("Nhóm dịch: \(groupName)").foregroundStyle(DSColor.brandPrimary)
-                    }
-                    .dsFont(DSFontToken.caption)
-                }
-
-                if !data.genres.isEmpty {
-                    genreTagsView(maxVisible: 4)
-                        .padding(.top, DSSpacing.xxs)
-                }
-
-                HStack(spacing: DSSpacing.xxs) {
-                    Image(systemName: "bookmark.fill").foregroundStyle(Color.orange)
-                    Text(data.isCompleted ? "Hoàn thành" : "Đang cập nhật")
-                }
-                .dsFont(DSFontToken.subheadline)
-                .foregroundStyle(DSColor.textPrimary)
-                .padding(.top, DSSpacing.xxs)
-            }
-
-            Spacer(minLength: 0)
-        }
-        .padding(DSSpacing.sm)
-        .background(DSColor.backgroundPrimary)
-        .clipShape(RoundedRectangle(cornerRadius: DSRadius.md))
-        .overlay {
-            RoundedRectangle(cornerRadius: DSRadius.md)
-                .strokeBorder(cardBorderGradient, lineWidth: 1.5)
-        }
-        .overlay(alignment: .trailing) {
-            if isPreviewShowing {
-                hoverPreview
-                    .transition(.opacity.combined(with: .move(edge: .leading)))
-            }
-        }
-        // Mouse/trackpad (Simulator, iPad Pointer): hover to show the preview immediately—no need to hold
-        .onHover { hovering in
-            guard pressTask == nil else { return } // Currently in a press-and-hold state -> prevent hover effects from overlapping
-            withAnimation(.easeInOut(duration: 0.15)) {
-                isPreviewShowing = hovering
-            }
-        }
-        // Real touch interaction (iPhone): QUICK TAP = open story, HOLD = view preview, RELEASE AFTER HOLDING = hide preview only (do NOT open story).
-        .simultaneousGesture(
-            DragGesture(minimumDistance: 0)
-                .onChanged { _ in
-                    guard pressTask == nil, !isPreviewShowing else { return }
-                    pressTask = Task {
-                        try? await Task.sleep(nanoseconds: 350_000_000) // threshold distinguishing between "quick tap" and "hold"
-                        guard !Task.isCancelled else { return }
-                        await MainActor.run {
-                            withAnimation(.easeInOut(duration: 0.15)) { isPreviewShowing = true }
-                        }
-                    }
-                }
-                .onEnded { _ in
-                    let wasShowingPreview = isPreviewShowing
-                    pressTask?.cancel()
-                    pressTask = nil
-                    withAnimation(.easeInOut(duration: 0.15)) { isPreviewShowing = false }
-
-                    // Only navigate if this is a quick tap (before the preview appears).
-                    // If the user holds long enough to see the preview, releasing their finger
-                    // should ONLY hide the preview, not open the story —
-                    // adhering to the requirement that "releasing the hold returns things to normal."
-                    if !wasShowingPreview {
-                        onTap?()
-                    }
-                }
-        )
-    }
-
-    // MARK: - Hover preview (List view only, works only with mouse/trackpad/pointer)
-
-    private var hoverPreview: some View {
+    private var revealedOverlayGrid: some View {
         ZStack(alignment: .bottomLeading) {
-            AsyncImage(url: data.coverURL) { phase in
-                if case .success(let image) = phase {
-                    image.resizable().aspectRatio(contentMode: .fill)
-                } else {
-                    Rectangle().fill(DSColor.backgroundSecondary)
-                }
-            }
-            LinearGradient(colors: [.clear, .black.opacity(0.8)], startPoint: .center, endPoint: .bottom)
+            LinearGradient(colors: [.clear, .black.opacity(0.85)], startPoint: .center, endPoint: .bottom)
             VStack(alignment: .leading, spacing: DSSpacing.xxs) {
                 Text(data.title)
                     .dsFont(DSFontToken.subheadline)
@@ -242,10 +138,91 @@ public struct SeriesCardView: View {
             }
             .padding(DSSpacing.sm)
         }
-        .frame(width: 170, height: 230)
-        .clipShape(RoundedRectangle(cornerRadius: DSRadius.lg))
-        .dsShadow(.floating)
-        .offset(x: 0)   // This place will be changed in the future.
+    }
+
+    // MARK: - List layout
+
+    private var listBody: some View {
+        GeometryReader { proxy in
+            ZStack(alignment: .topLeading) {
+                if isRevealed {
+                    coverImageFill(width: proxy.size.width, height: proxy.size.height)
+                        .transition(.opacity)
+                    LinearGradient(
+                        colors: [
+                            DSColor.backgroundPrimary.opacity(0.97),
+                            DSColor.backgroundPrimary.opacity(0.85),
+                            .clear
+                        ],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                    .transition(.opacity)
+                }
+
+                HStack(alignment: .top, spacing: DSSpacing.sm) {
+                    if !isRevealed {
+                        fixedRatioCoverImage(ratio: 2 / 3)
+                            .frame(width: 88, height: 132)
+                    }
+                    listTextContent
+                    Spacer(minLength: 0)
+                }
+                .padding(DSSpacing.sm)
+            }
+        }
+        .frame(height: listCardHeight)
+        .background(DSColor.backgroundPrimary)
+        .clipShape(RoundedRectangle(cornerRadius: DSRadius.md))
+        .overlay {
+            RoundedRectangle(cornerRadius: DSRadius.md).strokeBorder(cardBorderGradient, lineWidth: 1.5)
+        }
+        .animation(.easeInOut(duration: 0.25), value: isRevealed)
+        .revealInteractions(isRevealed: $isRevealed, didLongPress: $didLongPress, autoDismissTask: $autoDismissTask, onTap: onTap)
+    }
+
+    private var listTextContent: some View {
+        VStack(alignment: .leading, spacing: DSSpacing.xxs) {
+            HStack(spacing: DSSpacing.xxs) {
+                Image(systemName: "clock.arrow.circlepath").font(.caption2)
+                Text(data.metaInfo)
+            }
+            .dsFont(DSFontToken.caption)
+            .foregroundStyle(DSColor.textSecondary)
+
+            Text(data.title)
+                .dsFont(DSFontToken.title3)
+                .foregroundStyle(DSColor.textPrimary)
+                .lineLimit(1)
+                .truncationMode(.tail)
+
+            if let authorName = data.authorName {
+                HStack(spacing: DSSpacing.xxs) {
+                    Image(systemName: "person.fill").font(.caption2)
+                    Text("Tác giả: \(authorName)").foregroundStyle(DSColor.info)
+                }
+                .dsFont(DSFontToken.caption)
+            }
+
+            if let groupName = data.groupName {
+                HStack(spacing: DSSpacing.xxs) {
+                    Image(systemName: "flag.fill").font(.caption2).foregroundStyle(DSColor.brandPrimary)
+                    Text("Nhóm dịch: \(groupName)").foregroundStyle(DSColor.brandPrimary)
+                }
+                .dsFont(DSFontToken.caption)
+            }
+
+            if !data.genres.isEmpty {
+                genreTagsView(maxVisible: 4)
+            }
+
+            HStack(spacing: DSSpacing.xxs) {
+                Image(systemName: "bookmark.fill").foregroundStyle(DSColor.bookmarkAccent)
+                Text(data.isCompleted ? "Hoàn thành" : "Đang cập nhật")
+            }
+            .dsFont(DSFontToken.subheadline)
+            .foregroundStyle(DSColor.textPrimary)
+        }
     }
 
     // MARK: - Genre tags (flow + overflow "+N")
@@ -256,7 +233,7 @@ public struct SeriesCardView: View {
 
         return FlowLayout(spacing: DSSpacing.xs) {
             ForEach(visible, id: \.self) { genre in
-                DSTag(genre)
+                DSTag(genre, color: DSColor.tagNeutral)
             }
             if remaining > 0 {
                 DSTag("+\(remaining)", color: DSColor.brandPrimary)
@@ -268,50 +245,117 @@ public struct SeriesCardView: View {
 
     private var cardBorderGradient: LinearGradient {
         LinearGradient(
-            colors: [DSColor.brandPrimary, DSColor.brandPrimary.opacity(0.15)],
+            colors: [DSColor.brandPrimary, DSColor.brandPrimaryLight],
             startPoint: .top,
             endPoint: .bottom
         )
     }
 
-    // MARK: - Cover image (height forced via GeometryReader — fixing height misalignment)
+    // MARK: - Cover image helpers
 
+    /// Image covering the ENTIRE provided frame (used as a persistent background layer for both states).
+    @ViewBuilder
+    private func coverImageFill(width: CGFloat, height: CGFloat) -> some View {
+        AsyncImage(url: data.coverURL) { phase in
+            switch phase {
+            case .empty:
+                Rectangle().fill(DSColor.backgroundSecondary).overlay { ProgressView() }
+            case .success(let image):
+                image.resizable().aspectRatio(contentMode: .fill)
+            case .failure:
+                Rectangle().fill(DSColor.backgroundSecondary)
+                    .overlay { Image(systemName: "photo").foregroundStyle(DSColor.textSecondary.opacity(0.5)) }
+            @unknown default:
+                Rectangle().fill(DSColor.backgroundSecondary)
+            }
+        }
+        .frame(width: width, height: height)
+        .clipped()
+    }
+
+    /// Fixed-aspect-ratio thumbnail image (used for list thumbnails in the default state).
     @ViewBuilder
     private func fixedRatioCoverImage(ratio: CGFloat) -> some View {
         GeometryReader { proxy in
-            AsyncImage(url: data.coverURL) { phase in
-                switch phase {
-                case .empty:
-                    Rectangle()
-                        .fill(DSColor.backgroundSecondary)
-                        .overlay { ProgressView().tint(DSColor.textSecondary) }
-                case .success(let image):
-                    image.resizable().aspectRatio(contentMode: .fill)
-                case .failure:
-                    Rectangle()
-                        .fill(DSColor.backgroundSecondary)
-                        .overlay {
-                            Image(systemName: "photo")
-                                .foregroundStyle(DSColor.textSecondary.opacity(0.5))
-                        }
-                @unknown default:
-                    Rectangle().fill(DSColor.backgroundSecondary)
-                }
-            }
-            .frame(width: proxy.size.width, height: proxy.size.width / ratio)
-            .clipped()
+            coverImageFill(width: proxy.size.width, height: proxy.size.width / ratio)
         }
         .aspectRatio(ratio, contentMode: .fit)
-        .clipShape(RoundedRectangle(cornerRadius: DSRadius.md))
+        .clipShape(RoundedRectangle(cornerRadius: DSRadius.sm))
+    }
+}
+
+// MARK: - Shared gesture: hover (mouse/trackpad) or long-press (touch, without blocking scrolling).
+// Long-press automatically dismisses the reveal after 4 seconds if the user holds their finger still,
+// so they aren't required to remember to lift it.
+
+private struct RevealInteractionModifier: ViewModifier {
+    @Binding var isRevealed: Bool
+    @Binding var didLongPress: Bool
+    @Binding var autoDismissTask: Task<Void, Never>?
+    let onTap: (() -> Void)?
+
+    func body(content: Content) -> some View {
+        content
+            .onHover { hovering in
+                guard !didLongPress else { return }
+                withAnimation(.easeInOut(duration: 0.15)) { isRevealed = hovering }
+            }
+            .simultaneousGesture(
+                LongPressGesture(minimumDuration: 0.35, maximumDistance: 15)
+                    .onEnded { _ in
+                        didLongPress = true
+                        withAnimation(.easeInOut(duration: 0.15)) { isRevealed = true }
+                        scheduleAutoDismiss()
+                    }
+            )
+            .onTapGesture {
+                if didLongPress {
+                    dismissReveal()
+                } else {
+                    onTap?()
+                }
+            }
+    }
+
+    private func scheduleAutoDismiss() {
+        autoDismissTask?.cancel()
+        autoDismissTask = Task {
+            try? await Task.sleep(nanoseconds: 4_000_000_000) // 4s
+            guard !Task.isCancelled else { return }
+            await MainActor.run { dismissReveal() }
+        }
+    }
+
+    private func dismissReveal() {
+        autoDismissTask?.cancel()
+        autoDismissTask = nil
+        didLongPress = false
+        withAnimation(.easeInOut(duration: 0.15)) { isRevealed = false }
+    }
+}
+
+private extension View {
+    func revealInteractions(
+        isRevealed: Binding<Bool>,
+        didLongPress: Binding<Bool>,
+        autoDismissTask: Binding<Task<Void, Never>?>,
+        onTap: (() -> Void)?
+    ) -> some View {
+        modifier(RevealInteractionModifier(
+            isRevealed: isRevealed,
+            didLongPress: didLongPress,
+            autoDismissTask: autoDismissTask,
+            onTap: onTap
+        ))
     }
 }
 
 #Preview("SeriesCardView - Grid") {
     let sample = SeriesCardData(
-        id: "1", coverURL: nil, title: "Ngày Tôi Quyết Định Yêu Cậu Ấy Lần Nữa",
-        authorName: "Yasaka Shuu", groupName: "Cánh Tập Dịch",
-        genres: ["Comedy", "Romance", "School Life", "Yuri", "Slice of Life"],
-        metaInfo: "Cập nhật 1 giờ trước", isCompleted: true
+        id: "1", coverURL: nil, title: "Bắt nạt mình đi mà, nữ phản diện ơi!",
+        authorName: "Chise, Ciweimao", groupName: "Knights of Yuri",
+        genres: ["Bullying", "Comedy", "Fantasy", "Full Color"],
+        metaInfo: "khoảng 1 giờ trước", isCompleted: false
     )
     LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: DSSpacing.md) {
         SeriesCardView(data: sample, layout: .grid)
@@ -322,10 +366,10 @@ public struct SeriesCardView: View {
 
 #Preview("SeriesCardView - List") {
     let sample = SeriesCardData(
-        id: "1", coverURL: nil, title: "Ngày Tôi Quyết Định Yêu Cậu Ấy Lần Nữa",
-        authorName: "Yasaka Shuu", groupName: "Cánh Tập Dịch",
-        genres: ["Comedy", "Romance", "School Life", "Yuri", "Slice of Life"],
-        metaInfo: "Cập nhật 1 giờ trước"
+        id: "1", coverURL: nil, title: "Bắt nạt mình đi mà, nữ phản diện ơi!",
+        authorName: "Chise, Ciweimao", groupName: "Knights of Yuri",
+        genres: ["Bullying", "Comedy", "Fantasy", "Full Color"],
+        metaInfo: "khoảng 1 giờ trước"
     )
     VStack(spacing: DSSpacing.md) {
         SeriesCardView(data: sample, layout: .list)

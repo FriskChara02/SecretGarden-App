@@ -26,6 +26,13 @@ public enum DSColor {
     public static let brandPrimary = Color("BrandPrimary", bundle: .designSystemModule)
     public static let brandSecondary = Color("BrandSecondary", bundle: .designSystemModule)
 
+    public static let brandPrimaryLight = Color("BrandPrimaryLight", bundle: .designSystemModule)
+    public static let tagNeutral = Color("TagNeutral", bundle: .designSystemModule)
+    public static let bookmarkAccent = Color("BookmarkAccent", bundle: .designSystemModule)
+    public static let info = Color("Info", bundle: .designSystemModule)
+    public static let rankHighlight = Color("RankHighlight", bundle: .designSystemModule)
+    public static let rankAccentStripe = Color("RankAccentStripe", bundle: .designSystemModule)
+
     public static let backgroundPrimary = Color("BackgroundPrimary", bundle: .designSystemModule)
     public static let backgroundSecondary = Color("BackgroundSecondary", bundle: .designSystemModule)
 
