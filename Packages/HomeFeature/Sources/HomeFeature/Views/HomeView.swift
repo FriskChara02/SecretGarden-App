@@ -46,6 +46,15 @@ public struct HomeView: View {
                 BannerCarouselView(banners: banners)
 
                 ContentTypeToggle(selection: $selectedContentType)
+                    .onChange(of: selectedContentType) { _, newValue in
+                        viewModel.refreshRandomYuri(type: newValue.seriesType)
+                    }
+
+                RandomYuriSection(
+                    state: viewModel.randomYuriState,
+                    onRefresh: { viewModel.refreshRandomYuri(type: selectedContentType.seriesType) },
+                    onSeriesSelected: { seriesId in onSeriesSelected(seriesId) }
+                )
 
                 ContinueReadingSection(
                     state: viewModel.continueReadingState,
@@ -62,7 +71,8 @@ public struct HomeView: View {
                 RankingSection(
                     state: viewModel.rankingState,
                     selectedRange: viewModel.selectedRankingRange,
-                    onRangeSelected: { range in viewModel.reloadRanking(range: range) },
+                    selectedSortBy: viewModel.selectedRankingSortBy,
+                    onFilterChanged: { range, sortBy in viewModel.reloadRanking(range: range, sortBy: sortBy) },
                     onSeriesSelected: { seriesId in onSeriesSelected(seriesId) }
                 )
 

@@ -19,9 +19,12 @@ public protocol HomeRepositoryProtocol {
     /// `GET /home/latest-updates?page=` - "Recently updated" section.
     func fetchLatestUpdates(page: Int) async throws -> [Series]
 
-    /// `GET /home/ranking?range=&page=` - "Rankings" section.
-    func fetchRanking(range: RankingRange, page: Int) async throws -> [Series]
-
     /// `GET /home/random-comments` -"Random Comments" section.
     func fetchRandomComments() async throws -> [Comment]
+    
+    /// `GET /home/random?type=manga|novel` — section "Random Yuri".
+    func fetchRandomYuri(type: SeriesType) async throws -> [Series]
+    
+    /// `GET /home/ranking?range=&sortBy=&page=` - "Rankings" section.
+    func fetchRanking(range: RankingRange, sortBy: RankingSortBy, page: Int) async throws -> [Series]
 }

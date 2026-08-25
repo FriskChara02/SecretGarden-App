@@ -30,6 +30,7 @@ enum SeriesCardMapper {
             groupName: series.group?.name,
             genres: series.genres.map { $0.name },
             metaInfo: "Cập nhật \(relativeFormatter.localizedString(for: series.updatedAt, relativeTo: Date()))",
+            chapterLabel: series.latestChapterLabel,
             isCompleted: series.status == .completed
         )
     }

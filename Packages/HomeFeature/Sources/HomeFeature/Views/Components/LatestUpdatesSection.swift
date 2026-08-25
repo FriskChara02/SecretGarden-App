@@ -55,11 +55,11 @@ struct LatestUpdatesSection: View {
     private var header: some View {
         HStack {
             HStack(spacing: DSSpacing.xs) {
-                Image(systemName: "diamond.fill")
+                Image(systemName: "diamond.circle")
                     .font(.caption2)
                 Text("Mới Cập Nhật")
                     .dsFont(.title3)
-                Image(systemName: "diamond.fill")
+                Image(systemName: "diamond.circle")
                     .font(.caption2)
             }
             .foregroundStyle(DSColor.brandPrimary)
@@ -109,9 +109,12 @@ struct LatestUpdatesSection: View {
             case .grid:
                 LazyVGrid(columns: gridColumns, spacing: DSSpacing.md) {
                     ForEach(series) { item in
-                        SeriesCardView(data: SeriesCardMapper.map(item), layout: .grid)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .onTapGesture { onSeriesSelected(item.id) }
+                        SeriesCardView(
+                            data: SeriesCardMapper.map(item),
+                            layout: .grid,
+                            onTap: { onSeriesSelected(item.id) }
+                        )
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     }
                 }
                 .padding(.horizontal, DSSpacing.md)
@@ -119,8 +122,6 @@ struct LatestUpdatesSection: View {
             case .list:
                 LazyVStack(spacing: DSSpacing.md) {
                     ForEach(series) { item in
-                        // List layout handles internal gestures (tap = open story, hold = view preview)
-                        // -> pass onTap via init; do NOT use .onTapGesture externally (it will conflict).
                         SeriesCardView(
                             data: SeriesCardMapper.map(item),
                             layout: .list,

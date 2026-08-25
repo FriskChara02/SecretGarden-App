@@ -24,6 +24,7 @@ public struct Series: Codable, Identifiable, Equatable {
     public var favoriteCount: Int
     public var updatedAt: Date
     public var chapters: [Chapter]?
+    public var latestChapterLabel: String?
 
     public init(
         id: String,
@@ -39,7 +40,8 @@ public struct Series: Codable, Identifiable, Equatable {
         viewCount: Int = 0,
         favoriteCount: Int = 0,
         updatedAt: Date,
-        chapters: [Chapter]? = nil
+        chapters: [Chapter]? = nil,
+        latestChapterLabel: String? = nil
     ) {
         self.id = id
         self.title = title
@@ -55,6 +57,7 @@ public struct Series: Codable, Identifiable, Equatable {
         self.favoriteCount = favoriteCount
         self.updatedAt = updatedAt
         self.chapters = chapters
+        self.latestChapterLabel = latestChapterLabel
     }
 }
 

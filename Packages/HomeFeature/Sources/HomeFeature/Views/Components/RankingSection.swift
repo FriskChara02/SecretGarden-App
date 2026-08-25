@@ -11,6 +11,9 @@
 // IMPORTANT: Changing the filter must call `onRangeSelected` (intent) — do NOT arbitrarily set local state
 // that falls out of sync with `viewModel.selectedRankingRange` (single source of truth).
 
+// "Rankings" — 2-level filter: sortBy (Views/Favorites) × range (Day/Week/Month/All-time).
+// MAIN Section — display errors clearly, do not hide them silently.
+
 import CoreModels
 import CoreArchitecture
 import DesignSystem
@@ -19,70 +22,114 @@ import SwiftUI
 struct RankingSection: View {
     let state: LoadableState<[Series]>
     let selectedRange: RankingRange
-    let onRangeSelected: (RankingRange) -> Void
+    let selectedSortBy: RankingSortBy
+    let onFilterChanged: (RankingRange, RankingSortBy) -> Void
     let onSeriesSelected: (String) -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: DSSpacing.sm) {
-            header
+            sectionTitle
+            filterTabs
 
             switch state {
             case .idle, .loading:
                 loadingSkeleton
-
             case .loaded(let series) where series.isEmpty:
                 emptyState
-
             case .loaded(let series):
                 content(series)
-
             case .failed:
                 errorState
             }
         }
     }
 
-    // MARK: - Header (title + segmented range filter)
+    private var sectionTitle: some View {
+        HStack(spacing: DSSpacing.xs) {
+            Image(systemName: "diamond.circle").font(.caption2)
+            Text("Xếp Hạng").dsFont(.title3)
+            Image(systemName: "diamond.circle").font(.caption2)
+        }
+        .foregroundStyle(DSColor.brandPrimary)
+        .frame(maxWidth: .infinity)
+    }
 
-    private var header: some View {
-        VStack(alignment: .leading, spacing: DSSpacing.sm) {
-            Text("Xếp hạng")
-                .dsFont(.title3)
-                .foregroundStyle(DSColor.textPrimary)
-                .padding(.horizontal, DSSpacing.md)
+    // MARK: - 2-tier filter container (pink box)
 
-            Picker("Khoảng thời gian", selection: rangeBinding) {
-                Text("Ngày").tag(RankingRange.day)
-                Text("Tuần").tag(RankingRange.week)
-                Text("Tháng").tag(RankingRange.month)
-                Text("Tất cả").tag(RankingRange.all)
+    private var filterTabs: some View {
+        VStack(spacing: 0) {
+            sortByTabRow
+            Rectangle().fill(Color.white.opacity(0.3)).frame(height: 1)
+            rangeTabRow
+        }
+        .background(DSColor.brandPrimary)
+        .clipShape(RoundedRectangle(cornerRadius: DSRadius.lg))
+        .overlay {
+            RoundedRectangle(cornerRadius: DSRadius.lg).strokeBorder(DSColor.brandPrimaryLight, lineWidth: 2)
+        }
+        .padding(.horizontal, DSSpacing.md)
+    }
+
+    private var sortByTabRow: some View {
+        HStack(spacing: 0) {
+            tabButton("Lượt xem", isSelected: selectedSortBy == .views) {
+                onFilterChanged(selectedRange, .views)
             }
-            .pickerStyle(.segmented)
-            .padding(.horizontal, DSSpacing.md)
+            tabDivider
+            tabButton("Yêu thích", isSelected: selectedSortBy == .favorites) {
+                onFilterChanged(selectedRange, .favorites)
+            }
+        }
+        .padding(.vertical, DSSpacing.sm)
+    }
+
+    private var rangeTabRow: some View {
+        HStack(spacing: 0) {
+            rangeButton(.day, "Ngày")
+            tabDivider
+            rangeButton(.week, "Tuần")
+            tabDivider
+            rangeButton(.month, "Tháng")
+            tabDivider
+            rangeButton(.all, "Tất cả")
+        }
+        .padding(.vertical, DSSpacing.sm)
+    }
+
+    private var tabDivider: some View {
+        Rectangle().fill(Color.white.opacity(0.3)).frame(width: 1, height: 14)
+    }
+
+    private func rangeButton(_ range: RankingRange, _ title: String) -> some View {
+        tabButton(title, isSelected: selectedRange == range) {
+            onFilterChanged(range, selectedSortBy)
         }
     }
 
-    /// "Fake" binding - reads from `selectedRange` (the source of truth in the ViewModel), but when the user
-    /// changes the value, it does NOT automatically update a local variable; instead, it emits an `onRangeSelected` intent.
-    /// The Picker requires a real Binding to function; this is a valid way to achieve "read-only + emit intent"
-    /// behavior without introducing an extra `@State` that duplicates the ViewModel's state.
-    private var rangeBinding: Binding<RankingRange> {
-        Binding(get: { selectedRange }, set: { onRangeSelected($0) })
+    private func tabButton(_ title: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            VStack(spacing: DSSpacing.xxs) {
+                Text(title)
+                    .dsFont(.callout)
+                    .fontWeight(isSelected ? .bold : .regular)
+                    .foregroundStyle(.white)
+                Rectangle()
+                    .fill(isSelected ? Color.white : Color.clear)
+                    .frame(width: 32, height: 2)
+            }
+        }
+        .frame(maxWidth: .infinity)
     }
 
     // MARK: - Content states
 
     private func content(_ series: [Series]) -> some View {
-        VStack(spacing: DSSpacing.xs) {
+        VStack(spacing: DSSpacing.sm) {
             ForEach(Array(series.prefix(10).enumerated()), id: \.element.id) { index, item in
-                RankingRow(rank: index + 1, series: item) {
+                RankingRow(rank: index + 1, series: item, sortBy: selectedSortBy) {
                     onSeriesSelected(item.id)
                 }
                 .padding(.horizontal, DSSpacing.md)
-
-                if index < series.prefix(10).count - 1 {
-                    Divider().padding(.leading, DSSpacing.md + 28 + DSSpacing.sm)
-                }
             }
         }
     }
@@ -90,20 +137,11 @@ struct RankingSection: View {
     private var loadingSkeleton: some View {
         VStack(spacing: DSSpacing.sm) {
             ForEach(0..<3, id: \.self) { _ in
-                HStack(spacing: DSSpacing.sm) {
-                    Circle().fill(DSColor.backgroundSecondary).frame(width: 28, height: 28)
-                    RoundedRectangle(cornerRadius: DSRadius.sm)
-                        .fill(DSColor.backgroundSecondary)
-                        .frame(width: 52, height: 78)
-                    VStack(alignment: .leading, spacing: DSSpacing.xxs) {
-                        RoundedRectangle(cornerRadius: DSRadius.sm)
-                            .fill(DSColor.backgroundSecondary).frame(height: 14)
-                        RoundedRectangle(cornerRadius: DSRadius.sm)
-                            .fill(DSColor.backgroundSecondary).frame(width: 100, height: 10)
-                    }
-                    Spacer()
-                }
-                .padding(.horizontal, DSSpacing.md)
+                RoundedRectangle(cornerRadius: DSRadius.md)
+                    .fill(DSColor.backgroundSecondary)
+                    .frame(height: 90)
+                    .overlay { ProgressView() }
+                    .padding(.horizontal, DSSpacing.md)
             }
         }
     }
@@ -130,7 +168,7 @@ struct RankingSection: View {
                 .dsFont(.subheadline)
                 .foregroundStyle(DSColor.textPrimary)
             DSButton("Thử lại", variant: .outline) {
-                onRangeSelected(selectedRange) // Re-fetch the current range without changing the filter
+                onFilterChanged(selectedRange, selectedSortBy)
             }
         }
         .frame(maxWidth: .infinity)

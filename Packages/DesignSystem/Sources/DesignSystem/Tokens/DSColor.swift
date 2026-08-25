@@ -32,6 +32,7 @@ public enum DSColor {
     public static let info = Color("Info", bundle: .designSystemModule)
     public static let rankHighlight = Color("RankHighlight", bundle: .designSystemModule)
     public static let rankAccentStripe = Color("RankAccentStripe", bundle: .designSystemModule)
+    public static let chapterLabelText = Color("ChapterLabelText", bundle: .designSystemModule)
 
     public static let backgroundPrimary = Color("BackgroundPrimary", bundle: .designSystemModule)
     public static let backgroundSecondary = Color("BackgroundSecondary", bundle: .designSystemModule)

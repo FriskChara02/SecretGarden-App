@@ -22,6 +22,7 @@ public struct SeriesCardData: Identifiable, Equatable {
     public let groupName: String?
     public let genres: [String]
     public let metaInfo: String
+    public let chapterLabel: String?
     public let isCompleted: Bool
 
     public init(
@@ -32,6 +33,7 @@ public struct SeriesCardData: Identifiable, Equatable {
         groupName: String? = nil,
         genres: [String] = [],
         metaInfo: String,
+        chapterLabel: String? = nil,
         isCompleted: Bool = false
     ) {
         self.id = id
@@ -41,7 +43,13 @@ public struct SeriesCardData: Identifiable, Equatable {
         self.groupName = groupName
         self.genres = genres
         self.metaInfo = metaInfo
+        self.chapterLabel = chapterLabel
         self.isCompleted = isCompleted
+    }
+
+    /// The final display string for the bookmark line - prioritizing the actual chapter, falling back to the status.
+    var bookmarkLine: String {
+        chapterLabel ?? (isCompleted ? "Hoàn thành" : "Đang cập nhật")
     }
 }
 
@@ -110,14 +118,19 @@ public struct SeriesCardView: View {
             .lineLimit(1)
 
             Text(data.title)
-                .dsFont(DSFontToken.title3)
+                .dsFont(DSFontToken.headline)
                 .foregroundStyle(DSColor.textPrimary)
                 .lineLimit(1)
                 .truncationMode(.tail)
 
-            if !data.genres.isEmpty {
-                genreTagsView(maxVisible: 2)
+            HStack(spacing: DSSpacing.xxs) {
+                Image(systemName: "bookmark.fill").foregroundStyle(DSColor.bookmarkAccent)
+                Text(data.bookmarkLine)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
             }
+            .dsFont(DSFontToken.footnote)
+            .foregroundStyle(DSColor.textPrimary)
         }
         .padding(DSSpacing.sm)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -191,25 +204,35 @@ public struct SeriesCardView: View {
             .foregroundStyle(DSColor.textSecondary)
 
             Text(data.title)
-                .dsFont(DSFontToken.title3)
+                .dsFont(DSFontToken.headline)
                 .foregroundStyle(DSColor.textPrimary)
                 .lineLimit(1)
                 .truncationMode(.tail)
 
             if let authorName = data.authorName {
                 HStack(spacing: DSSpacing.xxs) {
-                    Image(systemName: "person.fill").font(.caption2)
-                    Text("Tác giả: \(authorName)").foregroundStyle(DSColor.info)
+                    Image(systemName: "person")
+                        .fontWeight(.bold)
+                        .foregroundStyle(DSColor.info)
+                    twoPartText(
+                        token: .caption,
+                        prefix: "Tác giả: ", prefixBold: true, prefixColor: DSColor.textPrimary,
+                        value: authorName, valueBold: true, valueColor: DSColor.info
+                    )
                 }
-                .dsFont(DSFontToken.caption)
             }
 
             if let groupName = data.groupName {
                 HStack(spacing: DSSpacing.xxs) {
-                    Image(systemName: "flag.fill").font(.caption2).foregroundStyle(DSColor.brandPrimary)
-                    Text("Nhóm dịch: \(groupName)").foregroundStyle(DSColor.brandPrimary)
+                    Image(systemName: "flag.fill")
+                        .fontWeight(.bold)
+                        .foregroundStyle(DSColor.brandPrimary)
+                    twoPartText(
+                        token: .caption,
+                        prefix: "Nhóm dịch: ", prefixBold: true, prefixColor: DSColor.textPrimary,
+                        value: groupName, valueBold: true, valueColor: DSColor.brandPrimary.opacity(0.75)
+                    )
                 }
-                .dsFont(DSFontToken.caption)
             }
 
             if !data.genres.isEmpty {
@@ -218,14 +241,17 @@ public struct SeriesCardView: View {
 
             HStack(spacing: DSSpacing.xxs) {
                 Image(systemName: "bookmark.fill").foregroundStyle(DSColor.bookmarkAccent)
-                Text(data.isCompleted ? "Hoàn thành" : "Đang cập nhật")
+                Text(data.bookmarkLine)
+                    .fontWeight(.bold)
+                    .foregroundStyle(DSColor.chapterLabelText)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
             }
-            .dsFont(DSFontToken.subheadline)
-            .foregroundStyle(DSColor.textPrimary)
+            .dsFont(DSFontToken.footnote)
         }
     }
 
-    // MARK: - Genre tags (flow + overflow "+N")
+    // MARK: - Genre tags (flow + overflow "+N" gradient badge)
 
     private func genreTagsView(maxVisible: Int) -> some View {
         let visible = Array(data.genres.prefix(maxVisible))
@@ -236,9 +262,44 @@ public struct SeriesCardView: View {
                 DSTag(genre, color: DSColor.tagNeutral)
             }
             if remaining > 0 {
-                DSTag("+\(remaining)", color: DSColor.brandPrimary)
+                overflowTag(remaining)
             }
         }
+    }
+
+    private func overflowTag(_ count: Int) -> some View {
+        Text("+\(count)")
+            .dsFont(DSFontToken.caption)
+            .fontWeight(.semibold)
+            .foregroundStyle(.white)
+            .padding(.horizontal, DSSpacing.sm)
+            .padding(.vertical, DSSpacing.xxs)
+            .background(
+                Capsule().fill(
+                    LinearGradient(
+                        colors: [DSColor.brandPrimaryLight,
+                                 DSColor.brandPrimary,
+                                 DSColor.brandPrimary,
+                                 DSColor.brandPrimary],
+                        startPoint: .bottomLeading,
+                        endPoint: .trailing
+                    )
+                )
+            )
+    }
+
+    // MARK: - Shared 2-part text helper (label bold/color different from value bold/color)
+
+    private func twoPartText(
+        token: DSFontToken,
+        prefix: String, prefixBold: Bool, prefixColor: Color,
+        value: String, valueBold: Bool, valueColor: Color
+    ) -> some View {
+        let baseFont = DSFont.font(token)
+        return (
+            Text(prefix).font(prefixBold ? baseFont.bold() : baseFont).foregroundColor(prefixColor)
+            + Text(value).font(valueBold ? baseFont.bold() : baseFont).foregroundColor(valueColor)
+        )
     }
 
     // MARK: - Gradient border
