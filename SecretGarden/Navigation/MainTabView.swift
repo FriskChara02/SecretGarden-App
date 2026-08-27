@@ -49,6 +49,9 @@ struct MainTabView: View {
                 repository: Container.shared.homeRepository(),
                 onSeriesSelected: { seriesId in
                     coordinator.homeCoordinator.push(.seriesDetail(id: seriesId))
+                },
+                onHeaderTapped: {
+                    coordinator.homeCoordinator.popToRoot()
                 }
             )
             .navigationDestination(for: HomeRoute.self) { route in
@@ -64,15 +67,25 @@ struct MainTabView: View {
 
     private var searchTab: some View {
         NavigationStack(path: pathBinding(for: coordinator.searchCoordinator)) {
-            VStack(spacing: DSSpacing.lg) {
-                Text("Tìm kiếm — Step 9 sẽ thay bằng SearchView thật")
-                    .dsFont(.headline)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 0) {
+                    GardenHeaderView {
+                        coordinator.searchCoordinator.popToRoot()
+                    }
 
-                DSButton("Xem demo Search Results", variant: .primary) {
-                    coordinator.searchCoordinator.push(.searchResults(query: "yuri"))
+                    VStack(spacing: DSSpacing.lg) {
+                        Text("Tìm kiếm — Step 9 sẽ thay bằng SearchView thật")
+                            .dsFont(.headline)
+
+                        DSButton("Xem demo Search Results", variant: .primary) {
+                            coordinator.searchCoordinator.push(.searchResults(query: "yuri"))
+                        }
+                    }
+                    .padding(DSSpacing.lg)
                 }
             }
-            .padding(DSSpacing.lg)
+            .background(DSColor.backgroundPrimary)
+            .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(for: SearchRoute.self) { route in
                 switch route {
                 case .searchResults(let query):
@@ -90,15 +103,25 @@ struct MainTabView: View {
 
     private var notificationsTab: some View {
         NavigationStack(path: pathBinding(for: coordinator.notificationsCoordinator)) {
-            VStack(spacing: DSSpacing.lg) {
-                Text("Thông báo — Phase tương ứng sẽ thay bằng NotificationListView thật")
-                    .dsFont(.headline)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 0) {
+                    GardenHeaderView {
+                        coordinator.notificationsCoordinator.popToRoot()
+                    }
 
-                DSButton("Xem demo Notification Settings", variant: .primary) {
-                    coordinator.notificationsCoordinator.push(.notificationSettings)
+                    VStack(spacing: DSSpacing.lg) {
+                        Text("Thông báo — Phase tương ứng sẽ thay bằng NotificationListView thật")
+                            .dsFont(.headline)
+
+                        DSButton("Xem demo Notification Settings", variant: .primary) {
+                            coordinator.notificationsCoordinator.push(.notificationSettings)
+                        }
+                    }
+                    .padding(DSSpacing.lg)
                 }
             }
-            .padding(DSSpacing.lg)
+            .background(DSColor.backgroundPrimary)
+            .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(for: NotificationsRoute.self) { route in
                 switch route {
                 case .notificationSettings:
@@ -116,15 +139,25 @@ struct MainTabView: View {
 
     private var profileTab: some View {
         NavigationStack(path: pathBinding(for: coordinator.profileCoordinator)) {
-            VStack(spacing: DSSpacing.lg) {
-                Text("Cá nhân — Phase 12 sẽ thay bằng ProfileView thật")
-                    .dsFont(.headline)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 0) {
+                    GardenHeaderView {
+                        coordinator.profileCoordinator.popToRoot()
+                    }
 
-                DSButton("Xem demo Edit Profile", variant: .primary) {
-                    coordinator.profileCoordinator.push(.editProfile)
+                    VStack(spacing: DSSpacing.lg) {
+                        Text("Cá nhân — Phase 12 sẽ thay bằng ProfileView thật")
+                            .dsFont(.headline)
+
+                        DSButton("Xem demo Edit Profile", variant: .primary) {
+                            coordinator.profileCoordinator.push(.editProfile)
+                        }
+                    }
+                    .padding(DSSpacing.lg)
                 }
             }
-            .padding(DSSpacing.lg)
+            .background(DSColor.backgroundPrimary)
+            .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(for: ProfileRoute.self) { route in
                 switch route {
                 case .editProfile:

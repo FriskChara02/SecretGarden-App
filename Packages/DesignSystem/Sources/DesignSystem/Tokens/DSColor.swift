@@ -13,7 +13,7 @@ import SwiftUI
 private final class DesignSystemBundleFinder {}
 
 extension Bundle {
-    static var designSystemModule: Bundle {
+    public static var designSystemModule: Bundle {
         #if SWIFT_PACKAGE
         return Bundle.module
         #else
