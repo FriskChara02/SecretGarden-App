@@ -46,6 +46,13 @@ public struct AdvancedFilterRequest: Codable, Equatable {
     /// "latest_update" / "newest" / "oldest" / "views" / "follows"
     public var sort: String
 
+    // Unlike the include/exclude fields above, these two are SINGLE-VALUE filters,
+    // there is no concept of "excluding status X" — so they do NOT follow the include/exclude pairing.
+    /// Filter by story status (ongoing/completed...). `nil` = no status filtering ("All").
+    public var status: SeriesStatus?
+    /// Only show stories with a number of chapters >= this value. `nil` or 0 = no restriction.
+    public var minChapterCount: Int?
+
     public init(
         includeTags: [String] = [],
         excludeTags: [String] = [],
@@ -57,7 +64,9 @@ public struct AdvancedFilterRequest: Codable, Equatable {
         excludePairings: [String] = [],
         includeGroups: [String] = [],
         excludeGroups: [String] = [],
-        sort: String = "latest_update"
+        sort: String = "latest_update",
+        status: SeriesStatus? = nil,
+        minChapterCount: Int? = nil
     ) {
         self.includeTags = includeTags
         self.excludeTags = excludeTags
@@ -70,5 +79,7 @@ public struct AdvancedFilterRequest: Codable, Equatable {
         self.includeGroups = includeGroups
         self.excludeGroups = excludeGroups
         self.sort = sort
+        self.status = status
+        self.minChapterCount = minChapterCount
     }
 }
