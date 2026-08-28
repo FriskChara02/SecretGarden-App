@@ -67,7 +67,9 @@ public struct ContentTypeToggle: View {
 
     private var barBackground: some View {
         LinearGradient(
-            colors: [DSColor.brandPrimary, DSColor.brandPrimary.opacity(0.85)],
+            colors: colorScheme == .dark
+                ? [DSColor.brandPrimary, DSColor.brandPrimary.opacity(0.5), Color.black]
+                : [DSColor.brandPrimary, DSColor.brandPrimary.opacity(0.85)],
             startPoint: .leading, endPoint: .trailing
         )
     }

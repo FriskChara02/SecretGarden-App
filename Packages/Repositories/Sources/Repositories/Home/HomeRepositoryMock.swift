@@ -130,10 +130,47 @@ public final class HomeRepositoryMock: HomeRepositoryProtocol {
 
     public func fetchRandomComments() async throws -> [Comment] {
         try await simulateNetworkDelay()
-        return [
-            Comment(id: "comment_mock_1", user: Self.sampleUser, content: "Chương này cảm động quá, đọc mà rưng rưng luôn 🥹", likeCount: 24, createdAt: Date(timeIntervalSinceNow: -1800)),
-            Comment(id: "comment_mock_2", user: Self.sampleUser, content: "Nhóm dịch làm việc chăm chỉ ghê, cảm ơn nhóm nhiều!", likeCount: 9, createdAt: Date(timeIntervalSinceNow: -7200))
+
+        // Pool of 15 comments — for each fetch (including the auto-loop after 4 pages), randomly select 12
+        // (exactly 4 pages × 3 comments)
+        let pool: [(content: String, days: Int, seriesIndex: Int)] = [
+            ("Ê tui muốn xem tiếp cặp chị em này 🔥", 8, 0),
+            ("Đang cảm xúc nhìn quả ảnh cười điên =))", 14, 1),
+            ("Như này vẫn chưa đủ, cần uốn nắn thêm nữa :)) 🔥", 13, 2),
+            ("Ai biểu bạn tìm mà bạn hăng hái thế 🔥", 9, 0),
+            ("Ây t đọc được 101 chương 1 ngày, new PB =)))", 4, 1),
+            ("Chị tôi bị familyzone mina ạ :<", 8, 2),
+            ("Cặp này ngọt xỉu, đọc xong tim đập loạn nhịp", 2, 0),
+            ("Nhóm dịch làm việc chăm chỉ ghê, cảm ơn nhiều!", 6, 1),
+            ("Chương này twist quá trời, không đoán được luôn", 11, 2),
+            ("Ước gì có mùa 2 sớm sớm", 3, 0),
+            ("Đọc lại lần thứ 5 rồi mà vẫn thấy hay", 15, 1),
+            ("Bạn nữ chính dễ thương ghê á", 5, 2),
+            ("Cốt truyện chậm mà cuốn phết", 7, 0),
+            ("Ai cũng nên đọc bộ này ít nhất 1 lần", 10, 1),
+            ("Cảm ơn tác giả vì bộ truyện tuyệt vời này", 1, 2)
         ]
+
+        let series = [
+            (id: "series_mock_1", title: "Ánh Trăng Bên Em"),
+            (id: "series_mock_2", title: "Hoa Anh Đào Mùa Hạ"),
+            (id: "series_mock_3", title: "Lời Hứa Dưới Giàn Hoa Tím")
+        ]
+
+        let allComments = pool.enumerated().map { index, item -> Comment in
+            let s = series[item.seriesIndex]
+            return Comment(
+                id: "comment_mock_\(index + 1)",
+                user: Self.sampleUser,
+                content: item.content,
+                likeCount: Int.random(in: 3...40),
+                createdAt: Date(timeIntervalSinceNow: -Double(item.days) * 86_400),
+                seriesId: s.id,
+                seriesTitle: s.title
+            )
+        }
+
+        return Array(allComments.shuffled().prefix(12))
     }
 
     public func fetchRandomYuri(type: SeriesType) async throws -> [Series] {

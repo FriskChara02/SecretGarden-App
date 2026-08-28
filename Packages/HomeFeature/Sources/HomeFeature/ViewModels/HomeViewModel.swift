@@ -36,6 +36,7 @@ public final class HomeViewModel: BaseViewModel {
     /// sharing it would mean that changing the Ranking filter would inadvertently cancel three other sections currently in the process of loading.
     private var rankingTask: Task<Void, Never>?
     private var randomYuriTask: Task<Void, Never>?
+    private var randomCommentsTask: Task<Void, Never>?
 
     public init(repository: HomeRepositoryProtocol) {
         self.repository = repository
@@ -86,6 +87,15 @@ public final class HomeViewModel: BaseViewModel {
                 await self?.loadRandomYuri(type: type)
             }
         }
+    
+    /// Shuffle random comments — called when the shuffle button is pressed.
+    public func refreshRandomComments() {
+        randomCommentsTask?.cancel()
+        randomCommentsState = .loading
+        randomCommentsTask = Task { [weak self] in
+            await self?.loadRandomComments()
+        }
+    }
 
     // MARK: - Per-section loaders
     // Each function does NOT throw errors externally, it catches its own errors and manages the state of its specific section.
@@ -154,5 +164,6 @@ public final class HomeViewModel: BaseViewModel {
     deinit {
         rankingTask?.cancel()
         randomYuriTask?.cancel()
+        randomCommentsTask?.cancel()
     }
 }

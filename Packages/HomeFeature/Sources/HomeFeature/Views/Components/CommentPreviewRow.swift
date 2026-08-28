@@ -15,35 +15,44 @@ import SwiftUI
 
 struct CommentPreviewRow: View {
     let comment: Comment
+    let onSeriesTapped: (String) -> Void
 
-    private static let relativeFormatter: RelativeDateTimeFormatter = {
-        let formatter = RelativeDateTimeFormatter()
-        formatter.locale = Locale(identifier: "vi_VN")
-        formatter.unitsStyle = .short
-        return formatter
-    }()
+    private let avatarSize: CGFloat = 32
+    private let contentHeight: CGFloat = 44
 
     var body: some View {
-        HStack(alignment: .top, spacing: DSSpacing.sm) {
-            avatar
-
-            VStack(alignment: .leading, spacing: DSSpacing.xxs) {
-                HStack(spacing: DSSpacing.xs) {
-                    Text(comment.user.username)
-                        .dsFont(.subheadline)
-                        .foregroundStyle(DSColor.textPrimary)
-                    Text(Self.relativeFormatter.localizedString(for: comment.createdAt, relativeTo: Date()))
-                        .dsFont(.caption)
-                        .foregroundStyle(DSColor.textSecondary)
-                }
-
-                Text(comment.content)
-                    .dsFont(.body)
+        VStack(alignment: .leading, spacing: DSSpacing.xs) {
+            // Row 1: avatar + username + timestamp
+            HStack(spacing: DSSpacing.sm) {
+                avatar
+                Text(comment.user.username)
+                    .dsFont(.subheadline)
+                    .fontWeight(.bold)
                     .foregroundStyle(DSColor.textPrimary)
-                    .lineLimit(2)
+                Spacer()
+                Text(Self.daysAgoText(from: comment.createdAt))
+                    .dsFont(.caption)
+                    .foregroundStyle(DSColor.textSecondary)
             }
 
-            Spacer(minLength: 0)
+            // Row 2: comment content
+            Text(comment.content)
+                .dsFont(.body)
+                .foregroundStyle(DSColor.textPrimary)
+                .lineLimit(2)
+                .truncationMode(.tail)
+                .frame(height: contentHeight, alignment: .top)
+
+            if let seriesId = comment.seriesId, let seriesTitle = comment.seriesTitle {
+                Divider()
+                Button {
+                    onSeriesTapped(seriesId)
+                } label: {
+                    Text(seriesTitle)
+                        .dsFont(.subheadline)
+                        .foregroundStyle(DSColor.brandPrimary)
+                }
+            }
         }
     }
 
@@ -61,7 +70,14 @@ struct CommentPreviewRow: View {
                     }
             }
         }
-        .frame(width: 36, height: 36)
+        .frame(width: avatarSize, height: avatarSize)
         .clipShape(Circle())
+    }
+
+    /// "N days ago" — Calculated manually by day, without using the default RelativeDateTimeFormatter
+    /// (which automatically selects "week"/"month" units based on the time span)
+    static func daysAgoText(from date: Date) -> String {
+        let days = Calendar.current.dateComponents([.day], from: date, to: Date()).day ?? 0
+        return days <= 0 ? "Hôm nay" : "\(days) ngày trước"
     }
 }

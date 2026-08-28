@@ -30,14 +30,49 @@ struct MainTabView: View {
                 .tag(MainTab.notifications)
 
             profileTab
-                .tabItem { Label(MainTab.profile.title, systemImage: MainTab.profile.systemImage) }
+                .tabItem { profileTabLabel }
                 .tag(MainTab.profile)
         }
+        .tint(DSColor.brandPrimary)
         .sheet(isPresented: Binding(
             get: { coordinator.sideMenuCoordinator.isPresented },
             set: { coordinator.sideMenuCoordinator.isPresented = $0 }
         )) {
             SideMenuView(coordinator: coordinator.sideMenuCoordinator)
+        }
+    }
+
+    // MARK: - Profile tab icon (guest vs logged-in)
+
+    /// TODO: Replace `avatarURL` with the actual session (AuthViewModel/KeychainManager) once
+    /// Profile & Settings are implemented. Currently, it always returns `nil` -> displays the guest icon.
+    private var avatarURL: URL? { nil }
+
+    @ViewBuilder
+    private var profileTabLabel: some View {
+        if let avatarURL {
+            Label {
+                Text(MainTab.profile.title)
+            } icon: {
+                AsyncImage(url: avatarURL) { phase in
+                    if case .success(let image) = phase {
+                        image.resizable().aspectRatio(contentMode: .fill)
+                    } else {
+                        Circle().fill(DSColor.backgroundSecondary)
+                    }
+                }
+                .frame(width: 24, height: 24)
+                .clipShape(Circle())
+                .overlay {
+                    // Pink border ONLY when the Personal tab is selected.
+                    if coordinator.selectedTab == .profile {
+                        Circle().strokeBorder(DSColor.brandPrimary, lineWidth: 2)
+                    }
+                }
+            }
+        } else {
+            // Guest: person icon, auto-filled when selected (default SF Symbol behavior in TabView).
+            Label(MainTab.profile.title, systemImage: "person")
         }
     }
 

@@ -68,11 +68,28 @@ public struct HomeView: View {
                         onSeriesSelected: { seriesId in onSeriesSelected(seriesId) }
                     )
 
-                    RandomCommentsSection(state: viewModel.randomCommentsState)
+                    RandomCommentsSection(
+                        state: viewModel.randomCommentsState,
+                        onRefresh: { viewModel.refreshRandomComments() },
+                        onSeriesSelected: { seriesId in onSeriesSelected(seriesId) }
+                    )
                 }
                 .padding(.top, DSSpacing.lg)
+
+                GardenFooterView(
+                    policyLinks: [
+                        GardenFooterLink(title: "Chính sách bảo mật", action: {}),
+                        GardenFooterLink(title: "Quy định", action: {}),
+                        GardenFooterLink(title: "Điều khoản", action: {})
+                    ],
+                    socialLinks: [
+                        GardenFooterLink(title: "Discord", action: {}),
+                        GardenFooterLink(title: "Facebook", action: {})
+                    ],
+                    onPolicyTapped: {}   // TODO: connect Rules/Policy route
+                )
+                .padding(.top, DSSpacing.xl)
             }
-            .padding(.bottom, DSSpacing.lg)
         }
         .background(DSColor.backgroundPrimary)
         .toolbar(.hidden, for: .navigationBar)

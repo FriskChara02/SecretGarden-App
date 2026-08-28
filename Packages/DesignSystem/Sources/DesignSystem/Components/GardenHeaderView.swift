@@ -14,6 +14,7 @@ import SwiftUI
 public struct GardenHeaderView: View {
     private let title: String
     private let onTap: () -> Void
+    @Environment(\.colorScheme) private var colorScheme
 
     public init(title: String = "SECRET GARDEN", onTap: @escaping () -> Void) {
         self.title = title
@@ -40,25 +41,23 @@ public struct GardenHeaderView: View {
 
     @ViewBuilder
     private var logoIcon: some View {
-        // "AppLogo" — Asset Catalog Image Set in DesignSystem
         if let uiImage = UIImage(named: "AppLogo", in: .designSystemModule, compatibleWith: nil) {
-            Image(uiImage: uiImage)
-                .resizable()
-                .scaledToFit()
-                .frame(width: 32, height: 32)
+            Image(uiImage: uiImage).resizable().scaledToFit().frame(width: 32, height: 32)
         } else {
-            Image(systemName: "leaf.fill")
-                .font(.system(size: 20))
-                .foregroundStyle(.white)
-                .frame(width: 32, height: 32)
+            Image(systemName: "leaf.fill").font(.system(size: 20)).foregroundStyle(.white).frame(width: 32, height: 32)
         }
     }
 
     private var headerBackground: some View {
-        LinearGradient(
-            colors: [DSColor.brandPrimary, DSColor.brandPrimary.opacity(0.85)],
-            startPoint: .leading, endPoint: .trailing
-        )
+        ZStack {
+            LinearGradient(
+                colors: colorScheme == .dark
+                    ? [DSColor.brandPrimary, DSColor.brandPrimary.opacity(0.55), Color.black]
+                    : [DSColor.brandPrimary, DSColor.brandPrimary.opacity(0.85)],
+                startPoint: .leading, endPoint: .trailing
+            )
+            if colorScheme == .dark { sparkleOverlay }
+        }
         .overlay {
             Rectangle().strokeBorder(Color.white.opacity(0.4), lineWidth: 1).padding(4)
         }
@@ -67,6 +66,23 @@ public struct GardenHeaderView: View {
         }
         .ignoresSafeArea(edges: .top)
     }
+
+    private var sparkleOverlay: some View {
+        GeometryReader { proxy in
+            ForEach(Self.sparklePositions.indices, id: \.self) { i in
+                let pos = Self.sparklePositions[i]
+                Image(systemName: "sparkle")
+                    .font(.system(size: pos.size))
+                    .foregroundStyle(.white.opacity(0.65))
+                    .position(x: proxy.size.width * pos.x, y: proxy.size.height * pos.y)
+            }
+        }
+        .allowsHitTesting(false)
+    }
+
+    private static let sparklePositions: [(x: CGFloat, y: CGFloat, size: CGFloat)] = [
+        (0.55, 0.25, 8), (0.68, 0.65, 11), (0.78, 0.35, 13), (0.87, 0.6, 8), (0.94, 0.2, 9), (0.6, 0.85, 7)
+    ]
 }
 
 #Preview {
