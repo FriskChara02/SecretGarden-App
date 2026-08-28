@@ -11,6 +11,7 @@ import Foundation
 import Observation
 import CoreArchitecture
 import HomeFeature
+import SearchFeature
 
 @Observable
 final class MainTabCoordinator {

@@ -20,6 +20,8 @@ public struct Comment: Codable, Identifiable, Equatable {
     public var isLikedByMe: Bool
     public var createdAt: Date
     public var replies: [Comment]?
+    public var seriesId: String?
+    public var seriesTitle: String?
 
     public init(
         id: String,
@@ -29,7 +31,9 @@ public struct Comment: Codable, Identifiable, Equatable {
         likeCount: Int = 0,
         isLikedByMe: Bool = false,
         createdAt: Date,
-        replies: [Comment]? = nil
+        replies: [Comment]? = nil,
+        seriesId: String? = nil,
+        seriesTitle: String? = nil
     ) {
         self.id = id
         self.user = user
@@ -39,5 +43,7 @@ public struct Comment: Codable, Identifiable, Equatable {
         self.isLikedByMe = isLikedByMe
         self.createdAt = createdAt
         self.replies = replies
+        self.seriesId = seriesId
+        self.seriesTitle = seriesTitle
     }
 }

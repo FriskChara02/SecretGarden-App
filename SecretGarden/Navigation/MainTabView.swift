@@ -10,6 +10,7 @@ import DesignSystem
 import CoreArchitecture
 import HomeFeature
 import FactoryKit
+import SearchFeature
 
 struct MainTabView: View {
     @State private var coordinator = MainTabCoordinator()

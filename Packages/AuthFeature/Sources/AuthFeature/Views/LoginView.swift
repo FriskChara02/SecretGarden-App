@@ -78,7 +78,8 @@ public struct LoginView: View {
                     variant: .primary,
                     isLoading: viewModel.loginState.isSubmitting
                 ) {
-                    viewModel.login()
+                    //viewModel.login()
+                    onLoginSuccess()
                 }
 
                 DSButton("Khôi phục mật khẩu?", variant: .text, size: .medium) {

@@ -14,6 +14,7 @@
 		7A3C55983031543A00B5A993 /* AuthFeature in Frameworks */ = {isa = PBXBuildFile; productRef = 7A3C55973031543A00B5A993 /* AuthFeature */; };
 		7A97F446303222DF0078EE73 /* Repositories in Frameworks */ = {isa = PBXBuildFile; productRef = 7A97F445303222DF0078EE73 /* Repositories */; };
 		7A97F449303224370078EE73 /* FactoryKit in Frameworks */ = {isa = PBXBuildFile; productRef = 7A97F448303224370078EE73 /* FactoryKit */; };
+		7AD91EA23037FDAA00D588BA /* HomeFeature in Frameworks */ = {isa = PBXBuildFile; productRef = 7AD91EA13037FDAA00D588BA /* HomeFeature */; };
 		7AFB86A630283F6B003895FE /* .swiftlint.yml in Resources */ = {isa = PBXBuildFile; fileRef = 7AFB86A530283F68003895FE /* .swiftlint.yml */; };
 		7AFB86A830284044003895FE /* .swiftformat in Resources */ = {isa = PBXBuildFile; fileRef = 7AFB86A730284041003895FE /* .swiftformat */; };
 		7AFB86C13028C870003895FE /* CoreArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = 7AFB86C03028C870003895FE /* CoreArchitecture */; };
@@ -54,6 +55,7 @@
 			files = (
 				7A3C55983031543A00B5A993 /* AuthFeature in Frameworks */,
 				7AFB86D73028C940003895FE /* CoreArchitecture in Frameworks */,
+				7AD91EA23037FDAA00D588BA /* HomeFeature in Frameworks */,
 				7A0AC609302648A30042775A /* CoreStorage in Frameworks */,
 				7A97F449303224370078EE73 /* FactoryKit in Frameworks */,
 				7A0AC6033026487D0042775A /* CoreModels in Frameworks */,
@@ -123,6 +125,7 @@
 				7A3C55973031543A00B5A993 /* AuthFeature */,
 				7A97F445303222DF0078EE73 /* Repositories */,
 				7A97F448303224370078EE73 /* FactoryKit */,
+				7AD91EA13037FDAA00D588BA /* HomeFeature */,
 			);
 			productName = SecretGarden;
 			productReference = 7A21DC2F3025DFFB00AB92DD /* SecretGarden.app */;
@@ -163,6 +166,7 @@
 				7AFB885A3029CB89003895FE /* XCLocalSwiftPackageReference "Packages/Repositories" */,
 				7A3C55963031543A00B5A993 /* XCLocalSwiftPackageReference "Packages/AuthFeature" */,
 				7A97F447303224370078EE73 /* XCRemoteSwiftPackageReference "Factory" */,
+				7AD91EA03037FDAA00D588BA /* XCLocalSwiftPackageReference "Packages/HomeFeature" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 7A21DC303025DFFB00AB92DD /* Products */;
@@ -865,6 +869,10 @@
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/AuthFeature;
 		};
+		7AD91EA03037FDAA00D588BA /* XCLocalSwiftPackageReference "Packages/HomeFeature" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/HomeFeature;
+		};
 		7AFB86D53028C940003895FE /* XCLocalSwiftPackageReference "Packages/CoreArchitecture" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/CoreArchitecture;
@@ -932,6 +940,10 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 7A97F447303224370078EE73 /* XCRemoteSwiftPackageReference "Factory" */;
 			productName = FactoryKit;
+		};
+		7AD91EA13037FDAA00D588BA /* HomeFeature */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = HomeFeature;
 		};
 		7AFB868F30283704003895FE /* SwiftLintBuildToolPlugin */ = {
 			isa = XCSwiftPackageProductDependency;
