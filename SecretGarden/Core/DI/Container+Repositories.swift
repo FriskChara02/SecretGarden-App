@@ -13,8 +13,10 @@
 // directly — always declare @Injected(\.seriesRepository) and retrieve it via the Container.
 
 import CoreArchitecture
+import CoreStorage
 import FactoryKit
 import Repositories
+import Foundation
 
 extension Container {
     @MainActor
@@ -45,6 +47,50 @@ extension Container {
             } else {
                 return HomeRepository(apiClient: self.apiClient())
             }
+        }
+        .singleton
+    }
+
+    /// SwiftData ModelContainer for search history — if setup fails, this is a developer/configuration
+    /// error (e.g. corrupted schema), so it should fail loudly at launch rather than force-try silently.
+    /// Same fail-fast philosophy, but avoids SwiftLint's force_try rule.
+    @MainActor
+    var searchHistoryLocalStore: Factory<SearchHistoryLocalStore> {
+        self {
+            do {
+                return try SearchHistoryLocalStore()
+            } catch {
+                fatalError("Failed to initialize SearchHistoryLocalStore: \(error.localizedDescription)")
+            }
+        }
+        .singleton
+    }
+
+    /// This is the ONLY place that decides between Mock and Real for the search function -
+    /// but it applies at a more granular level
+    /// (only for remote search, it does NOT apply to history - history is always real).
+    @MainActor
+    var searchRemoteDataSource: Factory<SearchRemoteDataSource> {
+        self {
+            if AppConfig.isDebugEnvironment {
+                return SearchRemoteMockDataSource()
+            } else {
+                return SearchRemoteAPIDataSource(apiClient: self.apiClient())
+            }
+        }
+        .singleton
+    }
+
+    /// SearchRepository is always the real implementation - there are no longer any Mock/Real if/else branches at this level,
+    /// because the history (localHistoryStore) always requires the real version, while the search strategy
+    /// has already been determined by the searchRemoteDataSource upstream.
+    @MainActor
+    var searchRepository: Factory<SearchRepositoryProtocol> {
+        self {
+            SearchRepository(
+                remoteDataSource: self.searchRemoteDataSource(),
+                localHistoryStore: self.searchHistoryLocalStore()
+            )
         }
         .singleton
     }
