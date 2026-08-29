@@ -7,11 +7,14 @@
 
 // Empty states: "No search history", "No description",
 // "Not following any groups"... Optional action button (e.g., "Discover Groups").
+// Supports custom image assets (imageName) — prioritizes the actual image if present in the Asset Catalog,
+// and automatically falls back to an SF Symbol (icon) if the image is missing or fails to load.
 
 import SwiftUI
 
 public struct DSEmptyStateView: View {
     private let icon: String
+    private let imageName: String?
     private let title: String
     private let message: String?
     private let actionTitle: String?
@@ -19,12 +22,14 @@ public struct DSEmptyStateView: View {
 
     public init(
         icon: String = "tray",
+        imageName: String? = nil,
         title: String,
         message: String? = nil,
         actionTitle: String? = nil,
         action: (() -> Void)? = nil
     ) {
         self.icon = icon
+        self.imageName = imageName
         self.title = title
         self.message = message
         self.actionTitle = actionTitle
@@ -33,9 +38,7 @@ public struct DSEmptyStateView: View {
 
     public var body: some View {
         VStack(spacing: DSSpacing.sm) {
-            Image(systemName: icon)
-                .font(.system(size: 40))
-                .foregroundStyle(DSColor.textSecondary.opacity(0.5))
+            illustrationView
 
             Text(title)
                 .dsFont(.headline)
@@ -57,6 +60,23 @@ public struct DSEmptyStateView: View {
         }
         .padding(DSSpacing.xl)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    /// Prioritize the actual image asset (if `imageName` is provided AND the image exists in the Asset Catalog);
+    /// otherwise, always fall back to an SF Symbol — never leave it completely blank.
+    @ViewBuilder
+    private var illustrationView: some View {
+        if let imageName, let uiImage = UIImage(named: imageName, in: .designSystemModule, compatibleWith: nil) {
+            Image(uiImage: uiImage)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 120, height: 120)
+                .opacity(0.6)
+        } else {
+            Image(systemName: icon)
+                .font(.system(size: 40))
+                .foregroundStyle(DSColor.textSecondary.opacity(0.5))
+        }
     }
 }
 

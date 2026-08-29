@@ -103,33 +103,22 @@ struct MainTabView: View {
 
     private var searchTab: some View {
         NavigationStack(path: pathBinding(for: coordinator.searchCoordinator)) {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 0) {
-                    GardenHeaderView {
-                        coordinator.searchCoordinator.popToRoot()
-                    }
-
-                    VStack(spacing: DSSpacing.lg) {
-                        Text("Tìm kiếm — Step 9 sẽ thay bằng SearchView thật")
-                            .dsFont(.headline)
-
-                        DSButton("Xem demo Search Results", variant: .primary) {
-                            coordinator.searchCoordinator.push(.searchResults(query: "yuri"))
-                        }
-                    }
-                    .padding(DSSpacing.lg)
+            SearchView(
+                repository: Container.shared.searchRepository(),
+                onSeriesSelected: { seriesId in
+                    coordinator.searchCoordinator.push(.seriesDetail(id: seriesId))
+                },
+                onHeaderTapped: {
+                    coordinator.searchCoordinator.popToRoot()
                 }
-            }
-            .background(DSColor.backgroundPrimary)
-            .toolbar(.hidden, for: .navigationBar)
+            )
             .navigationDestination(for: SearchRoute.self) { route in
                 switch route {
                 case .searchResults(let query):
                     Text("Search Results (demo) — query: \(query)")
                         .dsFont(.title1)
                 case .seriesDetail(let id):
-                    Text("Series Detail (demo) — id: \(id)")
-                        .dsFont(.title1)
+                    SeriesDetailPlaceholderView(seriesId: id)
                 }
             }
         }
