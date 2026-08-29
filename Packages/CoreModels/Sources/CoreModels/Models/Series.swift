@@ -66,7 +66,10 @@ public enum SeriesType: String, Codable {
 }
 
 public enum SeriesStatus: String, Codable {
-    case ongoing, completed
+    case ongoing        // In progress
+    case completed      // Completed
+    case upcoming        // Coming soon
+    case dropped         // Stop translating
 }
 
 public struct Genre: Codable, Identifiable, Equatable {
