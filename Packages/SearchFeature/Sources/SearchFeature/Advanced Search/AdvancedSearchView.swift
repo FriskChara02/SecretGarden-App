@@ -16,6 +16,7 @@ import SwiftUI
 public struct AdvancedSearchView: View {
     @StateObject private var viewModel: AdvancedSearchViewModel
     @State private var layout: SeriesCardLayout = .grid
+    private let repository: SearchRepositoryProtocol
 
     private let onSeriesSelected: (String) -> Void
     private let onHeaderTapped: () -> Void
@@ -25,6 +26,7 @@ public struct AdvancedSearchView: View {
         onSeriesSelected: @escaping (String) -> Void,
         onHeaderTapped: @escaping () -> Void
     ) {
+        self.repository = repository
         _viewModel = StateObject(wrappedValue: AdvancedSearchViewModel(repository: repository))
         self.onSeriesSelected = onSeriesSelected
         self.onHeaderTapped = onHeaderTapped
@@ -51,9 +53,13 @@ public struct AdvancedSearchView: View {
         .background(DSColor.backgroundPrimary)
         .toolbar(.hidden, for: .navigationBar)
         .sheet(isPresented: $viewModel.isFilterSheetPresented) {
-            Text("AdvancedFilterView (Step 9.6 sẽ thay thế)")
-                .dsFont(.title1)
-                .padding()
+            AdvancedFilterView(
+                repository: repository,
+                initialFilter: viewModel.currentFilter,
+                onApply: { newFilter in
+                    viewModel.applyFilter(newFilter)
+                }
+            )
         }
     }
 

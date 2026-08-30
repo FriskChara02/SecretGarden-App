@@ -52,4 +52,8 @@ public final class SearchRepository: SearchRepositoryProtocol {
     public func clearHistory() async throws {
         try await localHistoryStore.clearAll()
     }
+    
+    public func fetchFilterOptions() async throws -> AdvancedFilterOptions {
+        try await remoteDataSource.fetchFilterOptions()
+    }
 }

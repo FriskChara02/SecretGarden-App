@@ -65,7 +65,7 @@ public enum SeriesType: String, Codable {
     case manga, novel, doujinshi
 }
 
-public enum SeriesStatus: String, Codable {
+public enum SeriesStatus: String, Codable, CaseIterable {
     case ongoing        // In progress
     case completed      // Completed
     case upcoming        // Coming soon

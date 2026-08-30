@@ -13,6 +13,7 @@ public protocol SearchRepositoryProtocol {
 
     func searchBasic(query: String, page: Int) async throws -> [Series]
     func searchAdvanced(filter: AdvancedFilterRequest, page: Int) async throws -> [Series]
+    func fetchFilterOptions() async throws -> AdvancedFilterOptions
 
     // MARK: - Search history (local data source via SwiftData)
     // The ViewModel calls these functions without needing to know whether the underlying

@@ -15,6 +15,7 @@ import Foundation
 public protocol SearchRemoteDataSource: Sendable {
     func searchBasic(query: String, page: Int) async throws -> [Series]
     func searchAdvanced(filter: AdvancedFilterRequest, page: Int) async throws -> [Series]
+    func fetchFilterOptions() async throws -> AdvancedFilterOptions
 }
 
 // MARK: - Production version, calling APIClient
@@ -33,6 +34,12 @@ public final class SearchRemoteAPIDataSource: SearchRemoteDataSource {
     public func searchAdvanced(filter: AdvancedFilterRequest, page: Int) async throws -> [Series] {
         try await apiClient.request(SearchEndpoint.advancedSearch(filter: filter, page: page))
     }
+
+    // TODO(server): The backend needs to add endpoints such as GET /tags and GET /pairings,
+    // as well as endpoints for abbreviated lists of Authors, Artists and Translation Groups.
+    public func fetchFilterOptions() async throws -> AdvancedFilterOptions {
+        AdvancedFilterOptions()
+    }
 }
 
 // MARK: - Mock version, used for debugging (to avoid DNS errors since the actual backend does not yet exist).
@@ -49,6 +56,8 @@ public final class SearchRemoteMockDataSource: SearchRemoteDataSource {
     private static let coverURL3 = URL(string: "https://picsum.photos/seed/search3/400/560")!
     private static let coverURL4 = URL(string: "https://picsum.photos/seed/search4/400/560")!
     // swiftlint:enable force_unwrapping
+
+    // MARK: - Sample data for basic search.
 
     private static let samplePool: [Series] = [
         Series(
@@ -87,7 +96,7 @@ public final class SearchRemoteMockDataSource: SearchRemoteDataSource {
             description: "Dữ liệu mẫu cho luồng tìm kiếm — dùng để test trên Simulator trước khi có backend thật.",
             status: .ongoing,
             author: AuthorGroupCommon(id: "author_search_3", name: "Radish"),
-            group: TranslationGroup(id: "group_search_3", name: "Knights of Yuri"),
+            group: TranslationGroup(id: "group_search_1", name: "Knights of Yuri"),
             genres: [Genre(id: "genre_1", name: "Yuri"), Genre(id: "genre_5", name: "Drama")],
             viewCount: 8400, favoriteCount: 1500,
             updatedAt: Date(timeIntervalSinceNow: -1800),
@@ -108,6 +117,43 @@ public final class SearchRemoteMockDataSource: SearchRemoteDataSource {
             latestChapterLabel: "Chương 21"
         )
     ]
+
+    // MARK: - Sample data for Advanced Filter.
+    
+    private static let sampleOptions = AdvancedFilterOptions(
+        tags: [
+            Tag(id: "tag_1", name: "Espionage"), Tag(id: "tag_2", name: "4-koma"),
+            Tag(id: "tag_3", name: "Abuse"), Tag(id: "tag_4", name: "Action"),
+            Tag(id: "tag_5", name: "Adult Life"), Tag(id: "tag_6", name: "Adventure"),
+            Tag(id: "tag_7", name: "Age Gap"), Tag(id: "tag_8", name: "Animal Ears"),
+            Tag(id: "tag_9", name: "Comedy"), Tag(id: "tag_10", name: "Drama"),
+            Tag(id: "tag_11", name: "Fantasy"), Tag(id: "tag_12", name: "Full Color"),
+            Tag(id: "tag_13", name: "School Life"), Tag(id: "tag_14", name: "Slice of Life")
+        ],
+        authors: [
+            AuthorGroupCommon(id: "author_search_1", name: "Chise, Ciweimao"),
+            AuthorGroupCommon(id: "author_search_2", name: "Kanno Fumi"),
+            AuthorGroupCommon(id: "author_search_3", name: "Radish")
+        ],
+        artists: [
+            AuthorGroupCommon(id: "artist_1", name: "Luoman"),
+            AuthorGroupCommon(id: "artist_2", name: "Takeshima Eku")
+        ],
+        pairings: [
+            Pairing(id: "pairing_1", name: "Tomboy x Femme"),
+            Pairing(id: "pairing_2", name: "Childhood Friends"),
+            Pairing(id: "pairing_3", name: "Senpai x Kouhai")
+        ],
+        groups: [
+            TranslationGroup(id: "group_search_1", name: "Knights of Yuri"),
+            TranslationGroup(id: "group_search_2", name: "Yune Projekt")
+        ]
+    )
+
+    public func fetchFilterOptions() async throws -> AdvancedFilterOptions {
+        try await Task.sleep(nanoseconds: 300_000_000)
+        return Self.sampleOptions
+    }
 
     public func searchBasic(query: String, page: Int) async throws -> [Series] {
         try await Task.sleep(nanoseconds: 300_000_000)

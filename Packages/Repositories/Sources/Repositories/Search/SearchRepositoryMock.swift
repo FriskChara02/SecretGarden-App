@@ -47,4 +47,8 @@ public final class SearchRepositoryMock: SearchRepositoryProtocol {
             SearchHistoryItem(query: "Saki", searchedAt: Date().addingTimeInterval(-7200))
         ]
     }
+    
+    public func fetchFilterOptions() async throws -> AdvancedFilterOptions {
+        AdvancedFilterOptions()
+    }
 }
