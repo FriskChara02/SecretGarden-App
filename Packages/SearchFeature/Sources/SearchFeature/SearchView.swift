@@ -40,6 +40,10 @@ public struct SearchView: View {
                 VStack(alignment: .leading, spacing: DSSpacing.md) {
                     searchBarRow
 
+                    if !isShowingHistory {
+                        layoutToggleRow
+                    }
+
                     if isShowingHistory {
                         historySection
                     } else {
@@ -59,18 +63,20 @@ public struct SearchView: View {
         viewModel.queryText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
-    // MARK: - Search bar + layout toggle
+    // MARK: - Search bar (only input field + "Search" button)
 
     private var searchBarRow: some View {
-        HStack(spacing: DSSpacing.sm) {
-            DSSearchBar(text: $viewModel.queryText, onSubmit: { viewModel.submitSearch() })
-                .onChange(of: viewModel.queryText) { _, newValue in
-                    viewModel.handleQueryChange(newValue)
-                }
-
-            if !isShowingHistory {
-                layoutToggle
+        DSSearchBar(text: $viewModel.queryText, onSubmit: { viewModel.submitSearch() })
+            .onChange(of: viewModel.queryText) { _, newValue in
+                viewModel.handleQueryChange(newValue)
             }
+    }
+
+    /// Separate row for Grid/List toggle - place BELOW the search bar, right-aligned,
+    private var layoutToggleRow: some View {
+        HStack {
+            Spacer()
+            layoutToggle
         }
     }
 
@@ -97,7 +103,12 @@ public struct SearchView: View {
     private var historySection: some View {
         LoadableContentView(
             state: viewModel.historyState,
+            emptyIcon: "magnifyingglass",
+            emptyImageName: "SearchHistoryMascot",
             emptyTitle: "Chưa có lịch sử tìm kiếm",
+            emptyTitleFont: .subheadline,
+            emptyTitleColor: DSColor.textSecondary,
+            emptyTopPadding: 60,
             isEmpty: { $0.isEmpty }
         ) { items in
             VStack(alignment: .leading, spacing: DSSpacing.sm) {

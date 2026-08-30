@@ -16,24 +16,33 @@ public struct DSEmptyStateView: View {
     private let icon: String
     private let imageName: String?
     private let title: String
+    private let titleFont: DSFontToken
+    private let titleColor: Color
     private let message: String?
     private let actionTitle: String?
     private let action: (() -> Void)?
+    private let topPadding: CGFloat
 
     public init(
         icon: String = "tray",
         imageName: String? = nil,
         title: String,
+        titleFont: DSFontToken = .headline,
+        titleColor: Color = DSColor.textPrimary,
         message: String? = nil,
         actionTitle: String? = nil,
-        action: (() -> Void)? = nil
+        action: (() -> Void)? = nil,
+        topPadding: CGFloat = 0
     ) {
         self.icon = icon
         self.imageName = imageName
         self.title = title
+        self.titleFont = titleFont
+        self.titleColor = titleColor
         self.message = message
         self.actionTitle = actionTitle
         self.action = action
+        self.topPadding = topPadding
     }
 
     public var body: some View {
@@ -41,8 +50,8 @@ public struct DSEmptyStateView: View {
             illustrationView
 
             Text(title)
-                .dsFont(.headline)
-                .foregroundStyle(DSColor.textPrimary)
+                .dsFont(titleFont)
+                .foregroundStyle(titleColor)
                 .multilineTextAlignment(.center)
 
             if let message {
@@ -58,6 +67,7 @@ public struct DSEmptyStateView: View {
                     .fixedSize(horizontal: true, vertical: false)
             }
         }
+        .padding(.top, topPadding)
         .padding(DSSpacing.xl)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
@@ -82,7 +92,13 @@ public struct DSEmptyStateView: View {
 
 #Preview("DSEmptyStateView") {
     VStack(spacing: 0) {
-        DSEmptyStateView(icon: "magnifyingglass", title: "Chưa có lịch sử tìm kiếm")
+        DSEmptyStateView(
+            icon: "magnifyingglass",
+            title: "Chưa có lịch sử tìm kiếm",
+            titleFont: .subheadline,
+            titleColor: DSColor.textSecondary,
+            topPadding: 60
+        )
         Divider()
         DSEmptyStateView(
             icon: "person.2.slash",
