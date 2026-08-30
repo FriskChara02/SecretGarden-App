@@ -18,4 +18,5 @@ enum SideMenuRoute: Hashable {
     case yuriList
     case uploadRegistration
     case rules
+    case seriesDetail(id: String)
 }

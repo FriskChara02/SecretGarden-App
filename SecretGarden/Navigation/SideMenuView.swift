@@ -7,6 +7,10 @@
 
 // A separate Drawer + NavigationStack list inside its own sheet.
 
+import SearchFeature
+import HomeFeature
+import Repositories
+import FactoryKit
 import SwiftUI
 import DesignSystem
 import CoreArchitecture
@@ -81,13 +85,23 @@ struct SideMenuView: View {
         case .category:
             Text("Category (demo) — Phase 9").dsFont(.title1)
         case .advancedSearch:
-            Text("Advanced Search (demo) — Phase 9").dsFont(.title1)
+            AdvancedSearchView(
+                repository: Container.shared.searchRepository(),
+                onSeriesSelected: { seriesId in
+                    coordinator.contentCoordinator.push(.seriesDetail(id: seriesId))
+                },
+                onHeaderTapped: {
+                    coordinator.contentCoordinator.popToRoot()
+                }
+            )
         case .yuriList:
             Text("Yuri List (demo) — Phase 10").dsFont(.title1)
         case .uploadRegistration:
             Text("Upload Registration (demo)").dsFont(.title1)
         case .rules:
             Text("Rules/Policy (demo)").dsFont(.title1)
+        case .seriesDetail(let id):
+            SeriesDetailPlaceholderView(seriesId: id)
         }
     }
 
