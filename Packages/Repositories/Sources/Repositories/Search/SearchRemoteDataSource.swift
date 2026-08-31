@@ -164,8 +164,56 @@ public final class SearchRemoteMockDataSource: SearchRemoteDataSource {
     public func searchAdvanced(filter: AdvancedFilterRequest, page: Int) async throws -> [Series] {
         try await Task.sleep(nanoseconds: 300_000_000)
         guard page == 1 else { return [] }
-        // TODO: Apply the actual filter.includeTags/status/minChapterCount... to samplePool
-        // once AdvancedFilterView is wired up — currently returning the raw pool to set.
-        return Self.samplePool
+
+        var results = Self.samplePool
+
+        // Include: if selected, retain only items with an author/group included in the selected list.
+        if !filter.includeAuthors.isEmpty {
+            results = results.filter { series in
+                guard let authorId = series.author?.id else { return false }
+                return filter.includeAuthors.contains(authorId)
+            }
+        }
+        if !filter.includeGroups.isEmpty {
+            results = results.filter { series in
+                guard let groupId = series.group?.id else { return false }
+                return filter.includeGroups.contains(groupId)
+            }
+        }
+
+        // Exclude: remove items with an author/group included in the exclusion list.
+        if !filter.excludeAuthors.isEmpty {
+            results = results.filter { series in
+                guard let authorId = series.author?.id else { return true }
+                return !filter.excludeAuthors.contains(authorId)
+            }
+        }
+        if !filter.excludeGroups.isEmpty {
+            results = results.filter { series in
+                guard let groupId = series.group?.id else { return true }
+                return !filter.excludeGroups.contains(groupId)
+            }
+        }
+
+        // Status: single-value filter, not using include/exclude pairs.
+        if let status = filter.status {
+            results = results.filter { $0.status == status }
+        }
+
+        // Sort
+        switch filter.sort {
+        case "views":
+            results.sort { $0.viewCount > $1.viewCount }
+        case "follows":
+            results.sort { $0.favoriteCount > $1.favoriteCount }
+        case "newest", "oldest":
+            results.sort { filter.sort == "newest" ? $0.updatedAt > $1.updatedAt : $0.updatedAt < $1.updatedAt }
+        default: // "latest_update"
+            results.sort { $0.updatedAt > $1.updatedAt }
+        }
+
+        // TODO(when Series includes tagIDs/pairingIDs or a real backend): apply
+        // includeTags/excludeTags/includePairings/excludePairings/minChapterCount similar to the above.
+        return results
     }
 }
