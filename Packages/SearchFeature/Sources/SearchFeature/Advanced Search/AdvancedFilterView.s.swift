@@ -59,7 +59,7 @@ public struct AdvancedFilterView: View {
     private var header: some View {
         HStack {
             HStack(spacing: DSSpacing.xs) {
-                Image(systemName: "diamond.fill").font(.system(size: 12)).foregroundStyle(DSColor.brandPrimaryLight)
+                Image(systemName: "diamond.circle").font(.system(size: 12)).foregroundStyle(DSColor.brandPrimaryLight)
                 Text("Bộ lọc").dsFont(.title2).fontWeight(.bold).foregroundStyle(DSColor.brandPrimary)
             }
             Spacer()
@@ -70,15 +70,23 @@ public struct AdvancedFilterView: View {
         .padding(DSSpacing.lg)
     }
 
-    // MARK: - Tab switcher (SELECT/EXCLUDE)
+    // MARK: - Tab switcher (Include / Exclude)
 
     private var tabSwitcher: some View {
         HStack(spacing: 0) {
             tabButton("MUỐN CHỌN", isActive: viewModel.tabMode == .include) { viewModel.tabMode = .include }
+
+            Rectangle()
+                .fill(.white.opacity(0.6))
+                .frame(width: 1, height: 18)
+
             tabButton("MUỐN LOẠI BỎ", isActive: viewModel.tabMode == .exclude) { viewModel.tabMode = .exclude }
         }
         .background(
             LinearGradient(colors: [DSColor.brandPrimary, DSColor.brandPrimaryLight], startPoint: .leading, endPoint: .trailing)
+        )
+        .overlay(
+            Rectangle().strokeBorder(.white.opacity(0.5), lineWidth: 1)
         )
     }
 
@@ -161,24 +169,11 @@ public struct AdvancedFilterView: View {
     }
 
     private var sortField: some View {
-        VStack(alignment: .leading, spacing: DSSpacing.xs) {
-            Text("Sắp xếp").dsFont(.headline).foregroundStyle(DSColor.textPrimary)
-            Menu {
-                ForEach(sortOptions, id: \.value) { option in
-                    Button {
-                        viewModel.draft.sort = option.value
-                    } label: {
-                        if viewModel.draft.sort == option.value {
-                            Label(option.label, systemImage: "checkmark")
-                        } else {
-                            Text(option.label)
-                        }
-                    }
-                }
-            } label: {
-                filterPickerLabel(sortOptions.first { $0.value == viewModel.draft.sort }?.label ?? "Mới cập nhật")
-            }
-        }
+        FilterSingleSelectField(
+            label: "Sắp xếp",
+            options: sortOptions.map { (value: $0.value, title: $0.label) },
+            selection: $viewModel.draft.sort
+        )
     }
 
     private let sortOptions: [(value: String, label: String)] = [
@@ -187,29 +182,26 @@ public struct AdvancedFilterView: View {
     ]
 
     private var statusField: some View {
-        VStack(alignment: .leading, spacing: DSSpacing.xs) {
-            Text("Tình trạng").dsFont(.headline).foregroundStyle(DSColor.textPrimary)
-            Menu {
-                Button {
-                    viewModel.draft.status = nil
-                } label: {
-                    if viewModel.draft.status == nil { Label("Tất cả", systemImage: "checkmark") } else { Text("Tất cả") }
-                }
-                ForEach(SeriesStatus.allCases, id: \.self) { status in
-                    Button {
-                        viewModel.draft.status = status
-                    } label: {
-                        if viewModel.draft.status == status {
-                            Label(statusLabel(status), systemImage: "checkmark")
-                        } else {
-                            Text(statusLabel(status))
-                        }
-                    }
-                }
-            } label: {
-                filterPickerLabel(viewModel.draft.status.map(statusLabel) ?? "Tất cả")
+        FilterSingleSelectField(
+            label: "Tình trạng",
+            options: statusOptions,
+            selection: statusSelectionBinding
+        )
+    }
+
+    // "All" is represented by the string "all" instead of directly using nil — required by FilterSingleSelectField.
+    // Value: Must be Hashable, using String for both sort and status for simplicity.
+    private var statusOptions: [(value: String, title: String)] {
+        [(value: "all", title: "Tất cả")] + SeriesStatus.allCases.map { (value: $0.rawValue, title: statusLabel($0)) }
+    }
+
+    private var statusSelectionBinding: Binding<String> {
+        Binding(
+            get: { viewModel.draft.status?.rawValue ?? "all" },
+            set: { newValue in
+                viewModel.draft.status = newValue == "all" ? nil : SeriesStatus(rawValue: newValue)
             }
-        }
+        )
     }
 
     private func statusLabel(_ status: SeriesStatus) -> String {
@@ -229,35 +221,50 @@ public struct AdvancedFilterView: View {
                 .dsFont(.body)
                 .padding(.horizontal, DSSpacing.md)
                 .padding(.vertical, DSSpacing.sm)
-                .overlay(RoundedRectangle(cornerRadius: DSRadius.md).stroke(DSColor.brandPrimary, lineWidth: 1.5))
+                .overlay(RoundedRectangle(cornerRadius: DSRadius.lg).stroke(DSColor.brandPrimary, lineWidth: 1.5))
         }
-    }
-
-    private func filterPickerLabel(_ text: String) -> some View {
-        HStack {
-            Text(text).dsFont(.body).foregroundStyle(DSColor.textPrimary)
-            Spacer()
-            Image(systemName: "chevron.down").foregroundStyle(DSColor.textSecondary)
-        }
-        .padding(.horizontal, DSSpacing.md)
-        .padding(.vertical, DSSpacing.sm)
-        .overlay(RoundedRectangle(cornerRadius: DSRadius.md).stroke(DSColor.brandPrimary, lineWidth: 1.5))
     }
 
     // MARK: - Footer
 
     private var footerButtons: some View {
         HStack(spacing: DSSpacing.md) {
-            DSButton("Đặt lại", variant: .outline) {
+            Button {
                 viewModel.resetDraft()
+            } label: {
+                Text("Đặt lại")
+                    .dsFont(.headline)
+                    .fontWeight(.bold)
+                    .foregroundStyle(DSColor.textPrimary)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, DSSpacing.sm)
             }
-            DSButton("Áp dụng", variant: .primary) {
+            .overlay(
+                Capsule().stroke(DSColor.brandPrimary, lineWidth: 1.5)
+            )
+
+            Button {
                 onApply(viewModel.draft)
+            } label: {
+                Text("Áp dụng")
+                    .dsFont(.headline)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, DSSpacing.sm)
+                    .background(
+                        Capsule().fill(
+                            LinearGradient(
+                                colors: [DSColor.brandPrimary, DSColor.brandPrimaryLight],
+                                startPoint: .leading, endPoint: .trailing
+                            )
+                        )
+                    )
             }
         }
         .padding(DSSpacing.lg)
     }
-    
+
     // MARK: - Reusable multi-select field (selected chips within the field + searchable checkbox list)
 
     private struct FilterMultiSelectField: View {
@@ -295,7 +302,13 @@ public struct AdvancedFilterView: View {
                     }
                     .padding(.horizontal, DSSpacing.md)
                     .padding(.vertical, DSSpacing.sm)
-                    .background(RoundedRectangle(cornerRadius: DSRadius.md).fill(DSColor.backgroundSecondary))
+                    .background(RoundedRectangle(cornerRadius: DSRadius.lg).fill(DSColor.backgroundSecondary))
+                    .overlay(
+                        // Default thin gray border; changes to a thicker pink border when expanded (isExpanded)
+                        // — adds a pink frame around the field when the user clicks on it.
+                        RoundedRectangle(cornerRadius: DSRadius.lg)
+                            .stroke(isExpanded ? DSColor.brandPrimary : DSColor.borderDefault, lineWidth: isExpanded ? 2 : 1)
+                    )
                 }
                 .buttonStyle(.plain)
 
@@ -340,8 +353,70 @@ public struct AdvancedFilterView: View {
                 }
             }
             .padding(.horizontal, DSSpacing.sm)
-            .background(RoundedRectangle(cornerRadius: DSRadius.md).fill(DSColor.backgroundPrimary))
-            .overlay(RoundedRectangle(cornerRadius: DSRadius.md).stroke(DSColor.borderDefault, lineWidth: 1))
+            .background(RoundedRectangle(cornerRadius: DSRadius.lg).fill(DSColor.backgroundPrimary))
+            .overlay(RoundedRectangle(cornerRadius: DSRadius.lg).stroke(DSColor.borderDefault, lineWidth: 1))
+        }
+    }
+
+    // MARK: - Reusable single-select field (Sort / Status)
+
+    private struct FilterSingleSelectField<Value: Hashable>: View {
+        let label: String
+        let options: [(value: Value, title: String)]
+        @Binding var selection: Value
+        @State private var isExpanded = false
+
+        var body: some View {
+            VStack(alignment: .leading, spacing: DSSpacing.xs) {
+                Text(label).dsFont(.headline).foregroundStyle(DSColor.textPrimary)
+
+                Button { isExpanded.toggle() } label: {
+                    HStack {
+                        Text(options.first { $0.value == selection }?.title ?? "")
+                            .dsFont(.body)
+                            .foregroundStyle(DSColor.textPrimary)
+                        Spacer()
+                        Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                            .font(.system(size: 12))
+                            .foregroundStyle(DSColor.textSecondary)
+                    }
+                    .padding(.horizontal, DSSpacing.md)
+                    .padding(.vertical, DSSpacing.sm)
+                    .overlay(RoundedRectangle(cornerRadius: DSRadius.lg).stroke(DSColor.brandPrimary, lineWidth: 1.5))
+                }
+                .buttonStyle(.plain)
+
+                if isExpanded {
+                    VStack(spacing: 0) {
+                        ForEach(options, id: \.value) { option in
+                            let isSelected = option.value == selection
+                            Button {
+                                selection = option.value
+                                isExpanded = false
+                            } label: {
+                                HStack(spacing: DSSpacing.xs) {
+                                    Image(systemName: "checkmark")
+                                        .foregroundStyle(DSColor.brandPrimary)
+                                        .opacity(isSelected ? 1 : 0)
+                                        .frame(width: 16, alignment: .leading)
+
+                                    Text(option.title)
+                                        .dsFont(.body)
+                                        .foregroundStyle(isSelected ? DSColor.brandPrimary : DSColor.textPrimary)
+
+                                    Spacer()
+                                }
+                                .padding(.horizontal, DSSpacing.md)
+                                .padding(.vertical, DSSpacing.sm)
+                                .background(isSelected ? DSColor.brandPrimary.opacity(0.12) : Color.clear)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .background(RoundedRectangle(cornerRadius: DSRadius.lg).fill(DSColor.backgroundPrimary))
+                    .overlay(RoundedRectangle(cornerRadius: DSRadius.lg).stroke(DSColor.borderDefault, lineWidth: 1))
+                }
+            }
         }
     }
 }

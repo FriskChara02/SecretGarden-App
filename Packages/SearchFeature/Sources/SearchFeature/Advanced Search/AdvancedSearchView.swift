@@ -39,11 +39,10 @@ public struct AdvancedSearchView: View {
 
                 VStack(alignment: .leading, spacing: DSSpacing.lg) {
                     titleRow
-                    filterBarRow
+                    filterRow
 
-                    if let results = viewModel.resultsState.value, !results.isEmpty {
-                        layoutToggleRow
-                    }
+                    Divider()
+                        .background(DSColor.borderDefault.opacity(0.4))
 
                     resultsSection
                 }
@@ -60,6 +59,32 @@ public struct AdvancedSearchView: View {
                     viewModel.applyFilter(newFilter)
                 }
             )
+        }
+    }
+
+    // MARK: - Filter row: "Filter" button + Grid/List toggle
+
+    private var filterRow: some View {
+        HStack(spacing: DSSpacing.sm) {
+            Button(action: viewModel.openFilterSheet) {
+                HStack(spacing: DSSpacing.xs) {
+                    Image(systemName: "line.3.horizontal.decrease")
+                    Text("Bộ lọc")
+                    if viewModel.hasActiveFilter {
+                        filterActiveBadge
+                    }
+                }
+                .dsFont(.headline)
+                .foregroundStyle(DSColor.textPrimary)
+                .padding(.horizontal, 100)
+                .padding(.vertical, DSSpacing.sm)
+            }
+            .overlay(
+                Capsule().stroke(DSColor.brandPrimary, lineWidth: 1.5)
+            )
+            .fixedSize(horizontal: true, vertical: false)
+
+            layoutToggleRow
         }
     }
 
