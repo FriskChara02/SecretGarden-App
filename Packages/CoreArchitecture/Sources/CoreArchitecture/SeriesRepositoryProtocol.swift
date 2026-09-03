@@ -33,4 +33,23 @@ public protocol SeriesRepositoryProtocol {
     ///     false = remove from favorites) — The ViewModel determines the target state;
     ///     the Repository is only responsible for calling the appropriate API.
     func toggleFavorite(seriesId: String, isFavorited: Bool) async throws
+
+    // MARK: - Series Detail & Reader
+
+    /// List of images in a chapter - corresponds to `GET /chapters/{id}/pages`.
+    func fetchChapterPages(chapterId: String) async throws -> [ChapterPage]
+
+    /// Record reading progress (current page) - `POST /chapters/{id}/read`.
+    /// `seriesId` is passed even though the actual endpoint doesn't require it, because future features
+    /// (such as "Continue Reading" on the Home screen) might need local caching based on series-chapter pairs.
+    func recordReadingProgress(seriesId: String, chapterId: String, page: Int) async throws
+
+    /// Update "Yuri list" status (Plan to Read/Reading/Completed/Dropped) - `PUT /users/me/reading-status/{seriesId}`.
+    func updateReadingStatus(seriesId: String, status: ReadingStatus, notifyNewChapter: Bool) async throws
+
+    /// Toggle "Receive notifications" for a specific series - `PUT /series/{id}/notify`.
+    func toggleNotify(seriesId: String, enabled: Bool) async throws
+
+    /// Submit a violation report for a story/chapter - `POST /reports`.
+    func submitReport(_ request: ReportRequest) async throws
 }

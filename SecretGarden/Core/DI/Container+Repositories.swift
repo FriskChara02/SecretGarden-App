@@ -19,12 +19,19 @@ import Repositories
 import Foundation
 
 extension Container {
+    /// Series Detail/Reader uses SeriesRepositoryMock in Debug/Staging (to avoid network errors when
+    /// the backend does not yet exist) and the real SeriesRepository in Production - following the same pattern
+    /// applied to homeRepository and searchRemoteDataSource.
     @MainActor
     var seriesRepository: Factory<SeriesRepositoryProtocol> {
-        self { SeriesRepository(apiClient: self.apiClient()) }
-            .singleton
-        // .singleton: shares a single instance throughout the app's lifecycle — appropriate because
-        // the Repository here does not maintain state specific to individual callers.
+        self {
+            if AppConfig.isDebugEnvironment {
+                return SeriesRepositoryMock()
+            } else {
+                return SeriesRepository(apiClient: self.apiClient())
+            }
+        }
+        .singleton
     }
     @MainActor
     var authRepository: Factory<AuthRepositoryProtocol> {
