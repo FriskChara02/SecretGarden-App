@@ -17,6 +17,7 @@ public struct Chapter: Codable, Identifiable, Equatable {
     public var releasedAt: Date
     public var viewCount: Int
     public var isRead: Bool
+    public var pageCount: Int
 
     public init(
         id: String,
@@ -25,7 +26,8 @@ public struct Chapter: Codable, Identifiable, Equatable {
         title: String? = nil,
         releasedAt: Date,
         viewCount: Int = 0,
-        isRead: Bool = false
+        isRead: Bool = false,
+        pageCount: Int = 0
     ) {
         self.id = id
         self.seriesId = seriesId
@@ -34,6 +36,7 @@ public struct Chapter: Codable, Identifiable, Equatable {
         self.releasedAt = releasedAt
         self.viewCount = viewCount
         self.isRead = isRead
+        self.pageCount = pageCount
     }
 }
 
