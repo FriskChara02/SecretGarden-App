@@ -123,4 +123,8 @@ public actor SeriesRepositoryMock: SeriesRepositoryProtocol {
     public func submitReport(_ request: ReportRequest) async throws {
         // No-op — always "succeeds" so the UI displays the "report sent successfully" notification.
     }
+
+    public func removeReadingStatus(seriesId: String) async throws {
+        series.readingStatus = nil
+    }
 }

@@ -24,6 +24,7 @@ enum SeriesEndpoint: APIEndpoint {
     case updateReadingStatus(seriesId: String, request: UpdateReadingStatusRequest)
     case toggleNotify(seriesId: String, request: ToggleNotifyRequest)
     case submitReport(ReportRequest)
+    case removeReadingStatus(seriesId: String)
 
     var path: String {
         switch self {
@@ -45,6 +46,8 @@ enum SeriesEndpoint: APIEndpoint {
             return "/series/\(seriesId)/notify"
         case .submitReport:
             return "/reports"
+        case .removeReadingStatus(let seriesId):
+            return "/users/me/reading-status/\(seriesId)"
         }
     }
 
@@ -61,12 +64,14 @@ enum SeriesEndpoint: APIEndpoint {
             return .post
         case .updateReadingStatus, .toggleNotify:
             return .put
+        case .removeReadingStatus:
+            return .delete
         }
     }
 
     var body: Data? {
         switch self {
-        case .seriesDetail, .chapters, .relatedSeries, .favorite, .chapterPages:
+        case .seriesDetail, .chapters, .relatedSeries, .favorite, .chapterPages, .removeReadingStatus:
             return nil
         case .recordReadingProgress(_, _, let request):
             return Self.encode(request)
@@ -84,7 +89,7 @@ enum SeriesEndpoint: APIEndpoint {
         case .seriesDetail, .chapters, .relatedSeries, .chapterPages:
             // Guest mode allows reading public stories/chapters without logging in.
             return false
-        case .favorite, .recordReadingProgress, .updateReadingStatus, .toggleNotify, .submitReport:
+        case .favorite, .recordReadingProgress, .updateReadingStatus, .toggleNotify, .submitReport, .removeReadingStatus:
             // All mutation actions require logging in.
             return true
         }

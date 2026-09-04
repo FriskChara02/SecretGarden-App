@@ -73,4 +73,8 @@ public final class SeriesRepository: SeriesRepositoryProtocol {
     public func submitReport(_ request: ReportRequest) async throws {
         try await apiClient.requestWithoutResponse(SeriesEndpoint.submitReport(request))
     }
+
+    public func removeReadingStatus(seriesId: String) async throws {
+        try await apiClient.requestWithoutResponse(SeriesEndpoint.removeReadingStatus(seriesId: seriesId))
+    }
 }

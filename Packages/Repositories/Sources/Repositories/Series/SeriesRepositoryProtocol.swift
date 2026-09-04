@@ -52,4 +52,7 @@ public protocol SeriesRepositoryProtocol {
 
     /// Submit a violation report for a story/chapter - `POST /reports`.
     func submitReport(_ request: ReportRequest) async throws
+
+    /// Remove story from Yuri list (set status to "unfollow")
+    func removeReadingStatus(seriesId: String) async throws
 }
