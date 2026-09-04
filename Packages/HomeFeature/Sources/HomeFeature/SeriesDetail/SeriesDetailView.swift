@@ -2,7 +2,7 @@
 //  SeriesDetailView.swift
 //  HomeFeature
 //
-//  Created by Loi Nguyen on 5/9/26.
+//  Created by Loi Nguyen on 4/9/26.
 //
 
 // Info Card section (cover, title, author/artist/group, tags, views, status,
