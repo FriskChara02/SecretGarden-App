@@ -101,4 +101,18 @@ extension Container {
         }
         .singleton
     }
+
+    /// Use Mock in Debug/Staging and Real in Production — following the same pattern as
+    /// all other repositories in the project.
+    @MainActor
+    var commentRepository: Factory<CommentRepositoryProtocol> {
+        self {
+            if AppConfig.isDebugEnvironment {
+                return CommentRepositoryMock()
+            } else {
+                return CommentRepository(apiClient: self.apiClient())
+            }
+        }
+        .singleton
+    }
 }
