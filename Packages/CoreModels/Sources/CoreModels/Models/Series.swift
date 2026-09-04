@@ -28,6 +28,7 @@ public struct Series: Codable, Identifiable, Equatable {
     public var isFavoritedByMe: Bool
     public var isNotifyEnabled: Bool
     public var readingStatus: ReadingStatus?
+    public var artist: AuthorGroupCommon?
 
     public init(
         id: String,
@@ -47,7 +48,8 @@ public struct Series: Codable, Identifiable, Equatable {
         latestChapterLabel: String? = nil,
         isFavoritedByMe: Bool = false,
         isNotifyEnabled: Bool = false,
-        readingStatus: ReadingStatus? = nil
+        readingStatus: ReadingStatus? = nil,
+        artist: AuthorGroupCommon? = nil
     ) {
         self.id = id
         self.title = title
@@ -67,6 +69,7 @@ public struct Series: Codable, Identifiable, Equatable {
         self.isFavoritedByMe = isFavoritedByMe
         self.isNotifyEnabled = isNotifyEnabled
         self.readingStatus = readingStatus
+        self.artist = artist
     }
 }
 

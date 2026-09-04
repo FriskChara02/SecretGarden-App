@@ -26,6 +26,7 @@ public actor SeriesRepositoryMock: SeriesRepositoryProtocol {
     public init() {
         let group = TranslationGroup(id: "group-1", name: "Yune Projekt", followerCount: 3_200)
         let author = AuthorGroupCommon(id: "author-1", name: "Radish")
+        let artist = AuthorGroupCommon(id: "artist-1", name: "Radish")
 
         // Split into an explicit `for` loop (instead of a single `.map` containing multiple nested operations)
         // to avoid the "compiler unable to type-check this expression in reasonable time" error —
@@ -72,7 +73,8 @@ public actor SeriesRepositoryMock: SeriesRepositoryProtocol {
             latestChapterLabel: "Chương 190",
             isFavoritedByMe: true,
             isNotifyEnabled: true,
-            readingStatus: .planToRead
+            readingStatus: .planToRead,
+            artist: artist
         )
 
         for chapter in builtChapters {
