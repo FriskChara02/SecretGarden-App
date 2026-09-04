@@ -34,6 +34,8 @@ public final class ChapterReaderViewModel: BaseViewModel {
 
     @Published public private(set) var isFavoritedByMe: Bool
     @Published public private(set) var isNotifyEnabled: Bool
+    @Published public private(set) var readingStatus: ReadingStatus?
+    @Published public private(set) var isUpdatingReadingStatus = false
     @Published public private(set) var isTogglingFavorite = false
     @Published public private(set) var isTogglingNotify = false
     @Published public var actionErrorMessage: String?
@@ -58,6 +60,7 @@ public final class ChapterReaderViewModel: BaseViewModel {
         initialChapterId: String,
         isFavoritedByMe: Bool,
         isNotifyEnabled: Bool,
+        readingStatus: ReadingStatus?,
         seriesRepository: SeriesRepositoryProtocol,
         commentRepository: CommentRepositoryProtocol
     ) {
@@ -68,6 +71,7 @@ public final class ChapterReaderViewModel: BaseViewModel {
             ?? Chapter(id: initialChapterId, seriesId: seriesId, chapterNumber: 0, releasedAt: Date())
         self.isFavoritedByMe = isFavoritedByMe
         self.isNotifyEnabled = isNotifyEnabled
+        self.readingStatus = readingStatus
         self.seriesRepository = seriesRepository
         self.commentRepository = commentRepository
         super.init()
@@ -203,6 +207,44 @@ public final class ChapterReaderViewModel: BaseViewModel {
                 try await self.seriesRepository.toggleNotify(seriesId: self.seriesId, enabled: self.isNotifyEnabled)
             } catch {
                 self.isNotifyEnabled = previous
+                self.actionErrorMessage = self.mapToAppError(error).errorDescription
+            }
+        }
+    }
+    
+    public func updateReadingStatus(to newStatus: ReadingStatus) {
+        guard !isUpdatingReadingStatus else { return }
+        let previous = readingStatus
+        readingStatus = newStatus
+        isUpdatingReadingStatus = true
+
+        Task { [weak self] in
+            guard let self else { return }
+            defer { Task { @MainActor in self.isUpdatingReadingStatus = false } }
+            do {
+                try await self.seriesRepository.updateReadingStatus(
+                    seriesId: self.seriesId, status: newStatus, notifyNewChapter: self.isNotifyEnabled
+                )
+            } catch {
+                self.readingStatus = previous
+                self.actionErrorMessage = self.mapToAppError(error).errorDescription
+            }
+        }
+    }
+
+    public func removeFromReadingList() {
+        guard !isUpdatingReadingStatus else { return }
+        let previous = readingStatus
+        readingStatus = nil
+        isUpdatingReadingStatus = true
+
+        Task { [weak self] in
+            guard let self else { return }
+            defer { Task { @MainActor in self.isUpdatingReadingStatus = false } }
+            do {
+                try await self.seriesRepository.removeReadingStatus(seriesId: self.seriesId)
+            } catch {
+                self.readingStatus = previous
                 self.actionErrorMessage = self.mapToAppError(error).errorDescription
             }
         }
