@@ -144,6 +144,12 @@ public final class SeriesDetailViewModel: BaseViewModel {
         chaptersSortDescending.toggle()
     }
 
+    /// Explicit setter (distinct from `toggleChaptersSortOrder`) - for use with separate icons
+    /// for ascending/descending order as shown in the mockup, avoiding the need to click a second time if the wrong icon is pressed.
+    public func setChaptersSortDescending(_ descending: Bool) {
+        chaptersSortDescending = descending
+    }
+
     public func showMoreChapters() {
         visibleChapterCount += 5
     }

@@ -18,6 +18,7 @@ public struct SeriesDetailView: View {
     @StateObject private var viewModel: SeriesDetailViewModel
     @State private var isDescriptionExpanded = false
     @State private var isReadingStatusExpanded = false
+    @State private var expandedCommentReplyIDs: Set<String> = []
 
     let onHeaderTapped: () -> Void
     /// TODO: sẽ điều hướng thật sang ChapterReaderView khi Reader hoàn thành.
@@ -57,8 +58,22 @@ public struct SeriesDetailView: View {
 
                     Spacer().frame(height: DSSpacing.lg)
 
-                    content
-                        .padding(.horizontal, DSSpacing.md)
+                    if case .loaded(let series) = viewModel.detailState {
+                        content
+                            .padding(.horizontal, DSSpacing.md)
+
+                        DSSectionDivider().padding(.vertical, DSSpacing.lg)
+                        chaptersCard(series)
+
+                        DSSectionDivider().padding(.vertical, DSSpacing.lg)
+                        relatedCard
+
+                        DSSectionDivider().padding(.vertical, DSSpacing.lg)
+                        commentsCard
+                    } else {
+                        content
+                            .padding(.horizontal, DSSpacing.md)
+                    }
                 }
             }
         }
@@ -411,6 +426,304 @@ public struct SeriesDetailView: View {
     private static let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "HH:mm:ss dd/MM/yyyy"
+        return formatter
+    }()
+    
+    // MARK: - Chapters Card
+
+    private func chaptersCard(_ series: Series) -> some View {
+        DSDecorativeCard {
+            VStack(alignment: .leading, spacing: DSSpacing.md) {
+                HStack {
+                    sectionTitle("Danh sách chương")
+                    Spacer()
+                    sortButton(icon: "arrow.up", isSelected: !viewModel.chaptersSortDescending) {
+                        viewModel.setChaptersSortDescending(false)
+                    }
+                    sortButton(icon: "arrow.down", isSelected: viewModel.chaptersSortDescending) {
+                        viewModel.setChaptersSortDescending(true)
+                    }
+                }
+
+                VStack(spacing: 0) {
+                    ForEach(Array(viewModel.visibleSortedChapters.enumerated()), id: \.element.id) { index, chapter in
+                        chapterRow(chapter, isLatest: chapter.chapterNumber == series.chapters?.map(\.chapterNumber).max())
+                        if index < viewModel.visibleSortedChapters.count - 1 {
+                            Divider().foregroundStyle(DSColor.borderDefault.opacity(0.3))
+                        }
+                    }
+                }
+
+                if viewModel.hasMoreChapters {
+                    Button {
+                        viewModel.showMoreChapters()
+                    } label: {
+                        HStack(spacing: DSSpacing.xxs) {
+                            Text("Xem thêm")
+                            Image(systemName: "chevron.down")
+                        }
+                        .dsFont(.subheadline).fontWeight(.semibold)
+                        .foregroundStyle(DSColor.brandPrimary)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, DSSpacing.sm)
+                        .overlay(Capsule().strokeBorder(DSColor.brandPrimary.opacity(0.5), lineWidth: 1))
+                    }
+                }
+            }
+            .padding(DSSpacing.lg)
+        }
+    }
+
+    private func sortButton(icon: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: icon)
+                .font(.subheadline)
+                .foregroundStyle(isSelected ? .white : DSColor.brandPrimary)
+                .frame(width: 32, height: 32)
+                .background(Circle().fill(isSelected ? DSColor.brandPrimary : DSColor.backgroundSecondary))
+        }
+    }
+
+    private func chapterRow(_ chapter: Chapter, isLatest: Bool) -> some View {
+        Button {
+            onContinueReading(chapter.id)
+        } label: {
+            HStack {
+                HStack(spacing: DSSpacing.xs) {
+                    Text("Chương \(Self.chapterNumberString(chapter.chapterNumber))")
+                        .dsFont(.subheadline).fontWeight(.semibold)
+                        .foregroundStyle(DSColor.textPrimary)
+                    if isLatest {
+                        Text("Mới nhất")
+                            .dsFont(.caption).fontWeight(.bold)
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, DSSpacing.xs).padding(.vertical, 2)
+                            .background(Capsule().fill(DSColor.brandPrimary))
+                    }
+                }
+                Spacer()
+                Text(Self.chapterDateFormatter.string(from: chapter.releasedAt))
+                    .dsFont(.caption).foregroundStyle(DSColor.textSecondary)
+            }
+            .padding(.vertical, DSSpacing.sm)
+        }
+        .buttonStyle(.plain)
+    }
+
+    // MARK: - Related Card ("You might also like")
+
+    private var relatedCard: some View {
+        DSDecorativeCard {
+            VStack(alignment: .leading, spacing: DSSpacing.md) {
+                sectionTitle("Có thể bạn cũng thích")
+
+                switch viewModel.relatedState {
+                case .idle, .loading:
+                    ProgressView().frame(maxWidth: .infinity).padding(.vertical, DSSpacing.lg)
+                case .failed:
+                    sectionErrorRow { viewModel.loadRelated() }
+                case .loaded(let items) where items.isEmpty:
+                    Text("Chưa có gợi ý nào.").dsFont(.footnote).foregroundStyle(DSColor.textSecondary)
+                case .loaded(let items):
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: DSSpacing.sm) {
+                            ForEach(items) { item in
+                                SeriesCardView(data: SeriesCardMapper.map(item), layout: .grid) {
+                                    onStartReading(item.id)
+                                }
+                                .frame(width: 140, height: 220)
+                            }
+                        }
+                    }
+                }
+            }
+            .padding(DSSpacing.lg)
+        }
+    }
+
+    // MARK: - Comments Card
+
+    private var commentsCard: some View {
+        DSDecorativeCard {
+            VStack(alignment: .leading, spacing: DSSpacing.md) {
+                sectionTitle("Bình luận (\(viewModel.commentsState.value?.count ?? 0))")
+
+                commentComposerPlaceholder
+
+                HStack {
+                    Text("Tất cả bình luận").dsFont(.subheadline).fontWeight(.semibold).foregroundStyle(DSColor.textPrimary)
+                    Image(systemName: "chevron.down").font(.caption).foregroundStyle(DSColor.textSecondary)
+                    Spacer()
+                }
+
+                switch viewModel.commentsState {
+                case .idle, .loading:
+                    ProgressView().frame(maxWidth: .infinity).padding(.vertical, DSSpacing.lg)
+                case .failed:
+                    sectionErrorRow { viewModel.loadComments() }
+                case .loaded(let comments) where comments.isEmpty:
+                    Text("Chưa có bình luận nào.").dsFont(.footnote).foregroundStyle(DSColor.textSecondary)
+                case .loaded(let comments):
+                    VStack(spacing: DSSpacing.md) {
+                        ForEach(comments) { comment in
+                            commentRow(comment)
+                        }
+                    }
+                }
+            }
+            .padding(DSSpacing.lg)
+        }
+    }
+
+    /// TODO: The comment input field currently only displays the UI - the actual submission action is not yet connected.
+    private var commentComposerPlaceholder: some View {
+        HStack(alignment: .top, spacing: DSSpacing.sm) {
+            Circle().fill(DSColor.backgroundSecondary).frame(width: 36, height: 36)
+                .overlay { Image(systemName: "person.fill").foregroundStyle(DSColor.textSecondary) }
+            VStack(alignment: .leading, spacing: DSSpacing.xs) {
+                Text("Bình luận (@ để nhắc tên)...")
+                    .dsFont(.subheadline).foregroundStyle(DSColor.textSecondary)
+                Divider()
+                HStack {
+                    Text("0/1000").dsFont(.caption).foregroundStyle(DSColor.textSecondary)
+                    Spacer()
+                    Image(systemName: "face.smiling").foregroundStyle(DSColor.textSecondary)
+                    Image(systemName: "photo").foregroundStyle(DSColor.textSecondary)
+                    Image(systemName: "paperplane.fill").foregroundStyle(DSColor.textSecondary.opacity(0.4))
+                }
+            }
+        }
+        .opacity(0.6) // Visual cue: this block is not yet active in Phase 10.
+    }
+
+    private func commentRow(_ comment: Comment) -> some View {
+        VStack(alignment: .leading, spacing: DSSpacing.xs) {
+            HStack(alignment: .top, spacing: DSSpacing.sm) {
+                avatarView(comment.user)
+                VStack(alignment: .leading, spacing: DSSpacing.xxs) {
+                    HStack(spacing: DSSpacing.xxs) {
+                        Text(comment.user.username).dsFont(.subheadline).fontWeight(.bold).foregroundStyle(DSColor.textPrimary)
+                        Image(systemName: "diamond.circle").font(.system(size: 6)).foregroundStyle(DSColor.brandPrimary)
+                        Text(Self.relativeFormatter.localizedString(for: comment.createdAt, relativeTo: Date()))
+                            .dsFont(.caption).foregroundStyle(DSColor.textSecondary)
+                    }
+
+                    ZStack(alignment: .bottomTrailing) {
+                        Text(comment.content)
+                            .dsFont(.subheadline).foregroundStyle(DSColor.textPrimary)
+                            .padding(DSSpacing.sm)
+                            .background(DSColor.backgroundSecondary)
+                            .clipShape(RoundedRectangle(cornerRadius: DSRadius.md))
+
+                        if comment.likeCount > 0 {
+                            HStack(spacing: 2) {
+                                Text("❤️").font(.system(size: 9))
+                                Text("\(comment.likeCount)").dsFont(.caption).foregroundStyle(DSColor.textSecondary)
+                            }
+                            .padding(.horizontal, DSSpacing.xs).padding(.vertical, 2)
+                            .background(Capsule().fill(DSColor.backgroundPrimary))
+                            .overlay(Capsule().strokeBorder(DSColor.borderDefault.opacity(0.4), lineWidth: 0.5))
+                            .offset(x: 8, y: 10)
+                        }
+                    }
+
+                    HStack(spacing: DSSpacing.md) {
+                        Label("Cảm xúc", systemImage: "hand.thumbsup")
+                        Label("Trả lời", systemImage: "arrowshape.turn.up.left")
+                    }
+                    .dsFont(.caption).foregroundStyle(DSColor.textSecondary)
+                    .padding(.top, 2)
+
+                    if let replies = comment.replies, !replies.isEmpty {
+                        replySection(replies, parentId: comment.id)
+                    }
+                }
+            }
+        }
+    }
+
+    private func replySection(_ replies: [Comment], parentId: String) -> some View {
+        let isExpanded = expandedCommentReplyIDs.contains(parentId)
+        return VStack(alignment: .leading, spacing: DSSpacing.sm) {
+            Button {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    if isExpanded { expandedCommentReplyIDs.remove(parentId) } else { expandedCommentReplyIDs.insert(parentId) }
+                }
+            } label: {
+                HStack(spacing: DSSpacing.xxs) {
+                    Image(systemName: isExpanded ? "chevron.up" : "arrow.turn.down.right")
+                    Text(isExpanded ? "Thu gọn" : "Xem thêm \(replies.count) phản hồi")
+                }
+                .dsFont(.caption).fontWeight(.semibold).foregroundStyle(DSColor.textSecondary)
+            }
+
+            if isExpanded {
+                VStack(alignment: .leading, spacing: DSSpacing.sm) {
+                    ForEach(replies) { reply in
+                        HStack(alignment: .top, spacing: DSSpacing.sm) {
+                            avatarView(reply.user, size: 28)
+                            VStack(alignment: .leading, spacing: DSSpacing.xxs) {
+                                Text(reply.user.username).dsFont(.caption).fontWeight(.bold).foregroundStyle(DSColor.textPrimary)
+                                Text(reply.content)
+                                    .dsFont(.caption).foregroundStyle(DSColor.textPrimary)
+                                    .padding(DSSpacing.xs)
+                                    .background(DSColor.backgroundSecondary)
+                                    .clipShape(RoundedRectangle(cornerRadius: DSRadius.sm))
+                            }
+                        }
+                    }
+                }
+                .padding(.leading, DSSpacing.md)
+                .overlay(alignment: .leading) {
+                    Rectangle().fill(DSColor.brandPrimary.opacity(0.3)).frame(width: 2)
+                }
+            }
+        }
+    }
+
+    private func avatarView(_ user: User, size: CGFloat = 36) -> some View {
+        AsyncImage(url: user.avatarURL) { phase in
+            if case .success(let image) = phase {
+                image.resizable().aspectRatio(contentMode: .fill)
+            } else {
+                Circle().fill(DSColor.backgroundSecondary).overlay { Image(systemName: "person.fill").foregroundStyle(DSColor.textSecondary) }
+            }
+        }
+        .frame(width: size, height: size)
+        .clipShape(Circle())
+    }
+
+    // MARK: - Shared small helpers
+
+    private func sectionTitle(_ text: String) -> some View {
+        HStack {
+            Image(systemName: "diamond.circle").font(.system(size: 8)).foregroundStyle(DSColor.brandPrimary)
+            Text(text).dsFont(.headline).fontWeight(.bold).foregroundStyle(DSColor.brandPrimary)
+            Image(systemName: "diamond.circle").font(.system(size: 8)).foregroundStyle(DSColor.brandPrimary)
+        }
+    }
+
+    private func sectionErrorRow(retry: @escaping () -> Void) -> some View {
+        HStack {
+            Text("Không tải được nội dung.").dsFont(.footnote).foregroundStyle(DSColor.textSecondary)
+            Button("Thử lại", action: retry).dsFont(.footnote).foregroundStyle(DSColor.brandPrimary)
+        }
+    }
+
+    private static func chapterNumberString(_ number: Double) -> String {
+        number == number.rounded() ? String(Int(number)) : String(number)
+    }
+
+    private static let chapterDateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd/MM/yyyy"
+        return formatter
+    }()
+
+    private static let relativeFormatter: RelativeDateTimeFormatter = {
+        let formatter = RelativeDateTimeFormatter()
+        formatter.locale = Locale(identifier: "vi_VN")
+        formatter.unitsStyle = .full
         return formatter
     }()
 }
