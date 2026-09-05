@@ -12,4 +12,5 @@ import Foundation
 /// so the enum and all its cases must be `public`.
 public enum HomeRoute: Hashable {
     case seriesDetail(id: String)
+    case chapterReader(seriesId: String, chapterId: String)
 }

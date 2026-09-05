@@ -5,10 +5,8 @@
 //  Created by Loi Nguyen on 4/9/26.
 //
 
-// ViewModel for the Chapter Reader. Receives pre-loaded `chapters` from SeriesDetailViewModel
-// (does NOT re-fetch the chapter list—avoiding redundant network calls), but fetches ChapterPages
-// individually as needed. Favorite/Notify states are initialized from the Series loaded in the Detail view
-// and managed via independent optimistic updates (there is NO two-way synchronization with SeriesDetailViewModel).
+// ViewModel for the Chapter Reader. Accepts ONLY seriesId and initialChapterId — fetches the full Series data
+// (chapters, favorite status, notifications, reading status) itself, rather than receiving them as parameters from SeriesDetailView.
 
 import CoreArchitecture
 import CoreModels
@@ -19,25 +17,29 @@ import Repositories
 public final class ChapterReaderViewModel: BaseViewModel {
 
     private let seriesId: String
+    private let initialChapterId: String
     private let seriesRepository: SeriesRepositoryProtocol
     private let commentRepository: CommentRepositoryProtocol
 
-    /// List of chapters sorted in ascending order (oldest → newest) - fixed for the lifetime of the Reader,
-    /// used to calculate previous/next chapters and populate the quick-selection dropdown.
-    private let sortedChapters: [Chapter]
-
-    @Published public private(set) var currentChapter: Chapter
+    /// Critical: The full Series is required before rendering anything (title, chapters, favorites...).
+    @Published public private(set) var seriesState: LoadableState<Series> = .idle
     @Published public private(set) var pagesState: LoadableState<[ChapterPage]> = .idle
     @Published public private(set) var commentsState: LoadableState<[Comment]> = .idle
+    /// Secondary - "Group's other works" at the end of the chapter. Reuse `fetchRelatedSeries` (no
+    /// dedicated endpoint for "series by the same scanlation group" yet - requires GroupRepository).
+    @Published public private(set) var groupOtherSeriesState: LoadableState<[Series]> = .idle
 
-    // MARK: - Favorite / Notify (optimistic, initialized from Detail — see note at the top of the file)
+    private var sortedChapters: [Chapter] = []
+    @Published public private(set) var currentChapter: Chapter = Chapter(
+        id: "", seriesId: "", chapterNumber: 0, releasedAt: Date()
+    )
 
-    @Published public private(set) var isFavoritedByMe: Bool
-    @Published public private(set) var isNotifyEnabled: Bool
+    @Published public private(set) var isFavoritedByMe = false
+    @Published public private(set) var isNotifyEnabled = false
     @Published public private(set) var readingStatus: ReadingStatus?
-    @Published public private(set) var isUpdatingReadingStatus = false
     @Published public private(set) var isTogglingFavorite = false
     @Published public private(set) var isTogglingNotify = false
+    @Published public private(set) var isUpdatingReadingStatus = false
     @Published public var actionErrorMessage: String?
 
     // MARK: - Overlay / Menu presentation state (Purely UI-focused, the View will bind directly.)
@@ -48,6 +50,7 @@ public final class ChapterReaderViewModel: BaseViewModel {
 
     private var pagesTask: Task<Void, Never>?
     private var commentsTask: Task<Void, Never>?
+    private var groupOtherSeriesTask: Task<Void, Never>?
     /// Task to record reading progress - debounced based on the current page - that is NOT cancelled
     /// when switching chapters mid-process (ensuring the final record for the old chapter is sent before the user leaves).
     private var progressTask: Task<Void, Never>?
@@ -56,22 +59,12 @@ public final class ChapterReaderViewModel: BaseViewModel {
 
     public init(
         seriesId: String,
-        chapters: [Chapter],
         initialChapterId: String,
-        isFavoritedByMe: Bool,
-        isNotifyEnabled: Bool,
-        readingStatus: ReadingStatus?,
         seriesRepository: SeriesRepositoryProtocol,
         commentRepository: CommentRepositoryProtocol
     ) {
         self.seriesId = seriesId
-        self.sortedChapters = chapters.sorted { $0.chapterNumber < $1.chapterNumber }
-        self.currentChapter = sortedChapters.first(where: { $0.id == initialChapterId })
-            ?? sortedChapters.last
-            ?? Chapter(id: initialChapterId, seriesId: seriesId, chapterNumber: 0, releasedAt: Date())
-        self.isFavoritedByMe = isFavoritedByMe
-        self.isNotifyEnabled = isNotifyEnabled
-        self.readingStatus = readingStatus
+        self.initialChapterId = initialChapterId
         self.seriesRepository = seriesRepository
         self.commentRepository = commentRepository
         super.init()
@@ -80,11 +73,35 @@ public final class ChapterReaderViewModel: BaseViewModel {
     // MARK: - Lifecycle
 
     public func onAppear() {
-        loadPages()
-        loadComments()
+        loadSeries()
     }
 
-    // MARK: - Navigation state (computed — Read-only view, the index is not automatically calculated)
+    /// Show full series - only after obtaining `chapters` can `currentChapter` be determined and the pages/comments downloaded.
+    private func loadSeries() {
+        seriesState = .loading
+        runTask({ [weak self] in
+            guard let self else { return }
+            let series = try await self.seriesRepository.fetchSeriesDetail(id: self.seriesId)
+            let chapters = try await self.seriesRepository.fetchChapters(seriesId: self.seriesId)
+
+            self.sortedChapters = chapters.sorted { $0.chapterNumber < $1.chapterNumber }
+            self.currentChapter = self.sortedChapters.first(where: { $0.id == self.initialChapterId })
+                ?? self.sortedChapters.last
+                ?? self.currentChapter
+            self.isFavoritedByMe = series.isFavoritedByMe
+            self.isNotifyEnabled = series.isNotifyEnabled
+            self.readingStatus = series.readingStatus
+            self.seriesState = .loaded(series)
+
+            self.loadPages()
+            self.loadComments()
+            self.loadGroupOtherSeries()
+        }, onError: { [weak self] error in
+            self?.seriesState = .failed(error)
+        })
+    }
+
+    // MARK: - Navigation state
 
     public var currentChapterIndex: Int {
         sortedChapters.firstIndex(where: { $0.id == currentChapter.id }) ?? 0
@@ -125,18 +142,24 @@ public final class ChapterReaderViewModel: BaseViewModel {
         // Do NOT cancel progressTask here — to allow the final progress write for the old chapter a chance to complete.
     }
 
-    // MARK: - Pages (critical)
+    // MARK: - Pages (critical, according to currentChapter)
 
     public func loadPages() {
         pagesState = .loading
-        runTask({ [weak self] in
+        pagesTask?.cancel()
+        pagesTask = Task { [weak self] in
             guard let self else { return }
-            let pages = try await self.seriesRepository.fetchChapterPages(chapterId: self.currentChapter.id)
-            self.pagesState = .loaded(pages)
-            self.recordProgress(page: 1) // Just opened the chapter -> treat it as being on page 1.
-        }, onError: { [weak self] error in
-            self?.pagesState = .failed(error)
-        })
+            do {
+                let pages = try await self.seriesRepository.fetchChapterPages(chapterId: self.currentChapter.id)
+                guard !Task.isCancelled else { return }
+                self.pagesState = .loaded(pages)
+                self.recordProgress(page: 1) // Just opened the chapter -> treat it as being on page 1.
+            } catch is CancellationError {
+            } catch {
+                guard !Task.isCancelled else { return }
+                self.pagesState = .failed(self.mapToAppError(error))
+            }
+        }
     }
 
     // MARK: - Reading progress (independent, debounced based on the current page)
@@ -155,7 +178,7 @@ public final class ChapterReaderViewModel: BaseViewModel {
         }
     }
 
-    // MARK: - Comments (secondary, by chapter)
+    // MARK: - Comments (secondary, according to currentChapter)
 
     public func loadComments() {
         commentsTask?.cancel()
@@ -174,7 +197,26 @@ public final class ChapterReaderViewModel: BaseViewModel {
         }
     }
 
-    // MARK: - Favorite / Notify (optimistic — using the same SeriesDetailViewModel pattern)
+    // MARK: - "Group-specific" (secondary, loaded once when opening the Reader, does not change by chapter)
+
+    public func loadGroupOtherSeries() {
+        groupOtherSeriesTask?.cancel()
+        groupOtherSeriesState = .loading
+        groupOtherSeriesTask = Task { [weak self] in
+            guard let self else { return }
+            do {
+                let items = try await self.seriesRepository.fetchRelatedSeries(seriesId: self.seriesId)
+                guard !Task.isCancelled else { return }
+                self.groupOtherSeriesState = .loaded(items)
+            } catch is CancellationError {
+            } catch {
+                guard !Task.isCancelled else { return }
+                self.groupOtherSeriesState = .failed(self.mapToAppError(error))
+            }
+        }
+    }
+
+    // MARK: - Favorite / Notify / Reading Status (optimistic)
 
     public func toggleFavorite() {
         guard !isTogglingFavorite else { return }
@@ -211,7 +253,7 @@ public final class ChapterReaderViewModel: BaseViewModel {
             }
         }
     }
-    
+
     public func updateReadingStatus(to newStatus: ReadingStatus) {
         guard !isUpdatingReadingStatus else { return }
         let previous = readingStatus
@@ -257,6 +299,7 @@ public final class ChapterReaderViewModel: BaseViewModel {
     deinit {
         pagesTask?.cancel()
         commentsTask?.cancel()
+        groupOtherSeriesTask?.cancel()
         progressTask?.cancel()
     }
 }

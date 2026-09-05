@@ -101,7 +101,29 @@ struct SideMenuView: View {
         case .rules:
             Text("Rules/Policy (demo)").dsFont(.title1)
         case .seriesDetail(let id):
-            SeriesDetailPlaceholderView(seriesId: id)
+            SeriesDetailView(
+                seriesId: id,
+                seriesRepository: Container.shared.seriesRepository(),
+                commentRepository: Container.shared.commentRepository(),
+                onHeaderTapped: { coordinator.contentCoordinator.popToRoot() },
+                onStartReading: { chapterId in
+                    coordinator.contentCoordinator.push(.chapterReader(seriesId: id, chapterId: chapterId))
+                },
+                onContinueReading: { chapterId in
+                    coordinator.contentCoordinator.push(.chapterReader(seriesId: id, chapterId: chapterId))
+                }
+            )
+        case .chapterReader(let seriesId, let chapterId):
+            ChapterReaderView(
+                seriesId: seriesId,
+                initialChapterId: chapterId,
+                seriesRepository: Container.shared.seriesRepository(),
+                commentRepository: Container.shared.commentRepository(),
+                onHomeTapped: { coordinator.contentCoordinator.popToRoot() },
+                onSeriesSelected: { newSeriesId in
+                    coordinator.contentCoordinator.push(.seriesDetail(id: newSeriesId))
+                }
+            )
         }
     }
 

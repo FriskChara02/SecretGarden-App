@@ -19,4 +19,5 @@ enum SideMenuRoute: Hashable {
     case uploadRegistration
     case rules
     case seriesDetail(id: String)
+    case chapterReader(seriesId: String, chapterId: String)
 }

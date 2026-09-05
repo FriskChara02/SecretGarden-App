@@ -18,49 +18,48 @@ public struct ChapterReaderView: View {
     @State private var isReadingStatusExpanded = false
 
     let onHomeTapped: () -> Void
+    let onSeriesSelected: (String) -> Void
 
     public init(
         seriesId: String,
-        chapters: [Chapter],
         initialChapterId: String,
-        isFavoritedByMe: Bool,
-        isNotifyEnabled: Bool,
-        readingStatus: ReadingStatus?,
         seriesRepository: SeriesRepositoryProtocol,
         commentRepository: CommentRepositoryProtocol,
-        onHomeTapped: @escaping () -> Void
+        onHomeTapped: @escaping () -> Void,
+        onSeriesSelected: @escaping (String) -> Void = { _ in }
     ) {
         _viewModel = StateObject(wrappedValue: ChapterReaderViewModel(
             seriesId: seriesId,
-            chapters: chapters,
             initialChapterId: initialChapterId,
-            isFavoritedByMe: isFavoritedByMe,
-            isNotifyEnabled: isNotifyEnabled,
-            readingStatus: readingStatus,
             seriesRepository: seriesRepository,
             commentRepository: commentRepository
         ))
         self.onHomeTapped = onHomeTapped
+        self.onSeriesSelected = onSeriesSelected
     }
 
     public var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: DSSpacing.md) {
-                readerHeader
-                infoCard
-                    .padding(.horizontal, DSSpacing.md)
-                pagesSection
-                    .padding(.horizontal, DSSpacing.md)
+        Group {
+            switch viewModel.seriesState {
+            case .idle, .loading:
+                ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
+            case .failed(let error):
+                VStack(spacing: DSSpacing.md) {
+                    Text(error.localizedDescription).dsFont(.subheadline).foregroundStyle(DSColor.textSecondary)
+                    DSButton("Thử lại", variant: .primary) { viewModel.onAppear() }
+                }
+            case .loaded(let series):
+                readerScrollContent(series)
             }
-            .padding(.bottom, DSSpacing.xl)
         }
         .background(DSColor.backgroundSecondary)
         .toolbar(.hidden, for: .navigationBar)
         .onAppear { viewModel.onAppear() }
         .sheet(isPresented: $viewModel.isMenuPresented) {
-            // TODO: Replace with the actual ReaderMenuView (Home/Reports/Favorites/
-            // Comments/Notifications/Dark mode) — temporary placeholder to verify state functionality.
-            Text("Menu (Step 10.10)").dsFont(.title2).padding()
+            ReaderMenuView(viewModel: viewModel, onHomeTapped: onHomeTapped)
+        }
+        .sheet(isPresented: $viewModel.isCommentsOverlayPresented) {
+            ChapterCommentsOverlayView(viewModel: viewModel)
         }
         .alert(
             "Có lỗi xảy ra",
@@ -75,15 +74,35 @@ public struct ChapterReaderView: View {
         }
     }
 
+    private func readerScrollContent(_ series: Series) -> some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: DSSpacing.md) {
+                readerHeader(title: series.title)
+                infoCard(title: series.title)
+                    .padding(.horizontal, DSSpacing.md)
+                pagesSection
+                    .padding(.horizontal, DSSpacing.md)
+                recapCard(series)
+                    .padding(.horizontal, DSSpacing.md)
+
+                DSSectionDivider()
+
+                groupOtherSeriesSection
+                    .padding(.horizontal, DSSpacing.md)
+            }
+            .padding(.bottom, DSSpacing.xl)
+        }
+    }
+
     // MARK: - Header (smaller than GardenHeaderView — features a circular avatar and a hamburger menu instead of a large logo)
 
-    private var readerHeader: some View {
+    private func readerHeader(title: String) -> some View {
         HStack(spacing: DSSpacing.sm) {
             Circle().fill(DSColor.brandPrimary)
                 .frame(width: 36, height: 36)
                 .overlay { Image(systemName: "leaf.fill").foregroundStyle(.white).font(.system(size: 16)) }
 
-            Text(seriesTitleForHeader)
+            Text(title)
                 .dsFont(.headline).fontWeight(.semibold)
                 .foregroundStyle(DSColor.textPrimary)
                 .lineLimit(1)
@@ -103,17 +122,12 @@ public struct ChapterReaderView: View {
         .background(DSColor.backgroundPrimary)
     }
 
-    /// TODO: Receive the actual series name via a parameter instead of a temporary string.
-    /// The full `Series` object hasn't been passed to the Reader yet (only `chapters`); this will be
-    /// finalized when the actual navigation is hooked up.
-    private var seriesTitleForHeader: String { "Đồ Ăn Của Ta Trông..." }
-
     // MARK: - Info Card
 
-    private var infoCard: some View {
+    private func infoCard(title: String) -> some View {
         DSDecorativeCard(showCornerBrackets: false) {
             VStack(alignment: .leading, spacing: DSSpacing.sm) {
-                Text(seriesTitleForHeader)
+                Text(title)
                     .dsFont(.headline).fontWeight(.bold)
                     .foregroundStyle(DSColor.textPrimary)
 
@@ -322,21 +336,84 @@ public struct ChapterReaderView: View {
     private static func chapterNumberString(_ number: Double) -> String {
         number == number.rounded() ? String(Int(number)) : String(number)
     }
+    
+    // MARK: - End-of-chapter recap card
+
+    private func recapCard(_ series: Series) -> some View {
+        DSDecorativeCard {
+            HStack(alignment: .top, spacing: DSSpacing.md) {
+                AsyncImage(url: series.coverURL) { phase in
+                    if case .success(let image) = phase {
+                        image.resizable().aspectRatio(contentMode: .fill)
+                    } else {
+                        Rectangle().fill(DSColor.backgroundSecondary)
+                    }
+                }
+                .frame(width: 64, height: 90)
+                .clipShape(RoundedRectangle(cornerRadius: DSRadius.sm))
+
+                VStack(alignment: .leading, spacing: DSSpacing.xs) {
+                    Text(series.title).dsFont(.subheadline).fontWeight(.bold).foregroundStyle(DSColor.textPrimary).lineLimit(2)
+                    if let author = series.author {
+                        Text("Tác giả: \(author.name)").dsFont(.caption).foregroundStyle(DSColor.textSecondary)
+                    }
+                    Button { viewModel.toggleFavorite() } label: {
+                        HStack(spacing: DSSpacing.xxs) {
+                            Image(systemName: viewModel.isFavoritedByMe ? "heart.fill" : "heart")
+                            Text(viewModel.isFavoritedByMe ? "Đã yêu thích" : "Yêu thích")
+                        }
+                        .dsFont(.caption).fontWeight(.semibold)
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, DSSpacing.sm).padding(.vertical, 4)
+                        .background(Capsule().fill(DSColor.brandPrimary))
+                    }
+                    .disabled(viewModel.isTogglingFavorite)
+                }
+                Spacer()
+            }
+            .padding(DSSpacing.md)
+        }
+    }
+
+    // MARK: - "Group Others"
+
+    @ViewBuilder
+    private var groupOtherSeriesSection: some View {
+        VStack(alignment: .leading, spacing: DSSpacing.sm) {
+            HStack {
+                Image(systemName: "diamond.fill").font(.system(size: 8)).foregroundStyle(DSColor.brandPrimary)
+                Text("Khác của nhóm").dsFont(.headline).fontWeight(.bold).foregroundStyle(DSColor.brandPrimary)
+                Image(systemName: "diamond.fill").font(.system(size: 8)).foregroundStyle(DSColor.brandPrimary)
+            }
+
+            switch viewModel.groupOtherSeriesState {
+            case .idle, .loading:
+                ProgressView().frame(maxWidth: .infinity).padding(.vertical, DSSpacing.md)
+            case .failed:
+                Text("Không tải được nội dung.").dsFont(.footnote).foregroundStyle(DSColor.textSecondary)
+            case .loaded(let items) where items.isEmpty:
+                Text("Chưa có truyện khác của nhóm.").dsFont(.footnote).foregroundStyle(DSColor.textSecondary)
+            case .loaded(let items):
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: DSSpacing.sm) {
+                        ForEach(items) { item in
+                            SeriesCardView(data: SeriesCardMapper.map(item), layout: .grid) {
+                                onSeriesSelected(item.id)
+                            }
+                            .frame(width: 140, height: 220)
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 #Preview {
-    let mock = SeriesRepositoryMock()
-    return ChapterReaderView(
+    ChapterReaderView(
         seriesId: "series-1",
-        chapters: [
-            Chapter(id: "chapter-190", seriesId: "series-1", chapterNumber: 190, releasedAt: Date(), pageCount: 50),
-            Chapter(id: "chapter-189", seriesId: "series-1", chapterNumber: 189, releasedAt: Date(), pageCount: 50)
-        ],
         initialChapterId: "chapter-190",
-        isFavoritedByMe: true,
-        isNotifyEnabled: true,
-        readingStatus: .planToRead,
-        seriesRepository: mock,
+        seriesRepository: SeriesRepositoryMock(),
         commentRepository: CommentRepositoryMock(),
         onHomeTapped: {}
     )

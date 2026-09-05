@@ -93,7 +93,29 @@ struct MainTabView: View {
             .navigationDestination(for: HomeRoute.self) { route in
                 switch route {
                 case .seriesDetail(let id):
-                    SeriesDetailPlaceholderView(seriesId: id)
+                    SeriesDetailView(
+                        seriesId: id,
+                        seriesRepository: Container.shared.seriesRepository(),
+                        commentRepository: Container.shared.commentRepository(),
+                        onHeaderTapped: { coordinator.homeCoordinator.popToRoot() },
+                        onStartReading: { chapterId in
+                            coordinator.homeCoordinator.push(.chapterReader(seriesId: id, chapterId: chapterId))
+                        },
+                        onContinueReading: { chapterId in
+                            coordinator.homeCoordinator.push(.chapterReader(seriesId: id, chapterId: chapterId))
+                        }
+                    )
+                case .chapterReader(let seriesId, let chapterId):
+                    ChapterReaderView(
+                        seriesId: seriesId,
+                        initialChapterId: chapterId,
+                        seriesRepository: Container.shared.seriesRepository(),
+                        commentRepository: Container.shared.commentRepository(),
+                        onHomeTapped: { coordinator.homeCoordinator.popToRoot() },
+                        onSeriesSelected: { newSeriesId in
+                            coordinator.homeCoordinator.push(.seriesDetail(id: newSeriesId))
+                        }
+                    )
                 }
             }
         }
@@ -118,7 +140,29 @@ struct MainTabView: View {
                     Text("Search Results (demo) — query: \(query)")
                         .dsFont(.title1)
                 case .seriesDetail(let id):
-                    SeriesDetailPlaceholderView(seriesId: id)
+                    SeriesDetailView(
+                        seriesId: id,
+                        seriesRepository: Container.shared.seriesRepository(),
+                        commentRepository: Container.shared.commentRepository(),
+                        onHeaderTapped: { coordinator.searchCoordinator.popToRoot() },
+                        onStartReading: { chapterId in
+                            coordinator.searchCoordinator.push(.chapterReader(seriesId: id, chapterId: chapterId))
+                        },
+                        onContinueReading: { chapterId in
+                            coordinator.searchCoordinator.push(.chapterReader(seriesId: id, chapterId: chapterId))
+                        }
+                    )
+                case .chapterReader(let seriesId, let chapterId):
+                    ChapterReaderView(
+                        seriesId: seriesId,
+                        initialChapterId: chapterId,
+                        seriesRepository: Container.shared.seriesRepository(),
+                        commentRepository: Container.shared.commentRepository(),
+                        onHomeTapped: { coordinator.searchCoordinator.popToRoot() },
+                        onSeriesSelected: { newSeriesId in
+                            coordinator.searchCoordinator.push(.seriesDetail(id: newSeriesId))
+                        }
+                    )
                 }
             }
         }
