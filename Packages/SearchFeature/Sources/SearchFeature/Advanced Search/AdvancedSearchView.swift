@@ -93,12 +93,12 @@ public struct AdvancedSearchView: View {
     private var titleRow: some View {
         HStack(spacing: DSSpacing.sm) {
             Spacer()
-            Image(systemName: "diamond.circle").font(.system(size: 10)).foregroundStyle(DSColor.brandPrimaryLight)
+            Image(systemName: "diamond.inset.filled").font(.system(size: 10)).foregroundStyle(DSColor.brandPrimaryLight)
             Text("Tìm kiếm nâng cao")
                 .dsFont(.title2)
                 .fontWeight(.bold)
                 .foregroundStyle(DSColor.brandPrimary)
-            Image(systemName: "diamond.circle").font(.system(size: 10)).foregroundStyle(DSColor.brandPrimaryLight)
+            Image(systemName: "diamond.inset.filled").font(.system(size: 10)).foregroundStyle(DSColor.brandPrimaryLight)
             Spacer()
         }
     }

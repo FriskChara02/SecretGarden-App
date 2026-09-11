@@ -71,13 +71,13 @@ struct RandomCommentsSection: View {
     private func header(pageCount: Int, currentPage: Int) -> some View {
         HStack(spacing: DSSpacing.sm) {
             HStack(spacing: DSSpacing.xs) {
-                Image(systemName: "diamond.circle").font(.caption2)
+                Image(systemName: "diamond.inset.filled").font(.caption2)
                 Text("Bình Luận Ngẫu Nhiên")
                     .dsFont(.title3)
                     .fontWeight(.bold)
                     .lineLimit(1)
                     .minimumScaleFactor(0.85)
-                Image(systemName: "diamond.circle").font(.caption2)
+                Image(systemName: "diamond.inset.filled").font(.caption2)
             }
             .foregroundStyle(DSColor.brandPrimary)
 

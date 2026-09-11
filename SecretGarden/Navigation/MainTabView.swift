@@ -35,11 +35,23 @@ struct MainTabView: View {
                 .tag(MainTab.profile)
         }
         .tint(DSColor.brandPrimary)
-        .sheet(isPresented: Binding(
-            get: { coordinator.sideMenuCoordinator.isPresented },
-            set: { coordinator.sideMenuCoordinator.isPresented = $0 }
-        )) {
-            SideMenuView(coordinator: coordinator.sideMenuCoordinator)
+        .animation(.easeInOut(duration: 0.25), value: coordinator.sideMenuCoordinator.isPresented)
+        .overlay {
+            if coordinator.sideMenuCoordinator.isPresented {
+                ZStack(alignment: .trailing) {
+                    Color.black.opacity(0.3)
+                        .ignoresSafeArea()
+                        .onTapGesture {
+                            withAnimation(.easeInOut(duration: 0.25)) {
+                                coordinator.sideMenuCoordinator.isPresented = false
+                            }
+                        }
+                    SideMenuView(coordinator: coordinator.sideMenuCoordinator)
+                        .frame(width: 300)
+                        .transition(.move(edge: .trailing))
+                }
+                .transition(.opacity)
+            }
         }
     }
 
@@ -114,7 +126,8 @@ struct MainTabView: View {
                         onHomeTapped: { coordinator.homeCoordinator.popToRoot() },
                         onSeriesSelected: { newSeriesId in
                             coordinator.homeCoordinator.push(.seriesDetail(id: newSeriesId))
-                        }
+                        },
+                        onBackToDetailTapped: { coordinator.homeCoordinator.pop() }
                     )
                 }
             }
@@ -161,7 +174,8 @@ struct MainTabView: View {
                         onHomeTapped: { coordinator.searchCoordinator.popToRoot() },
                         onSeriesSelected: { newSeriesId in
                             coordinator.searchCoordinator.push(.seriesDetail(id: newSeriesId))
-                        }
+                        },
+                        onBackToDetailTapped: { coordinator.searchCoordinator.pop() }
                     )
                 }
             }

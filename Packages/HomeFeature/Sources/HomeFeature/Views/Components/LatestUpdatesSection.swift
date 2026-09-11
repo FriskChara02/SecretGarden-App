@@ -55,11 +55,11 @@ struct LatestUpdatesSection: View {
     private var header: some View {
         HStack {
             HStack(spacing: DSSpacing.xs) {
-                Image(systemName: "diamond.circle")
+                Image(systemName: "diamond.inset.filled")
                     .font(.caption2)
                 Text("Mới Cập Nhật")
                     .dsFont(.title3)
-                Image(systemName: "diamond.circle")
+                Image(systemName: "diamond.inset.filled")
                     .font(.caption2)
             }
             .foregroundStyle(DSColor.brandPrimary)

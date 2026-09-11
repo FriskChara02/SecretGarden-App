@@ -26,6 +26,9 @@ public struct SeriesDetailView: View {
     let onContinueReading: (String) -> Void
     /// TODO(Report riêng): hiện modal Báo cáo vi phạm khi có FormSubmissionState.
     let onReportTapped: () -> Void
+    let onAuthorTapped: (String) -> Void
+    let onArtistTapped: (String) -> Void
+    let onGroupTapped: (String) -> Void
 
     public init(
         seriesId: String,
@@ -34,7 +37,10 @@ public struct SeriesDetailView: View {
         onHeaderTapped: @escaping () -> Void,
         onStartReading: @escaping (String) -> Void,
         onContinueReading: @escaping (String) -> Void,
-        onReportTapped: @escaping () -> Void = {}
+        onReportTapped: @escaping () -> Void = {},
+        onAuthorTapped: @escaping (String) -> Void = { _ in },
+        onArtistTapped: @escaping (String) -> Void = { _ in },
+        onGroupTapped: @escaping (String) -> Void = { _ in }
     ) {
         _viewModel = StateObject(wrappedValue: SeriesDetailViewModel(
             seriesId: seriesId,
@@ -45,6 +51,9 @@ public struct SeriesDetailView: View {
         self.onStartReading = onStartReading
         self.onContinueReading = onContinueReading
         self.onReportTapped = onReportTapped
+        self.onAuthorTapped = onAuthorTapped
+        self.onArtistTapped = onArtistTapped
+        self.onGroupTapped = onGroupTapped
     }
 
     public var body: some View {
@@ -56,7 +65,7 @@ public struct SeriesDetailView: View {
                 VStack(alignment: .leading, spacing: 0) {
                     GardenHeaderView(onTap: onHeaderTapped)
 
-                    Spacer().frame(height: DSSpacing.lg)
+                    Spacer().frame(height: DSSpacing.xxl + DSSpacing.sm)
 
                     if case .loaded(let series) = viewModel.detailState {
                         content
@@ -70,6 +79,21 @@ public struct SeriesDetailView: View {
 
                         DSSectionDivider().padding(.vertical, DSSpacing.lg)
                         commentsCard
+                        
+                        DSSectionDivider().padding(.vertical, DSSpacing.lg)
+
+                        GardenFooterView(
+                            policyLinks: [
+                                GardenFooterLink(title: "Chính sách bảo mật", action: {}),
+                                GardenFooterLink(title: "Quy định", action: {}),
+                                GardenFooterLink(title: "Điều khoản", action: {})
+                            ],
+                            socialLinks: [
+                                GardenFooterLink(title: "Discord", action: {}),
+                                GardenFooterLink(title: "Facebook", action: {})
+                            ],
+                            onPolicyTapped: {}
+                        )
                     } else {
                         content
                             .padding(.horizontal, DSSpacing.md)
@@ -135,7 +159,9 @@ public struct SeriesDetailView: View {
                 readingStatusDropdown(series)
                 shareRow
             }
-            .padding(DSSpacing.lg)
+            .padding(.horizontal, DSSpacing.lg)
+            .padding(.bottom, DSSpacing.lg)
+            .padding(.top, DSSpacing.xl)
         }
     }
 
@@ -169,6 +195,7 @@ public struct SeriesDetailView: View {
             if let originalTitle = series.originalTitle {
                 Text(originalTitle)
                     .dsFont(.subheadline)
+                    .fontWeight(.bold)
                     .foregroundStyle(DSColor.textSecondary)
             }
         }
@@ -179,13 +206,19 @@ public struct SeriesDetailView: View {
     private func infoRows(_ series: Series) -> some View {
         VStack(alignment: .leading, spacing: DSSpacing.xs) {
             if let author = series.author {
-                infoRow(icon: "pencil.tip", iconColor: DSColor.info, label: "Tác giả:", value: author.name, valueColor: DSColor.info)
+                Button { onAuthorTapped(author.id) } label: {
+                    infoRow(icon: "paintbrush.pointed", iconColor: DSColor.info, label: "Tác giả:", value: author.name, valueColor: DSColor.info)
+                }
             }
             if let artist = series.artist {
-                infoRow(icon: "paintpalette", iconColor: .purple, label: "Họa sĩ:", value: artist.name, valueColor: .purple)
+                Button { onArtistTapped(artist.id) } label: {
+                    infoRow(icon: "paintpalette", iconColor: .purple, label: "Họa sĩ:", value: artist.name, valueColor: .purple)
+                }
             }
             if let group = series.group {
-                infoRow(icon: "flag.fill", iconColor: DSColor.brandPrimary, label: "Nhóm dịch:", value: group.name, valueColor: DSColor.brandPrimary)
+                Button { onGroupTapped(group.id) } label: {
+                    infoRow(icon: "flag.fill", iconColor: DSColor.brandPrimary, label: "Nhóm dịch:", value: group.name, valueColor: DSColor.brandPrimary)
+                }
             }
         }
     }
@@ -231,7 +264,7 @@ public struct SeriesDetailView: View {
         HStack(spacing: DSSpacing.xs) {
             Image(systemName: "battery.50").foregroundStyle(.orange)
             Text("Trạng thái:").dsFont(.subheadline).fontWeight(.semibold).foregroundStyle(DSColor.textPrimary)
-            Text(statusLabel(status)).dsFont(.subheadline).fontWeight(.bold).foregroundStyle(.orange)
+            Text(statusLabel(status)).dsFont(.subheadline).fontWeight(.bold).foregroundStyle(DSColor.brandPrimary)
         }
     }
 
@@ -252,12 +285,13 @@ public struct SeriesDetailView: View {
                 Text("Nội dung:").dsFont(.headline).fontWeight(.bold).foregroundStyle(DSColor.textPrimary)
                 Spacer()
                 Text("(Cập nhật: \(Self.dateFormatter.string(from: series.updatedAt)))")
-                    .dsFont(.caption).foregroundStyle(DSColor.textSecondary)
+                    .dsFont(.caption).fontWeight(.bold).foregroundStyle(DSColor.textSecondary)
             }
 
             VStack(alignment: .leading, spacing: DSSpacing.xs) {
                 Text(series.description)
                     .dsFont(.subheadline)
+                    .fontWeight(.semibold)
                     .foregroundStyle(DSColor.textPrimary)
                     .lineLimit(isDescriptionExpanded ? nil : 3)
 
@@ -280,33 +314,71 @@ public struct SeriesDetailView: View {
     private func actionButtons(_ series: Series) -> some View {
         HStack(spacing: DSSpacing.sm) {
             if let firstChapter = viewModel.visibleSortedChapters.last ?? series.chapters?.first {
-                DSButton("Đọc từ đầu", variant: .primary) { onStartReading(firstChapter.id) }
+                readActionButton(title: "Đọc từ đầu", isPrimary: true) { onStartReading(firstChapter.id) }
             }
             // TODO(Actual history): currently points to the LATEST chapter, not the actual
             // last-read position (requires READING_HISTORY). Note this clearly, do not pretend it represents the final intended behavior.
             if let latestChapter = viewModel.visibleSortedChapters.first ?? series.chapters?.last {
-                DSButton("Tiếp tục đọc (Ch. \(Int(latestChapter.chapterNumber)))", variant: .outline) {
+                readActionButton(title: "Tiếp tục đọc (Ch. \(Int(latestChapter.chapterNumber)))", isPrimary: false) {
                     onContinueReading(latestChapter.id)
                 }
             }
         }
     }
 
+    private func readActionButton(title: String, isPrimary: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: DSSpacing.xxs) {
+                Image(systemName: "books.vertical.fill").font(.caption)
+                Text(title)
+                    .dsFont(.footnote).fontWeight(.semibold)
+                    .lineLimit(1).minimumScaleFactor(0.8)
+            }
+            .foregroundStyle(isPrimary ? .white : DSColor.brandPrimary)
+            .padding(.vertical, DSSpacing.sm)
+            .frame(maxWidth: .infinity)
+            .background(
+                Capsule().fill(isPrimary ? DSColor.brandPrimary : Color.clear)
+            )
+            .overlay(Capsule().strokeBorder(DSColor.brandPrimary, lineWidth: isPrimary ? 0 : 1.5))
+        }
+    }
+
     // MARK: - Notify toggle
 
     private func notifyRow(_ series: Series) -> some View {
-        HStack {
-            Image(systemName: series.isNotifyEnabled ? "bell.fill" : "bell").foregroundStyle(DSColor.brandPrimary)
-            Text("Nhận thông báo").dsFont(.subheadline).foregroundStyle(DSColor.textPrimary)
-            Spacer()
+        HStack(spacing: DSSpacing.sm) {
             Toggle("", isOn: Binding(
                 get: { series.isNotifyEnabled },
                 set: { _ in viewModel.toggleNotify() }
             ))
             .labelsHidden()
-            .tint(DSColor.brandPrimary)
+            .toggleStyle(DSBellToggleStyle())
             .disabled(viewModel.isTogglingNotify)
+
+            Text("Nhận thông báo")
+                .dsFont(.subheadline).fontWeight(.bold)
+                .foregroundStyle(DSColor.textPrimary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.85)
+
+            Image(systemName: "exclamationmark.triangle")
+                .font(.caption)
+                .foregroundStyle(.orange)
+                .frame(width: 24, height: 24)
+                .overlay(Circle().strokeBorder(.orange, lineWidth: 1.2))
+
+            Spacer()
         }
+    }
+
+    /// Bell icon inside a circle — matching the style of the warning icon in the "Report Violation" modal.
+    private func circledBellIcon(isOn: Bool) -> some View {
+        Image(systemName: isOn ? "bell.fill" : "bell")
+            .font(.caption)
+            .foregroundStyle(.orange)
+            .frame(width: 22, height: 22)
+            .overlay(Circle().strokeBorder(.orange, lineWidth: 1.2))
     }
 
     // MARK: - Favorite
@@ -320,6 +392,7 @@ public struct SeriesDetailView: View {
                 Text(series.isFavoritedByMe ? "Đã yêu thích" : "Yêu thích")
                     .fontWeight(.semibold)
                 Text("(\(Self.numberFormatter.string(from: NSNumber(value: series.favoriteCount)) ?? "0") người)")
+                    .fontWeight(.bold)
             }
             .dsFont(.subheadline)
             .foregroundStyle(.white)
@@ -337,16 +410,14 @@ public struct SeriesDetailView: View {
             Button {
                 withAnimation(.easeInOut(duration: 0.2)) { isReadingStatusExpanded.toggle() }
             } label: {
-                HStack {
+                HStack(spacing: DSSpacing.xs) {
                     Image(systemName: "bookmark.fill")
                     Text(readingStatusLabel(series.readingStatus))
-                    Spacer()
                     Image(systemName: isReadingStatusExpanded ? "chevron.up" : "chevron.down")
                 }
                 .dsFont(.subheadline).fontWeight(.semibold)
                 .foregroundStyle(DSColor.brandPrimary)
                 .padding(.vertical, DSSpacing.sm)
-                .padding(.horizontal, DSSpacing.md)
                 .frame(maxWidth: .infinity)
                 .overlay(Capsule().strokeBorder(DSColor.brandPrimary, lineWidth: 1.5))
             }
@@ -357,6 +428,7 @@ public struct SeriesDetailView: View {
                     ForEach(ReadingStatus.allCases, id: \.self) { status in
                         readingStatusOptionRow(status, isSelected: series.readingStatus == status)
                     }
+                    Divider()
                     Button {
                         viewModel.removeFromReadingList()
                         isReadingStatusExpanded = false
@@ -379,7 +451,7 @@ public struct SeriesDetailView: View {
             isReadingStatusExpanded = false
         } label: {
             HStack {
-                Text(readingStatusLabel(status)).dsFont(.subheadline).foregroundStyle(DSColor.textPrimary)
+                Text(readingStatusLabel(status)).dsFont(.subheadline).fontWeight(.bold).foregroundStyle(DSColor.textPrimary)
                 Spacer()
                 if isSelected {
                     Image(systemName: "checkmark").foregroundStyle(DSColor.brandPrimary)
@@ -404,13 +476,15 @@ public struct SeriesDetailView: View {
 
     private var shareRow: some View {
         HStack(spacing: DSSpacing.md) {
-            Text("Chia sẻ:").dsFont(.subheadline).foregroundStyle(DSColor.textPrimary)
+            Spacer()
+            Text("Chia sẻ:").dsFont(.subheadline).fontWeight(.bold).foregroundStyle(DSColor.textPrimary)
             ForEach(["square.and.arrow.up", "message.fill", "paperplane.fill", "bubble.left.fill"], id: \.self) { icon in
                 Image(systemName: icon)
                     .foregroundStyle(DSColor.brandPrimary)
                     .frame(width: 32, height: 32)
                     .background(Circle().fill(DSColor.backgroundSecondary))
             }
+            Spacer()
         }
     }
 
@@ -445,28 +519,29 @@ public struct SeriesDetailView: View {
                     }
                 }
 
-                VStack(spacing: 0) {
-                    ForEach(Array(viewModel.visibleSortedChapters.enumerated()), id: \.element.id) { index, chapter in
+                VStack(spacing: DSSpacing.lg) {
+                    ForEach(viewModel.visibleSortedChapters) { chapter in
                         chapterRow(chapter, isLatest: chapter.chapterNumber == series.chapters?.map(\.chapterNumber).max())
-                        if index < viewModel.visibleSortedChapters.count - 1 {
-                            Divider().foregroundStyle(DSColor.borderDefault.opacity(0.3))
-                        }
                     }
                 }
 
                 if viewModel.hasMoreChapters {
-                    Button {
-                        viewModel.showMoreChapters()
-                    } label: {
-                        HStack(spacing: DSSpacing.xxs) {
-                            Text("Xem thêm")
-                            Image(systemName: "chevron.down")
+                    HStack {
+                        Spacer()
+                        Button {
+                            viewModel.showMoreChapters()
+                        } label: {
+                            HStack(spacing: DSSpacing.xxs) {
+                                Text("Xem thêm")
+                                Image(systemName: "chevron.down")
+                            }
+                            .dsFont(.subheadline).fontWeight(.semibold)
+                            .foregroundStyle(DSColor.brandPrimary)
+                            .padding(.horizontal, DSSpacing.xl)
+                            .padding(.vertical, DSSpacing.sm)
+                            .overlay(Capsule().strokeBorder(DSColor.brandPrimary.opacity(0.5), lineWidth: 1))
                         }
-                        .dsFont(.subheadline).fontWeight(.semibold)
-                        .foregroundStyle(DSColor.brandPrimary)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, DSSpacing.sm)
-                        .overlay(Capsule().strokeBorder(DSColor.brandPrimary.opacity(0.5), lineWidth: 1))
+                        Spacer()
                     }
                 }
             }
@@ -489,10 +564,11 @@ public struct SeriesDetailView: View {
             onContinueReading(chapter.id)
         } label: {
             HStack {
-                HStack(spacing: DSSpacing.xs) {
-                    Text("Chương \(Self.chapterNumberString(chapter.chapterNumber))")
-                        .dsFont(.subheadline).fontWeight(.semibold)
-                        .foregroundStyle(DSColor.textPrimary)
+                Text("Chương \(Self.chapterNumberString(chapter.chapterNumber))")
+                    .dsFont(.subheadline).fontWeight(.semibold)
+                    .foregroundStyle(DSColor.textPrimary)
+                Spacer()
+                HStack(spacing: DSSpacing.xxs) {
                     if isLatest {
                         Text("Mới nhất")
                             .dsFont(.caption).fontWeight(.bold)
@@ -500,12 +576,11 @@ public struct SeriesDetailView: View {
                             .padding(.horizontal, DSSpacing.xs).padding(.vertical, 2)
                             .background(Capsule().fill(DSColor.brandPrimary))
                     }
+                    Text(Self.chapterDateFormatter.string(from: chapter.releasedAt))
+                        .dsFont(.caption).foregroundStyle(DSColor.textSecondary)
                 }
-                Spacer()
-                Text(Self.chapterDateFormatter.string(from: chapter.releasedAt))
-                    .dsFont(.caption).foregroundStyle(DSColor.textSecondary)
             }
-            .padding(.vertical, DSSpacing.sm)
+            .padding(.vertical, DSSpacing.xxs)
         }
         .buttonStyle(.plain)
     }
@@ -603,7 +678,7 @@ public struct SeriesDetailView: View {
                 VStack(alignment: .leading, spacing: DSSpacing.xxs) {
                     HStack(spacing: DSSpacing.xxs) {
                         Text(comment.user.username).dsFont(.subheadline).fontWeight(.bold).foregroundStyle(DSColor.textPrimary)
-                        Image(systemName: "diamond.circle").font(.system(size: 6)).foregroundStyle(DSColor.brandPrimary)
+                        Image(systemName: "diamond.inset.filled").font(.system(size: 6)).foregroundStyle(DSColor.brandPrimary)
                         Text(Self.relativeFormatter.localizedString(for: comment.createdAt, relativeTo: Date()))
                             .dsFont(.caption).foregroundStyle(DSColor.textSecondary)
                     }
@@ -697,9 +772,9 @@ public struct SeriesDetailView: View {
 
     private func sectionTitle(_ text: String) -> some View {
         HStack {
-            Image(systemName: "diamond.circle").font(.system(size: 8)).foregroundStyle(DSColor.brandPrimary)
+            Image(systemName: "inset.filled.diamond").font(.system(size: 8)).foregroundStyle(DSColor.brandPrimary)
             Text(text).dsFont(.headline).fontWeight(.bold).foregroundStyle(DSColor.brandPrimary)
-            Image(systemName: "diamond.circle").font(.system(size: 8)).foregroundStyle(DSColor.brandPrimary)
+            Image(systemName: "inset.filled.diamond").font(.system(size: 8)).foregroundStyle(DSColor.brandPrimary)
         }
     }
 

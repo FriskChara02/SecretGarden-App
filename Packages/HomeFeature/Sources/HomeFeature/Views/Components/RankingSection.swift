@@ -46,9 +46,9 @@ struct RankingSection: View {
 
     private var sectionTitle: some View {
         HStack(spacing: DSSpacing.xs) {
-            Image(systemName: "diamond.circle").font(.caption2)
+            Image(systemName: "diamond.inset.filled").font(.caption2)
             Text("Xếp Hạng").dsFont(.title3)
-            Image(systemName: "diamond.circle").font(.caption2)
+            Image(systemName: "diamond.inset.filled").font(.caption2)
         }
         .foregroundStyle(DSColor.brandPrimary)
         .frame(maxWidth: .infinity)

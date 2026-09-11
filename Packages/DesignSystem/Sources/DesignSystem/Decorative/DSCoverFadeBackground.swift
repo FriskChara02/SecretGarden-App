@@ -31,8 +31,8 @@ public struct DSCoverFadeBackground: View {
                             .aspectRatio(contentMode: .fill)
                             .frame(height: fadeHeight)
                             .clipped()
-                            .blur(radius: 20)
-                            .overlay(Color.black.opacity(0.22))
+                            .blur(radius: 8)
+                            .overlay(Color.black.opacity(0.10))
                             .mask(fadeMask)
                     }
                 }

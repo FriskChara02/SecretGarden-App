@@ -100,6 +100,7 @@ public struct GardenFooterView: View {
 
     private var bottomBlock: some View {
         ZStack(alignment: .top) {
+            DSColor.backgroundPrimary
             DiagonalRiseShape()
                 .fill(
                     LinearGradient(

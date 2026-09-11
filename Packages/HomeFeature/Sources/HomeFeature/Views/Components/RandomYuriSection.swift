@@ -40,9 +40,9 @@ struct RandomYuriSection: View {
     private var header: some View {
         HStack {
             HStack(spacing: DSSpacing.xs) {
-                Image(systemName: "diamond.circle").font(.caption2)
+                Image(systemName: "diamond.inset.filled").font(.caption2)
                 Text("Random Yuri").dsFont(.title3)
-                Image(systemName: "diamond.circle").font(.caption2)
+                Image(systemName: "diamond.inset.filled").font(.caption2)
             }
             .foregroundStyle(DSColor.brandPrimary)
 

@@ -87,11 +87,9 @@ struct SideMenuView: View {
         case .advancedSearch:
             AdvancedSearchView(
                 repository: Container.shared.searchRepository(),
-                onSeriesSelected: { seriesId in
-                    coordinator.contentCoordinator.push(.seriesDetail(id: seriesId))
+                onSeriesSelected: { seriesId in coordinator.contentCoordinator.push(.seriesDetail(id: seriesId))
                 },
-                onHeaderTapped: {
-                    coordinator.contentCoordinator.popToRoot()
+                onHeaderTapped: { coordinator.contentCoordinator.popToRoot()
                 }
             )
         case .yuriList:
@@ -122,7 +120,8 @@ struct SideMenuView: View {
                 onHomeTapped: { coordinator.contentCoordinator.popToRoot() },
                 onSeriesSelected: { newSeriesId in
                     coordinator.contentCoordinator.push(.seriesDetail(id: newSeriesId))
-                }
+                },
+                onBackToDetailTapped: { coordinator.contentCoordinator.pop() }
             )
         }
     }

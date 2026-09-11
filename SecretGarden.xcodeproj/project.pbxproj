@@ -12,6 +12,7 @@
 		7A0AC609302648A30042775A /* CoreStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 7A0AC608302648A30042775A /* CoreStorage */; };
 		7A0AC60E30264A8F0042775A /* DesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = 7A0AC60D30264A8F0042775A /* DesignSystem */; };
 		7A3C55983031543A00B5A993 /* AuthFeature in Frameworks */ = {isa = PBXBuildFile; productRef = 7A3C55973031543A00B5A993 /* AuthFeature */; };
+		7A7555B83041D858007AB09E /* SearchFeature in Frameworks */ = {isa = PBXBuildFile; productRef = 7A7555B73041D858007AB09E /* SearchFeature */; };
 		7A97F446303222DF0078EE73 /* Repositories in Frameworks */ = {isa = PBXBuildFile; productRef = 7A97F445303222DF0078EE73 /* Repositories */; };
 		7A97F449303224370078EE73 /* FactoryKit in Frameworks */ = {isa = PBXBuildFile; productRef = 7A97F448303224370078EE73 /* FactoryKit */; };
 		7AD91EA23037FDAA00D588BA /* HomeFeature in Frameworks */ = {isa = PBXBuildFile; productRef = 7AD91EA13037FDAA00D588BA /* HomeFeature */; };
@@ -62,6 +63,7 @@
 				7A97F446303222DF0078EE73 /* Repositories in Frameworks */,
 				7A0AC606302648940042775A /* CoreNetworking in Frameworks */,
 				7A0AC60E30264A8F0042775A /* DesignSystem in Frameworks */,
+				7A7555B83041D858007AB09E /* SearchFeature in Frameworks */,
 				7AFB86C13028C870003895FE /* CoreArchitecture in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -126,6 +128,7 @@
 				7A97F445303222DF0078EE73 /* Repositories */,
 				7A97F448303224370078EE73 /* FactoryKit */,
 				7AD91EA13037FDAA00D588BA /* HomeFeature */,
+				7A7555B73041D858007AB09E /* SearchFeature */,
 			);
 			productName = SecretGarden;
 			productReference = 7A21DC2F3025DFFB00AB92DD /* SecretGarden.app */;
@@ -167,6 +170,7 @@
 				7A3C55963031543A00B5A993 /* XCLocalSwiftPackageReference "Packages/AuthFeature" */,
 				7A97F447303224370078EE73 /* XCRemoteSwiftPackageReference "Factory" */,
 				7AD91EA03037FDAA00D588BA /* XCLocalSwiftPackageReference "Packages/HomeFeature" */,
+				7A7555B63041D858007AB09E /* XCLocalSwiftPackageReference "Packages/SearchFeature" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 7A21DC303025DFFB00AB92DD /* Products */;
@@ -869,6 +873,10 @@
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/AuthFeature;
 		};
+		7A7555B63041D858007AB09E /* XCLocalSwiftPackageReference "Packages/SearchFeature" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/SearchFeature;
+		};
 		7AD91EA03037FDAA00D588BA /* XCLocalSwiftPackageReference "Packages/HomeFeature" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/HomeFeature;
@@ -930,6 +938,10 @@
 		7A3C55973031543A00B5A993 /* AuthFeature */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = AuthFeature;
+		};
+		7A7555B73041D858007AB09E /* SearchFeature */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = SearchFeature;
 		};
 		7A97F445303222DF0078EE73 /* Repositories */ = {
 			isa = XCSwiftPackageProductDependency;

@@ -14,102 +14,166 @@ import SwiftUI
 struct ReaderMenuView: View {
     @ObservedObject var viewModel: ChapterReaderViewModel
     let onHomeTapped: () -> Void
-    @Environment(\.dismiss) private var dismiss
     /// TODO: Replace with the actual ThemeManager. Local placeholder to prevent the UI from freezing.
     @State private var isDarkModePlaceholder = false
+    @State private var isReadingStatusExpanded = false
+
+    private let contentVerticalOffset: CGFloat = 60
 
     var body: some View {
-        NavigationStack {
-            VStack(spacing: 0) {
-                Text("ĐĂNG LÚC")
-                    .dsFont(.caption).foregroundStyle(DSColor.textSecondary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                Text(viewModel.currentChapter.releasedAt, style: .relative)
-                    .dsFont(.headline).fontWeight(.bold).foregroundStyle(DSColor.textPrimary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+        VStack(spacing: 0) {
 
-                DSSectionDivider().padding(.vertical, DSSpacing.md)
-
-                menuRow(icon: "house", title: "Trang chủ") {
-                    dismiss()
-                    onHomeTapped()
+            VStack(alignment: .leading, spacing: DSSpacing.lg) {
+                header
+                
+                VStack(alignment: .leading, spacing: DSSpacing.xxs) {
+                    Text("ĐĂNG LÚC")
+                        .dsFont(.caption).foregroundStyle(DSColor.textSecondary)
+                    Text(Self.relativeFormatter.localizedString(for: viewModel.currentChapter.releasedAt, relativeTo: Date()))
+                        .dsFont(.headline).fontWeight(.bold).foregroundStyle(DSColor.textPrimary)
                 }
-                menuRow(icon: "exclamationmark.triangle", title: "Báo cáo") {
-                    // TODO(Separate report — requires FormSubmissionState): Show the actual "Report Violation" modal.
-                    dismiss()
-                }
-                menuRow(icon: viewModel.isFavoritedByMe ? "heart.fill" : "heart", title: "Đã yêu thích", isHighlighted: true) {
-                    viewModel.toggleFavorite()
-                }
-                menuRow(icon: "bubble.left", title: "Bình luận") {
-                    dismiss()
-                    viewModel.isCommentsOverlayPresented = true
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.top, DSSpacing.xs)
+
+                DSSectionDivider()
+
+                VStack(spacing: 0) {
+                    menuRow(icon: "house", title: "Trang chủ") {
+                        viewModel.isMenuPresented = false
+                        onHomeTapped()
+                    }
+                    Divider()
+                    menuRow(icon: "exclamationmark.triangle", title: "Báo cáo") {
+                        viewModel.isMenuPresented = false // TODO(Separate report — requires FormSubmissionState)
+                    }
+                    Divider()
+                    menuRow(icon: viewModel.isFavoritedByMe ? "heart.fill" : "heart", title: "Đã yêu thích", isHighlighted: viewModel.isFavoritedByMe) {
+                        viewModel.toggleFavorite()
+                    }
+                    Divider()
+                    menuRow(icon: "message", title: "Bình luận") {
+                        viewModel.isMenuPresented = false
+                        viewModel.isCommentsOverlayPresented = true
+                    }
+                    Divider()
+                    toggleRow(icon: "bell", activeIcon: "bell.fill", title: "Thông báo", isOn: Binding(
+                        get: { viewModel.isNotifyEnabled },
+                        set: { _ in viewModel.toggleNotify() }
+                    ))
+                    Divider()
+                    toggleRow(icon: "sun.max", activeIcon: "moon.stars.fill", title: "Chế độ sáng/tối", isOn: $isDarkModePlaceholder, useThemeStyle: true)
                 }
 
-                toggleRow(icon: "bell", title: "Thông báo", isOn: Binding(
-                    get: { viewModel.isNotifyEnabled },
-                    set: { _ in viewModel.toggleNotify() }
-                ))
-                toggleRow(icon: "moon.stars", title: "Chế độ sáng/tối", isOn: $isDarkModePlaceholder)
-
-                Spacer()
-
-                readingStatusButton
+                readingStatusDropdown
             }
-            .padding(DSSpacing.lg)
-            .navigationTitle("Menu")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button { dismiss() } label: { Image(systemName: "xmark") }
-                }
-            }
+            .padding(.horizontal, DSSpacing.lg)
+            .padding(.top, DSSpacing.lg)
+            .offset(y: contentVerticalOffset)
+
+            Spacer(minLength: 0)
         }
+        .frame(maxHeight: .infinity)
+        .background(DSColor.backgroundPrimary)
     }
 
-    @ViewBuilder
-    private func menuRow(icon: String, title: String, isHighlighted: Bool = false, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            HStack {
-                Image(systemName: icon).foregroundStyle(isHighlighted ? DSColor.brandPrimary : DSColor.textPrimary)
-                Text(title).dsFont(.subheadline).foregroundStyle(isHighlighted ? DSColor.brandPrimary : DSColor.textPrimary)
-                Spacer()
-            }
-            .padding(.vertical, DSSpacing.sm)
-        }
-        Divider()
-    }
-
-    private func toggleRow(icon: String, title: String, isOn: Binding<Bool>) -> some View {
+    private var header: some View {
         VStack(spacing: 0) {
             HStack {
-                Image(systemName: icon).foregroundStyle(DSColor.textPrimary)
-                Text(title).dsFont(.subheadline).foregroundStyle(DSColor.textPrimary)
+                Text("Menu").dsFont(.title2).fontWeight(.bold).foregroundStyle(DSColor.textPrimary)
                 Spacer()
-                Toggle("", isOn: isOn).labelsHidden().tint(DSColor.brandPrimary)
+                Button { viewModel.isMenuPresented = false } label: {
+                    Image(systemName: "xmark").foregroundStyle(DSColor.textSecondary)
+                }
             }
-            .padding(.vertical, DSSpacing.sm)
+            .padding(.bottom, DSSpacing.md)
+            
             Divider()
+            .padding(.horizontal, -DSSpacing.lg)
+        }
+        .padding(.top, DSSpacing.lg)
+        .background(DSColor.backgroundPrimary)
+    }
+
+    private func menuRow(icon: String, title: String, isHighlighted: Bool = false, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: DSSpacing.sm) {
+                Image(systemName: icon).foregroundStyle(DSColor.brandPrimary)
+                Text(title).dsFont(.subheadline).fontWeight(.bold).foregroundStyle(isHighlighted ? DSColor.brandPrimary : DSColor.textPrimary)
+                Spacer()
+            }
+            .padding(.vertical, DSSpacing.md)
+            .frame(maxWidth: .infinity)
+            .background(isHighlighted ? DSColor.brandPrimaryLight.opacity(0.15) : Color.clear)
+            .clipShape(RoundedRectangle(cornerRadius: DSRadius.sm))
         }
     }
 
-    private var readingStatusButton: some View {
-        Menu {
-            ForEach(ReadingStatus.allCases, id: \.self) { status in
-                Button(readingStatusLabel(status)) { viewModel.updateReadingStatus(to: status) }
+    private func toggleRow(icon: String, activeIcon: String, title: String, isOn: Binding<Bool>, useThemeStyle: Bool = false) -> some View {
+        HStack(spacing: DSSpacing.sm) {
+            Image(systemName: isOn.wrappedValue ? activeIcon : icon).foregroundStyle(DSColor.brandPrimary)
+            Text(title).dsFont(.subheadline).fontWeight(.bold).foregroundStyle(DSColor.textPrimary)
+            Spacer()
+            if useThemeStyle {
+                Toggle("", isOn: isOn).labelsHidden().toggleStyle(DSThemeToggleStyle())
+            } else {
+                Toggle("", isOn: isOn).labelsHidden().toggleStyle(DSBellToggleStyle())
             }
-            Button("Xoá khỏi danh sách", role: .destructive) { viewModel.removeFromReadingList() }
-        } label: {
-            HStack {
-                Image(systemName: "bookmark.fill")
-                Text(readingStatusLabel(viewModel.readingStatus))
-                Image(systemName: "chevron.down")
+        }
+        .padding(.vertical, DSSpacing.md)
+    }
+
+    // MARK: - Reading status dropdown
+
+    private var readingStatusDropdown: some View {
+        VStack(spacing: 0) {
+            Button {
+                withAnimation(.easeInOut(duration: 0.2)) { isReadingStatusExpanded.toggle() }
+            } label: {
+                HStack(spacing: DSSpacing.xs) {
+                    Image(systemName: "bookmark.fill")
+                    Text(readingStatusLabel(viewModel.readingStatus)).fontWeight(.bold)
+                    Image(systemName: isReadingStatusExpanded ? "chevron.up" : "chevron.down")
+                }
+                .dsFont(.subheadline).fontWeight(.semibold)
+                .foregroundStyle(DSColor.brandPrimary)
+                .padding(.vertical, DSSpacing.sm)
+                .frame(maxWidth: .infinity)
+                .overlay(Capsule().strokeBorder(DSColor.brandPrimary, lineWidth: 1.5))
             }
-            .dsFont(.subheadline).fontWeight(.semibold)
-            .foregroundStyle(DSColor.brandPrimary)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, DSSpacing.sm)
-            .overlay(Capsule().strokeBorder(DSColor.brandPrimary, lineWidth: 1.5))
+            .disabled(viewModel.isUpdatingReadingStatus)
+
+            if isReadingStatusExpanded {
+                VStack(alignment: .leading, spacing: 0) {
+                    ForEach(ReadingStatus.allCases, id: \.self) { status in
+                        Button {
+                            viewModel.updateReadingStatus(to: status)
+                            isReadingStatusExpanded = false
+                        } label: {
+                            HStack {
+                                Text(readingStatusLabel(status)).dsFont(.subheadline).fontWeight(.bold).foregroundStyle(DSColor.textPrimary)
+                                Spacer()
+                                if viewModel.readingStatus == status {
+                                    Image(systemName: "checkmark").foregroundStyle(DSColor.brandPrimary)
+                                }
+                            }
+                            .padding(.vertical, DSSpacing.sm)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                    }
+                    Divider()
+                    Button {
+                        viewModel.removeFromReadingList()
+                        isReadingStatusExpanded = false
+                    } label: {
+                        Text("Xoá khỏi danh sách")
+                            .dsFont(.subheadline).fontWeight(.semibold)
+                            .foregroundStyle(DSColor.statusError)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.vertical, DSSpacing.sm)
+                    }
+                }
+                .padding(.top, DSSpacing.xs)
+            }
         }
     }
 
@@ -121,4 +185,11 @@ struct ReaderMenuView: View {
         case .dropped: return "Ngừng đọc"
         }
     }
+
+    private static let relativeFormatter: RelativeDateTimeFormatter = {
+        let f = RelativeDateTimeFormatter()
+        f.locale = Locale(identifier: "vi_VN")
+        f.dateTimeStyle = .named
+        return f
+    }()
 }

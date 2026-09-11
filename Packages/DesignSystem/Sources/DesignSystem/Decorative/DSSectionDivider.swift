@@ -22,7 +22,7 @@ public struct DSSectionDivider: View {
     public var body: some View {
         HStack(spacing: DSSpacing.sm) {
             Rectangle().fill(lineColor).frame(height: 1)
-            Image(systemName: "diamond.circle")
+            Image(systemName: "diamond.inset.filled")
                 .font(.system(size: 7))
                 .foregroundStyle(diamondColor)
             Rectangle().fill(lineColor).frame(height: 1)

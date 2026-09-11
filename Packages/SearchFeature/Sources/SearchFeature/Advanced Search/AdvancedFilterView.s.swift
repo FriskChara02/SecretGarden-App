@@ -59,7 +59,7 @@ public struct AdvancedFilterView: View {
     private var header: some View {
         HStack {
             HStack(spacing: DSSpacing.xs) {
-                Image(systemName: "diamond.circle").font(.system(size: 12)).foregroundStyle(DSColor.brandPrimaryLight)
+                Image(systemName: "diamond.inset.filled").font(.system(size: 12)).foregroundStyle(DSColor.brandPrimaryLight)
                 Text("Bộ lọc").dsFont(.title2).fontWeight(.bold).foregroundStyle(DSColor.brandPrimary)
             }
             Spacer()
