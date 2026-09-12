@@ -20,4 +20,6 @@ enum SideMenuRoute: Hashable {
     case rules
     case seriesDetail(id: String)
     case chapterReader(seriesId: String, chapterId: String)
+    case groupProfile(id: String)
+    case authorProfile(id: String)
 }

@@ -14,4 +14,6 @@ public enum SearchRoute: Hashable {
     case searchResults(query: String)
     case seriesDetail(id: String)
     case chapterReader(seriesId: String, chapterId: String)
+    case groupProfile(id: String)
+    case authorProfile(id: String)
 }
