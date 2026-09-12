@@ -76,6 +76,30 @@ struct SideMenuView: View {
     @ViewBuilder
     private func destinationView(for route: SideMenuRoute) -> some View {
         switch route {
+        case .favorites, .followedGroups, .history, .category, .yuriList, .uploadRegistration, .rules:
+            placeholderDestination(for: route)
+        case .advancedSearch:
+            AdvancedSearchView(
+                repository: Container.shared.searchRepository(),
+                onSeriesSelected: { seriesId in coordinator.contentCoordinator.push(.seriesDetail(id: seriesId)) },
+                onHeaderTapped: { coordinator.contentCoordinator.popToRoot() }
+            )
+        case .seriesDetail(let id):
+            seriesDetailDestination(id: id)
+        case .chapterReader(let seriesId, let chapterId):
+            chapterReaderDestination(seriesId: seriesId, chapterId: chapterId)
+        case .groupProfile(let id):
+            Text("Group Profile (demo) — id: \(id)") // TODO: Connect the actual GroupProfileView
+                .dsFont(.title1)
+        case .authorProfile(let id):
+            Text("Author Profile (demo) — id: \(id)") // TODO
+                .dsFont(.title1)
+        }
+    }
+
+    @ViewBuilder
+    private func placeholderDestination(for route: SideMenuRoute) -> some View {
+        switch route {
         case .favorites:
             Text("Favorites (demo) — Phase 11").dsFont(.title1)
         case .followedGroups:
@@ -84,46 +108,44 @@ struct SideMenuView: View {
             Text("History (demo) — Phase 11").dsFont(.title1)
         case .category:
             Text("Category (demo) — Phase 9").dsFont(.title1)
-        case .advancedSearch:
-            AdvancedSearchView(
-                repository: Container.shared.searchRepository(),
-                onSeriesSelected: { seriesId in coordinator.contentCoordinator.push(.seriesDetail(id: seriesId))
-                },
-                onHeaderTapped: { coordinator.contentCoordinator.popToRoot()
-                }
-            )
         case .yuriList:
             Text("Yuri List (demo) — Phase 10").dsFont(.title1)
         case .uploadRegistration:
             Text("Upload Registration (demo)").dsFont(.title1)
         case .rules:
             Text("Rules/Policy (demo)").dsFont(.title1)
-        case .seriesDetail(let id):
-            SeriesDetailView(
-                seriesId: id,
-                seriesRepository: Container.shared.seriesRepository(),
-                commentRepository: Container.shared.commentRepository(),
-                onHeaderTapped: { coordinator.contentCoordinator.popToRoot() },
-                onStartReading: { chapterId in
-                    coordinator.contentCoordinator.push(.chapterReader(seriesId: id, chapterId: chapterId))
-                },
-                onContinueReading: { chapterId in
-                    coordinator.contentCoordinator.push(.chapterReader(seriesId: id, chapterId: chapterId))
-                }
-            )
-        case .chapterReader(let seriesId, let chapterId):
-            ChapterReaderView(
-                seriesId: seriesId,
-                initialChapterId: chapterId,
-                seriesRepository: Container.shared.seriesRepository(),
-                commentRepository: Container.shared.commentRepository(),
-                onHomeTapped: { coordinator.contentCoordinator.popToRoot() },
-                onSeriesSelected: { newSeriesId in
-                    coordinator.contentCoordinator.push(.seriesDetail(id: newSeriesId))
-                },
-                onBackToDetailTapped: { coordinator.contentCoordinator.pop() }
-            )
+        default:
+            EmptyView() // unreachable — the caller only forwards these 7 cases here
         }
+    }
+
+    private func seriesDetailDestination(id: String) -> some View {
+        SeriesDetailView(
+            seriesId: id,
+            seriesRepository: Container.shared.seriesRepository(),
+            commentRepository: Container.shared.commentRepository(),
+            onHeaderTapped: { coordinator.contentCoordinator.popToRoot() },
+            onStartReading: { chapterId in
+                coordinator.contentCoordinator.push(.chapterReader(seriesId: id, chapterId: chapterId))
+            },
+            onContinueReading: { chapterId in
+                coordinator.contentCoordinator.push(.chapterReader(seriesId: id, chapterId: chapterId))
+            }
+        )
+    }
+
+    private func chapterReaderDestination(seriesId: String, chapterId: String) -> some View {
+        ChapterReaderView(
+            seriesId: seriesId,
+            initialChapterId: chapterId,
+            seriesRepository: Container.shared.seriesRepository(),
+            commentRepository: Container.shared.commentRepository(),
+            onHomeTapped: { coordinator.contentCoordinator.popToRoot() },
+            onSeriesSelected: { newSeriesId in
+                coordinator.contentCoordinator.push(.seriesDetail(id: newSeriesId))
+            },
+            onBackToDetailTapped: { coordinator.contentCoordinator.pop() }
+        )
     }
 
     private var pathBinding: Binding<NavigationPath> {

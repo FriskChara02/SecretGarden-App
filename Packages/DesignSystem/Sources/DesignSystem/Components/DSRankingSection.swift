@@ -1,45 +1,60 @@
 //
-//  RankingSection.swift
-//  HomeFeature
+//  DSRankingSection.swift
+//  DesignSystem
 //
-//  Created by Loi Nguyen on 22/8/26.
+//  Created by Loi Nguyen on 12/9/26.
 //
 
-// "Rankings" section — filters: Day/Week/Month/All.
-// This is a PRIMARY section (similar to Latest Updates) -> display errors clearly; do not fail silently.
-//
-// IMPORTANT: Changing the filter must call `onRangeSelected` (intent) — do NOT arbitrarily set local state
-// that falls out of sync with `viewModel.selectedRankingRange` (single source of truth).
+// Dumb component shared across ALL leaderboards in the app (system-wide Home, group-scoped).
 
-// "Rankings" — 2-level filter: sortBy (Views/Favorites) × range (Day/Week/Month/All-time).
-// MAIN Section — display errors clearly, do not hide them silently.
-
-import CoreModels
-import CoreArchitecture
-import DesignSystem
 import SwiftUI
 
-struct RankingSection: View {
-    let state: LoadableState<[Series]>
-    let selectedRange: RankingRange
-    let selectedSortBy: RankingSortBy
-    let onFilterChanged: (RankingRange, RankingSortBy) -> Void
-    let onSeriesSelected: (String) -> Void
+public struct DSRankingSection: View {
+    private let title: String
+    private let items: [RankingItemData]
+    private let isLoading: Bool
+    private let errorMessage: String?
+    private let selectedSortBy: DSRankingSortBy
+    private let selectedRange: DSRankingRange
+    private let onFilterChanged: (DSRankingRange, DSRankingSortBy) -> Void
+    private let onRetry: () -> Void
+    private let onItemSelected: (String) -> Void
 
-    var body: some View {
+    public init(
+        title: String,
+        items: [RankingItemData],
+        isLoading: Bool,
+        errorMessage: String?,
+        selectedSortBy: DSRankingSortBy,
+        selectedRange: DSRankingRange,
+        onFilterChanged: @escaping (DSRankingRange, DSRankingSortBy) -> Void,
+        onRetry: @escaping () -> Void,
+        onItemSelected: @escaping (String) -> Void
+    ) {
+        self.title = title
+        self.items = items
+        self.isLoading = isLoading
+        self.errorMessage = errorMessage
+        self.selectedSortBy = selectedSortBy
+        self.selectedRange = selectedRange
+        self.onFilterChanged = onFilterChanged
+        self.onRetry = onRetry
+        self.onItemSelected = onItemSelected
+    }
+
+    public var body: some View {
         VStack(alignment: .leading, spacing: DSSpacing.sm) {
             sectionTitle
             filterTabs
 
-            switch state {
-            case .idle, .loading:
+            if isLoading {
                 loadingSkeleton
-            case .loaded(let series) where series.isEmpty:
-                emptyState
-            case .loaded(let series):
-                content(series)
-            case .failed:
+            } else if errorMessage != nil {
                 errorState
+            } else if items.isEmpty {
+                emptyState
+            } else {
+                content
             }
         }
     }
@@ -47,7 +62,7 @@ struct RankingSection: View {
     private var sectionTitle: some View {
         HStack(spacing: DSSpacing.xs) {
             Image(systemName: "diamond.inset.filled").font(.caption2)
-            Text("Xếp Hạng").dsFont(.title3)
+            Text(title).dsFont(.title3)
             Image(systemName: "diamond.inset.filled").font(.caption2)
         }
         .foregroundStyle(DSColor.brandPrimary)
@@ -100,7 +115,7 @@ struct RankingSection: View {
         Rectangle().fill(Color.white.opacity(0.3)).frame(width: 1, height: 14)
     }
 
-    private func rangeButton(_ range: RankingRange, _ title: String) -> some View {
+    private func rangeButton(_ range: DSRankingRange, _ title: String) -> some View {
         tabButton(title, isSelected: selectedRange == range) {
             onFilterChanged(range, selectedSortBy)
         }
@@ -123,11 +138,11 @@ struct RankingSection: View {
 
     // MARK: - Content states
 
-    private func content(_ series: [Series]) -> some View {
+    private var content: some View {
         VStack(spacing: DSSpacing.sm) {
-            ForEach(Array(series.prefix(10).enumerated()), id: \.element.id) { index, item in
-                RankingRow(rank: index + 1, series: item, sortBy: selectedSortBy) {
-                    onSeriesSelected(item.id)
+            ForEach(Array(items.prefix(10).enumerated()), id: \.element.id) { index, item in
+                DSRankingRow(rank: index + 1, item: item, sortBy: selectedSortBy) {
+                    onItemSelected(item.id)
                 }
                 .padding(.horizontal, DSSpacing.md)
             }
@@ -167,9 +182,7 @@ struct RankingSection: View {
             Text("Không tải được bảng xếp hạng")
                 .dsFont(.subheadline)
                 .foregroundStyle(DSColor.textPrimary)
-            DSButton("Thử lại", variant: .outline) {
-                onFilterChanged(selectedRange, selectedSortBy)
-            }
+            DSButton("Thử lại", variant: .outline) { onRetry() }
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, DSSpacing.lg)

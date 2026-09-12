@@ -34,9 +34,14 @@ public final class GroupProfileViewModel: BaseViewModel {
     @Published public var actionErrorMessage: String?
     /// DSSuccessToastModifier — This field is shared by Follow, Unfollow, and Toggle Notifications actions.
     @Published public var successMessage: String?
+    
+    @Published public private(set) var highlightsState: LoadableState<[Series]> = .idle
+    @Published public private(set) var selectedHighlightsSortBy: RankingSortBy = .views
+    @Published public private(set) var selectedHighlightsRange: RankingRange = .day
 
     private var membersTask: Task<Void, Never>?
     private var seriesTask: Task<Void, Never>?
+    private var highlightsTask: Task<Void, Never>?
 
     public init(groupId: String, groupRepository: GroupRepositoryProtocol) {
         self.groupId = groupId
@@ -48,6 +53,7 @@ public final class GroupProfileViewModel: BaseViewModel {
         loadDetail()
         loadMembers()
         loadSeries()
+        loadHighlights()
     }
 
     // MARK: - Critical load
@@ -153,9 +159,37 @@ public final class GroupProfileViewModel: BaseViewModel {
     public func dismissActionError() {
         actionErrorMessage = nil
     }
+    
+    public func loadHighlights() {
+        highlightsTask?.cancel()
+        highlightsState = .loading
+        let sortBy = selectedHighlightsSortBy
+        let range = selectedHighlightsRange
+        highlightsTask = Task { [weak self] in
+            guard let self else { return }
+            do {
+                let items = try await self.groupRepository.fetchGroupHighlights(
+                    groupId: self.groupId, sortBy: sortBy, range: range
+                )
+                guard !Task.isCancelled else { return }
+                self.highlightsState = .loaded(items)
+            } catch is CancellationError {
+            } catch {
+                guard !Task.isCancelled else { return }
+                self.highlightsState = .failed(self.mapToAppError(error))
+            }
+        }
+    }
+
+    public func changeHighlightsFilter(range: RankingRange, sortBy: RankingSortBy) {
+        selectedHighlightsRange = range
+        selectedHighlightsSortBy = sortBy
+        loadHighlights()
+    }
 
     deinit {
         membersTask?.cancel()
         seriesTask?.cancel()
+        highlightsTask?.cancel()
     }
 }

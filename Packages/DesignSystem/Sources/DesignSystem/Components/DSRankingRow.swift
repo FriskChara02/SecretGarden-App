@@ -1,31 +1,30 @@
 //
-//  RankingRow.swift
-//  HomeFeature
+//  DSRankingRow.swift
+//  DesignSystem
 //
-//  Created by Loi Nguyen on 22/8/26.
+//  Created by Loi Nguyen on 12/9/26.
 //
 
-// A row displaying a single series in the ranking list.
-// Do NOT use SeriesCardView.
-// They involve complex tap/hold gestures (triggering hover previews) that are unsuitable for a list row,
-// a simple ranking list requires a prominent rank number that is easy to scan sequentially.
-// This is a local component required only by HomeFeature—do not add it to the Design System.
-
-import CoreModels
-import DesignSystem
 import SwiftUI
 
-struct RankingRow: View {
-    let rank: Int
-    let series: Series
-    let sortBy: RankingSortBy
-    let onTap: () -> Void
+public struct DSRankingRow: View {
+    private let rank: Int
+    private let item: RankingItemData
+    private let sortBy: DSRankingSortBy
+    private let onTap: () -> Void
 
     @Environment(\.colorScheme) private var colorScheme
 
     private var isTopRank: Bool { rank == 1 }
 
-    var body: some View {
+    public init(rank: Int, item: RankingItemData, sortBy: DSRankingSortBy, onTap: @escaping () -> Void) {
+        self.rank = rank
+        self.item = item
+        self.sortBy = sortBy
+        self.onTap = onTap
+    }
+
+    public var body: some View {
         Button(action: onTap) {
             cardBody
                 .padding(DSSpacing.sm)
@@ -42,14 +41,12 @@ struct RankingRow: View {
         .buttonStyle(.plain)
     }
 
-    // MARK: - The body is shared across all categories (color changes are handled via the computed properties below)
-
     private var cardBody: some View {
         HStack(spacing: DSSpacing.sm) {
             rankBadge
             coverImage(width: 60, height: 84)
             VStack(alignment: .leading, spacing: DSSpacing.xxs) {
-                Text(series.title)
+                Text(item.title)
                     .dsFont(.headline)
                     .fontWeight(.bold)
                     .foregroundStyle(titleColor)
@@ -62,7 +59,7 @@ struct RankingRow: View {
                     .lineLimit(1)
                     .truncationMode(.tail)
 
-                if let author = series.author?.name {
+                if let author = item.authorName {
                     twoPartText(
                         token: .caption,
                         prefix: "Tác giả: ", prefixBold: false, prefixColor: labelColor,
@@ -72,7 +69,7 @@ struct RankingRow: View {
                     .truncationMode(.tail)
                 }
 
-                if let chapterLabel = series.latestChapterLabel {
+                if let chapterLabel = item.chapterLabel {
                     if isTopRank {
                         chapterText(chapterLabel)
                     } else {
@@ -88,9 +85,8 @@ struct RankingRow: View {
         }
     }
 
-    /// Enlarged, faded cover image — #1 priority only, placed in the background (does not affect layout dimensions).
     private var backgroundArtwork: some View {
-        AsyncImage(url: series.coverURL) { phase in
+        AsyncImage(url: item.coverURL) { phase in
             if case .success(let image) = phase {
                 image.resizable().aspectRatio(contentMode: .fill)
                     .opacity(0.25)
@@ -101,8 +97,6 @@ struct RankingRow: View {
         }
         .allowsHitTesting(false)
     }
-
-    // MARK: - Colors theo hạng
 
     private var titleColor: Color { isTopRank ? .white : DSColor.textPrimary }
     private var labelColor: Color { isTopRank ? .white.opacity(0.9) : DSColor.textSecondary }
@@ -135,8 +129,6 @@ struct RankingRow: View {
         DSColor.rankHighlight.opacity(colorScheme == .dark ? 0.30 : 0.25)
     }
 
-    // MARK: - Shared pieces (SAME dimensions for all tiers)
-
     private var rankBadge: some View {
         ZStack {
             Circle()
@@ -166,7 +158,7 @@ struct RankingRow: View {
     }
 
     private var formattedMetricValue: String {
-        let value = sortBy == .views ? series.viewCount : series.favoriteCount
+        let value = sortBy == .views ? item.viewCount : item.favoriteCount
         return value.formatted(.number.locale(Locale(identifier: "en_US")))
     }
 
@@ -205,7 +197,7 @@ struct RankingRow: View {
 
     @ViewBuilder
     private func coverImage(width: CGFloat, height: CGFloat) -> some View {
-        AsyncImage(url: series.coverURL) { phase in
+        AsyncImage(url: item.coverURL) { phase in
             if case .success(let image) = phase {
                 image.resizable().aspectRatio(contentMode: .fill)
             } else {

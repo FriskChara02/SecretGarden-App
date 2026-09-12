@@ -129,6 +129,12 @@ struct MainTabView: View {
                         },
                         onBackToDetailTapped: { coordinator.homeCoordinator.pop() }
                     )
+                case .groupProfile(let id):
+                    Text("Group Profile (demo) — id: \(id)") // TODO: Connect the actual GroupProfileView.
+                        .dsFont(.title1)
+                case .authorProfile(let id):
+                    Text("Author Profile (demo) — id: \(id)") // TODO
+                        .dsFont(.title1)
                 }
             }
         }
@@ -177,6 +183,12 @@ struct MainTabView: View {
                         },
                         onBackToDetailTapped: { coordinator.searchCoordinator.pop() }
                     )
+                case .groupProfile(let id):
+                    Text("Group Profile (demo) — id: \(id)") // TODO: Connect the actual GroupProfileView
+                        .dsFont(.title1)
+                case .authorProfile(let id):
+                    Text("Author Profile (demo) — id: \(id)") // TODO
+                        .dsFont(.title1)
                 }
             }
         }

@@ -60,12 +60,21 @@ public struct HomeView: View {
                         onSeriesSelected: { seriesId in onSeriesSelected(seriesId) }
                     )
 
-                    RankingSection(
-                        state: viewModel.rankingState,
-                        selectedRange: viewModel.selectedRankingRange,
-                        selectedSortBy: viewModel.selectedRankingSortBy,
-                        onFilterChanged: { range, sortBy in viewModel.reloadRanking(range: range, sortBy: sortBy) },
-                        onSeriesSelected: { seriesId in onSeriesSelected(seriesId) }
+                    DSRankingSection(
+                        title: "Xếp Hạng",
+                        items: viewModel.rankingState.value?.map(RankingItemMapper.map) ?? [],
+                        isLoading: viewModel.rankingState.isLoading,
+                        errorMessage: viewModel.rankingState.error?.errorDescription,
+                        selectedSortBy: RankingItemMapper.map(viewModel.selectedRankingSortBy),
+                        selectedRange: RankingItemMapper.map(viewModel.selectedRankingRange),
+                        onFilterChanged: { dsRange, dsSortBy in
+                            viewModel.reloadRanking(
+                                range: RankingItemMapper.map(dsRange),
+                                sortBy: RankingItemMapper.map(dsSortBy)
+                            )
+                        },
+                        onRetry: { viewModel.reloadRanking(range: viewModel.selectedRankingRange, sortBy: viewModel.selectedRankingSortBy) },
+                        onItemSelected: { seriesId in onSeriesSelected(seriesId) }
                     )
 
                     RandomCommentsSection(

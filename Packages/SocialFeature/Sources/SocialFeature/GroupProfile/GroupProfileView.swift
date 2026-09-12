@@ -40,6 +40,8 @@ public struct GroupProfileView: View {
                     membersSection
                     DSSectionDivider()
                     seriesSection
+                    DSSectionDivider()
+                    highlightsSection
                 case .failed:
                     errorState
                 }
@@ -339,5 +341,24 @@ public struct GroupProfileView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.top, DSSpacing.xxl)
+    }
+    
+    private var highlightsSection: some View {
+        DSRankingSection(
+            title: "Nổi Bật Của Nhóm",
+            items: viewModel.highlightsState.value?.map(GroupHighlightMapper.map) ?? [],
+            isLoading: viewModel.highlightsState.isLoading,
+            errorMessage: viewModel.highlightsState.error?.errorDescription,
+            selectedSortBy: GroupHighlightMapper.map(viewModel.selectedHighlightsSortBy),
+            selectedRange: GroupHighlightMapper.map(viewModel.selectedHighlightsRange),
+            onFilterChanged: { dsRange, dsSortBy in
+                viewModel.changeHighlightsFilter(
+                    range: GroupHighlightMapper.map(dsRange),
+                    sortBy: GroupHighlightMapper.map(dsSortBy)
+                )
+            },
+            onRetry: { viewModel.loadHighlights() },
+            onItemSelected: { onSeriesSelected($0) }
+        )
     }
 }
