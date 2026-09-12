@@ -115,4 +115,32 @@ extension Container {
         }
         .singleton
     }
+    
+    /// Author and Artist share the same repository.
+    /// Uses a mock in Debug/Staging and the real implementation in Production, following the pattern used by all other repositories in the project.
+    @MainActor
+    var authorRepository: Factory<AuthorRepositoryProtocol> {
+        self {
+            if AppConfig.isDebugEnvironment {
+                return AuthorRepositoryMock()
+            } else {
+                return AuthorRepository(apiClient: self.apiClient())
+            }
+        }
+        .singleton
+    }
+
+    /// Group (Translation Group) – a distinct entity, separated from AuthorRepository because it has
+    /// its own members, highlights and discover sections.
+    @MainActor
+    var groupRepository: Factory<GroupRepositoryProtocol> {
+        self {
+            if AppConfig.isDebugEnvironment {
+                return GroupRepositoryMock()
+            } else {
+                return GroupRepository(apiClient: self.apiClient())
+            }
+        }
+        .singleton
+    }
 }
