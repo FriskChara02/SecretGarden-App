@@ -115,7 +115,7 @@ extension Container {
         }
         .singleton
     }
-    
+
     /// Author and Artist share the same repository.
     /// Uses a mock in Debug/Staging and the real implementation in Production, following the pattern used by all other repositories in the project.
     @MainActor
