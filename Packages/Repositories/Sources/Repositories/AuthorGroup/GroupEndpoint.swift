@@ -18,6 +18,7 @@ enum GroupEndpoint {
     case unfollow(groupId: String)
     case notify(groupId: String, enabled: Bool)
     case discover(query: String, sort: GroupDiscoverSort, page: Int)
+    case followedGroups
 }
 
 extension GroupEndpoint: APIEndpoint {
@@ -31,12 +32,13 @@ extension GroupEndpoint: APIEndpoint {
         case .unfollow(let groupId): return "/groups/\(groupId)/follow"
         case .notify(let groupId, _): return "/groups/\(groupId)/notify"
         case .discover: return "/groups/discover"
+        case .followedGroups: return "/users/me/followed-groups"
         }
     }
 
     var method: HTTPMethod {
         switch self {
-        case .detail, .series, .members, .highlights, .discover: return .get
+        case .detail, .series, .members, .highlights, .discover, .followedGroups: return .get
         case .follow: return .post
         case .unfollow: return .delete
         case .notify: return .put

@@ -1,0 +1,80 @@
+//
+//  GroupListCard.swift
+//  SocialFeature
+//
+//  Created by Loi Nguyen on 13/9/26.
+//
+
+// Card displaying a group as a list item — shared by FollowedGroupsView and DiscoverGroupsView
+
+import CoreModels
+import DesignSystem
+import SwiftUI
+
+struct GroupListCard: View {
+    let group: TranslationGroup
+    let onTap: () -> Void
+
+    var body: some View {
+        Button(action: onTap) {
+            VStack(alignment: .leading, spacing: 0) {
+                bannerAndAvatar
+                content
+            }
+            .background(DSColor.backgroundPrimary)
+            .clipShape(RoundedRectangle(cornerRadius: DSRadius.lg))
+            .overlay {
+                RoundedRectangle(cornerRadius: DSRadius.lg).strokeBorder(DSColor.borderDefault, lineWidth: 1)
+            }
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var bannerAndAvatar: some View {
+        ZStack(alignment: .bottomLeading) {
+            LinearGradient(
+                colors: [DSColor.brandPrimaryLight.opacity(0.35), DSColor.brandPrimary.opacity(0.5)],
+                startPoint: .top, endPoint: .bottom
+            )
+            .frame(height: 90)
+
+            avatarImage.offset(x: DSSpacing.md, y: 26)
+        }
+        .padding(.bottom, 26)
+    }
+
+    private var avatarImage: some View {
+        AsyncImage(url: group.avatarURL) { phase in
+            if case .success(let image) = phase {
+                image.resizable().aspectRatio(contentMode: .fill)
+            } else {
+                Circle().fill(DSColor.backgroundSecondary)
+            }
+        }
+        .frame(width: 60, height: 60)
+        .clipShape(Circle())
+        .overlay { Circle().strokeBorder(.white, lineWidth: 3) }
+    }
+
+    private var content: some View {
+        VStack(alignment: .leading, spacing: DSSpacing.xxs) {
+            Text(group.name)
+                .dsFont(.headline)
+                .fontWeight(.bold)
+                .foregroundStyle(DSColor.textPrimary)
+
+            HStack(spacing: DSSpacing.xs) {
+                Image(systemName: "person.2.fill").font(.caption2)
+                Text("\(group.followerCount) người theo dõi")
+            }
+            .dsFont(.caption)
+            .foregroundStyle(DSColor.textSecondary)
+
+            Text(group.description ?? "Chưa có mô tả")
+                .dsFont(.footnote)
+                .foregroundStyle(group.description == nil ? DSColor.textSecondary.opacity(0.6) : DSColor.textSecondary)
+                .lineLimit(2)
+        }
+        .padding(DSSpacing.md)
+    }
+}

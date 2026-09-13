@@ -48,4 +48,8 @@ public final class GroupRepository: GroupRepositoryProtocol {
     public func discoverGroups(query: String, sort: GroupDiscoverSort, page: Int) async throws -> [TranslationGroup] {
         try await apiClient.request(GroupEndpoint.discover(query: query, sort: sort, page: page))
     }
+
+    public func fetchFollowedGroups() async throws -> [TranslationGroup] {
+        try await apiClient.request(GroupEndpoint.followedGroups)
+    }
 }

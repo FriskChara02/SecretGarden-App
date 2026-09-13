@@ -11,6 +11,7 @@ import CoreArchitecture
 import HomeFeature
 import FactoryKit
 import SearchFeature
+import SocialFeature
 
 struct MainTabView: View {
     @State private var coordinator = MainTabCoordinator()
@@ -130,11 +131,18 @@ struct MainTabView: View {
                         onBackToDetailTapped: { coordinator.homeCoordinator.pop() }
                     )
                 case .groupProfile(let id):
-                    Text("Group Profile (demo) — id: \(id)") // TODO: Connect the actual GroupProfileView.
-                        .dsFont(.title1)
-                case .authorProfile(let id):
-                    Text("Author Profile (demo) — id: \(id)") // TODO
-                        .dsFont(.title1)
+                    GroupProfileView(
+                        groupId: id,
+                        groupRepository: Container.shared.groupRepository(),
+                        onSeriesSelected: { seriesId in coordinator.homeCoordinator.push(.seriesDetail(id: seriesId)) }
+                    )
+                case .authorProfile(let id, let roleLabel):
+                    AuthorProfileView(
+                        authorId: id,
+                        roleLabel: roleLabel,
+                        authorRepository: Container.shared.authorRepository(),
+                        onSeriesSelected: { seriesId in coordinator.homeCoordinator.push(.seriesDetail(id: seriesId)) }
+                    )
                 }
             }
         }
@@ -184,11 +192,18 @@ struct MainTabView: View {
                         onBackToDetailTapped: { coordinator.searchCoordinator.pop() }
                     )
                 case .groupProfile(let id):
-                    Text("Group Profile (demo) — id: \(id)") // TODO: Connect the actual GroupProfileView
-                        .dsFont(.title1)
-                case .authorProfile(let id):
-                    Text("Author Profile (demo) — id: \(id)") // TODO
-                        .dsFont(.title1)
+                    GroupProfileView(
+                        groupId: id,
+                        groupRepository: Container.shared.groupRepository(),
+                        onSeriesSelected: { seriesId in coordinator.searchCoordinator.push(.seriesDetail(id: seriesId)) }
+                    )
+                case .authorProfile(let id, let roleLabel):
+                    AuthorProfileView(
+                        authorId: id,
+                        roleLabel: roleLabel,
+                        authorRepository: Container.shared.authorRepository(),
+                        onSeriesSelected: { seriesId in coordinator.searchCoordinator.push(.seriesDetail(id: seriesId)) }
+                    )
                 }
             }
         }

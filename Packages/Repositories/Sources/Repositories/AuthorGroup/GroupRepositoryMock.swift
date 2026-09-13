@@ -88,4 +88,8 @@ public actor GroupRepositoryMock: GroupRepositoryProtocol {
         guard !query.isEmpty else { return allGroups }
         return allGroups.filter { $0.name.localizedCaseInsensitiveContains(query) }
     }
+
+    public func fetchFollowedGroups() async throws -> [TranslationGroup] {
+        groups.values.filter { $0.isFollowedByMe }
+    }
 }

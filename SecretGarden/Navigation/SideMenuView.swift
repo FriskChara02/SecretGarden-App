@@ -9,6 +9,7 @@
 
 import SearchFeature
 import HomeFeature
+import SocialFeature
 import Repositories
 import FactoryKit
 import SwiftUI
@@ -76,8 +77,19 @@ struct SideMenuView: View {
     @ViewBuilder
     private func destinationView(for route: SideMenuRoute) -> some View {
         switch route {
-        case .favorites, .followedGroups, .history, .category, .yuriList, .uploadRegistration, .rules:
+        case .favorites, .history, .category, .yuriList, .uploadRegistration, .rules:
             placeholderDestination(for: route)
+        case .followedGroups:
+            FollowedGroupsView(
+                groupRepository: Container.shared.groupRepository(),
+                onGroupSelected: { id in coordinator.contentCoordinator.push(.groupProfile(id: id)) },
+                onDiscoverTapped: { coordinator.contentCoordinator.push(.discoverGroups) }
+            )
+        case .discoverGroups:
+            DiscoverGroupsView(
+                groupRepository: Container.shared.groupRepository(),
+                onGroupSelected: { id in coordinator.contentCoordinator.push(.groupProfile(id: id)) }
+            )
         case .advancedSearch:
             AdvancedSearchView(
                 repository: Container.shared.searchRepository(),
@@ -89,11 +101,18 @@ struct SideMenuView: View {
         case .chapterReader(let seriesId, let chapterId):
             chapterReaderDestination(seriesId: seriesId, chapterId: chapterId)
         case .groupProfile(let id):
-            Text("Group Profile (demo) — id: \(id)") // TODO: Connect the actual GroupProfileView
-                .dsFont(.title1)
-        case .authorProfile(let id):
-            Text("Author Profile (demo) — id: \(id)") // TODO
-                .dsFont(.title1)
+            GroupProfileView(
+                groupId: id,
+                groupRepository: Container.shared.groupRepository(),
+                onSeriesSelected: { seriesId in coordinator.contentCoordinator.push(.seriesDetail(id: seriesId)) }
+            )
+        case .authorProfile(let id, let roleLabel):
+            AuthorProfileView(
+                authorId: id,
+                roleLabel: roleLabel,
+                authorRepository: Container.shared.authorRepository(),
+                onSeriesSelected: { seriesId in coordinator.contentCoordinator.push(.seriesDetail(id: seriesId)) }
+            )
         }
     }
 

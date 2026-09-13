@@ -36,6 +36,9 @@ public protocol GroupRepositoryProtocol {
 
     /// Explore groups - `GET /groups/discover?q=&sort=&page=`.
     func discoverGroups(query: String, sort: GroupDiscoverSort, page: Int) async throws -> [TranslationGroup]
+    
+    /// Followed Groups
+    func fetchFollowedGroups() async throws -> [TranslationGroup]
 }
 
 /// Sorting for Discover Groups - 4 dropdown options.
