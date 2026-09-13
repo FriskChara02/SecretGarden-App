@@ -575,7 +575,7 @@ public struct ChapterReaderView: View {
                     Image(systemName: "diamond.inset.filled").font(.system(size: 8)).foregroundStyle(DSColor.brandPrimary)
                 }
 
-                chapterCommentComposerPlaceholder
+                chapterCommentComposer
 
                 HStack {
                     Text("Tất cả bình luận").dsFont(.subheadline).fontWeight(.semibold).foregroundStyle(DSColor.textPrimary)
@@ -603,24 +603,38 @@ public struct ChapterReaderView: View {
         }
     }
 
-    private var chapterCommentComposerPlaceholder: some View {
+    private var chapterCommentComposer: some View {
         HStack(alignment: .top, spacing: DSSpacing.sm) {
             Circle().fill(DSColor.backgroundSecondary).frame(width: 36, height: 36)
                 .overlay { Image(systemName: "person.fill").foregroundStyle(DSColor.textSecondary) }
             VStack(alignment: .leading, spacing: DSSpacing.xs) {
-                Text("Bình luận (@ để nhắc tên)...")
-                    .dsFont(.subheadline).foregroundStyle(DSColor.textSecondary)
+                TextField("Bình luận (@ để nhắc tên)...", text: $viewModel.commentDraft, axis: .vertical)
+                    .dsFont(.subheadline)
+                    .lineLimit(1...4)
                 Divider()
                 HStack {
-                    Text("0/1000").dsFont(.caption).foregroundStyle(DSColor.textSecondary)
+                    Text("\(viewModel.commentDraft.count)/1000").dsFont(.caption).foregroundStyle(DSColor.textSecondary)
                     Spacer()
                     Image(systemName: "face.smiling").foregroundStyle(DSColor.textSecondary)
                     Image(systemName: "photo").foregroundStyle(DSColor.textSecondary)
-                    Image(systemName: "paperplane.fill").foregroundStyle(DSColor.textSecondary.opacity(0.4))
+                    Button {
+                        viewModel.postComment()
+                    } label: {
+                        if viewModel.isPostingComment {
+                            ProgressView()
+                        } else {
+                            Image(systemName: "paperplane.fill")
+                                .foregroundStyle(
+                                    viewModel.commentDraft.trimmingCharacters(in: .whitespaces).isEmpty
+                                        ? DSColor.textSecondary.opacity(0.4)
+                                        : DSColor.brandPrimary
+                                )
+                        }
+                    }
+                    .disabled(viewModel.commentDraft.trimmingCharacters(in: .whitespaces).isEmpty || viewModel.isPostingComment)
                 }
             }
         }
-        .opacity(0.6)
     }
 
     private func commentRow(_ comment: Comment) -> some View {
@@ -814,6 +828,13 @@ public struct ChapterReaderView: View {
     private static func chapterNumberString(_ number: Double) -> String {
         number == number.rounded() ? String(Int(number)) : String(number)
     }
+    
+    private static let relativeFormatter: RelativeDateTimeFormatter = {
+        let formatter = RelativeDateTimeFormatter()
+        formatter.locale = Locale(identifier: "vi_VN")
+        formatter.unitsStyle = .full
+        return formatter
+    }()
     
     private static func daysAgoString(from date: Date) -> String {
         let days = Calendar.current.dateComponents([.day], from: date, to: Date()).day ?? 0

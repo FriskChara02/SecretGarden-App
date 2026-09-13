@@ -47,6 +47,14 @@ public final class ChapterReaderViewModel: BaseViewModel {
     @Published public var isMenuPresented = false
     @Published public var isCommentsOverlayPresented = false
     @Published public var isChapterPickerPresented = false
+    
+    // MARK: - Comment composer state (chapter-level)
+
+    @Published public var commentDraft: String = ""
+    @Published public private(set) var isPostingComment = false
+    @Published public private(set) var replyingToCommentId: String?
+    @Published public var replyDraft: String = ""
+    @Published public private(set) var isPostingReply = false
 
     private var pagesTask: Task<Void, Never>?
     private var commentsTask: Task<Void, Never>?
@@ -294,6 +302,121 @@ public final class ChapterReaderViewModel: BaseViewModel {
 
     public func dismissActionError() {
         actionErrorMessage = nil
+    }
+
+    // MARK: - Comment CRUD (chapter-level)
+
+    public func postComment() {
+        let trimmed = commentDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty, !isPostingComment else { return }
+        isPostingComment = true
+        let chapterId = currentChapter.id
+
+        Task { [weak self] in
+            guard let self else { return }
+            defer { Task { @MainActor in self.isPostingComment = false } }
+            do {
+                let newComment = try await self.commentRepository.postChapterComment(
+                    chapterId: chapterId, content: trimmed
+                )
+                if var current = self.commentsState.value {
+                    current.insert(newComment, at: 0)
+                    self.commentsState = .loaded(current)
+                } else {
+                    self.commentsState = .loaded([newComment])
+                }
+                self.commentDraft = ""
+            } catch {
+                self.actionErrorMessage = self.mapToAppError(error).errorDescription
+            }
+        }
+    }
+
+    public func toggleCommentLike(commentId: String) {
+        guard var comments = commentsState.value,
+              let location = findCommentLocation(commentId: commentId, in: comments) else { return }
+
+        let willLike: Bool
+        switch location {
+        case .topLevel(let index):
+            willLike = !comments[index].isLikedByMe
+            comments[index].isLikedByMe = willLike
+            comments[index].likeCount += willLike ? 1 : -1
+        case .reply(let parentIndex, let replyIndex):
+            willLike = !(comments[parentIndex].replies?[replyIndex].isLikedByMe ?? false)
+            comments[parentIndex].replies?[replyIndex].isLikedByMe = willLike
+            comments[parentIndex].replies?[replyIndex].likeCount += willLike ? 1 : -1
+        }
+        let previous = commentsState.value
+        commentsState = .loaded(comments)
+
+        Task { [weak self] in
+            guard let self else { return }
+            do {
+                try await self.commentRepository.toggleLike(commentId: commentId, isLiked: willLike)
+            } catch {
+                if let previous {
+                    self.commentsState = .loaded(previous)
+                }
+                self.actionErrorMessage = self.mapToAppError(error).errorDescription
+            }
+        }
+    }
+
+    public func startReplying(to commentId: String) {
+        replyingToCommentId = commentId
+        replyDraft = ""
+    }
+
+    public func cancelReplying() {
+        replyingToCommentId = nil
+        replyDraft = ""
+    }
+
+    public func submitReply() {
+        guard let parentId = replyingToCommentId else { return }
+        let trimmed = replyDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty, !isPostingReply else { return }
+        isPostingReply = true
+
+        Task { [weak self] in
+            guard let self else { return }
+            defer { Task { @MainActor in self.isPostingReply = false } }
+            do {
+                let newReply = try await self.commentRepository.postReply(
+                    parentCommentId: parentId, content: trimmed
+                )
+                if var comments = self.commentsState.value,
+                   let parentIndex = comments.firstIndex(where: { $0.id == parentId }) {
+                    var replies = comments[parentIndex].replies ?? []
+                    replies.append(newReply)
+                    comments[parentIndex].replies = replies
+                    self.commentsState = .loaded(comments)
+                }
+                self.cancelReplying()
+            } catch {
+                self.actionErrorMessage = self.mapToAppError(error).errorDescription
+            }
+        }
+    }
+
+    // MARK: - Private helper: Locate the comment (top-level or reply, only single-level replies are supported).
+
+    private enum CommentLocation {
+        case topLevel(Int)
+        case reply(parentIndex: Int, replyIndex: Int)
+    }
+
+    private func findCommentLocation(commentId: String, in comments: [Comment]) -> CommentLocation? {
+        if let topIndex = comments.firstIndex(where: { $0.id == commentId }) {
+            return .topLevel(topIndex)
+        }
+        for (parentIndex, comment) in comments.enumerated() {
+            if let replyIndex = comment.replies?.firstIndex(where: { $0.id == commentId }) {
+                return .reply(parentIndex: parentIndex, replyIndex: replyIndex)
+            }
+        }
+        return nil
     }
 
     deinit {
