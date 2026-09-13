@@ -82,6 +82,19 @@ public actor CommentRepositoryMock: CommentRepositoryProtocol {
         return newComment
     }
 
+    public func postChapterComment(chapterId: String, content: String) async throws -> Comment {
+        let newComment = Comment(
+            id: "mock-chapter-comment-\(UUID().uuidString.prefix(8))",
+            user: mockCurrentUser,
+            content: content,
+            likeCount: 0,
+            isLikedByMe: false,
+            createdAt: Date()
+        )
+        chapterComments.insert(newComment, at: 0)
+        return newComment
+    }
+
     public func toggleLike(commentId: String, isLiked: Bool) async throws {
         updateCommentInPlace(commentId: commentId, in: &seriesComments) { comment in
             comment.isLikedByMe = isLiked

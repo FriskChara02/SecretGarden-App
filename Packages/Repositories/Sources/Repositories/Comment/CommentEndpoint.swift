@@ -12,6 +12,7 @@ enum CommentEndpoint: APIEndpoint {
     case seriesComments(seriesId: String, page: Int)
     case chapterComments(chapterId: String, page: Int)
     case postSeriesComment(seriesId: String, content: String)
+    case postChapterComment(chapterId: String, content: String)
     case toggleLike(commentId: String, isLiked: Bool)
     case postReply(parentCommentId: String, content: String)
 
@@ -23,6 +24,8 @@ enum CommentEndpoint: APIEndpoint {
             return "/chapters/\(chapterId)/comments"
         case .postSeriesComment(let seriesId, _):
             return "/series/\(seriesId)/comments"
+        case .postChapterComment(let chapterId, _):
+            return "/chapters/\(chapterId)/comments"
         case .toggleLike(let commentId, _):
             return "/comments/\(commentId)/like"
         case .postReply(let parentCommentId, _):
@@ -34,7 +37,7 @@ enum CommentEndpoint: APIEndpoint {
         switch self {
         case .seriesComments, .chapterComments:
             return .get
-        case .postSeriesComment, .postReply:
+        case .postSeriesComment, .postChapterComment, .postReply:
             return .post
         case .toggleLike(_, let isLiked):
             return isLiked ? .post : .delete
@@ -54,7 +57,7 @@ enum CommentEndpoint: APIEndpoint {
 
     var body: Data? {
         switch self {
-        case .postSeriesComment(_, let content), .postReply(_, let content):
+        case .postSeriesComment(_, let content), .postChapterComment(_, let content), .postReply(_, let content):
             return try? JSONEncoder().encode(["content": content])
         default:
             return nil

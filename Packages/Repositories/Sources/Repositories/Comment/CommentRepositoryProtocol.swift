@@ -22,7 +22,9 @@ public protocol CommentRepositoryProtocol {
     /// The server returns the full comment (including user).
     func postSeriesComment(seriesId: String, content: String) async throws -> Comment
 
-    /// Like/Unlike a comment - `POST /comments/{id}/like` / `DELETE`.
+    /// Post a comment for a specific chapter - `POST /chapters/{id}/comments`.
+    func postChapterComment(chapterId: String, content: String) async throws -> Comment
+
     func toggleLike(commentId: String, isLiked: Bool) async throws
 
     /// Reply to a top-level comment - `POST /comments/{id}/reply`.
