@@ -41,6 +41,14 @@ public final class SeriesDetailViewModel: BaseViewModel {
     @Published public var chaptersSortDescending: Bool = true
     @Published public private(set) var visibleChapterCount: Int = 5
 
+    // MARK: - Comment
+    
+    @Published public var commentDraft: String = ""
+    @Published public private(set) var isPostingComment = false
+    @Published public private(set) var replyingToCommentId: String?
+    @Published public var replyDraft: String = ""
+    @Published public private(set) var isPostingReply = false
+
     /// List of chapters sorted and sliced ​​according to `visibleChapterCount` - The view simply renders the list directly without performing its own sorting.
     public var visibleSortedChapters: [Chapter] {
         guard let chapters = chaptersState.value else { return [] }
@@ -244,6 +252,118 @@ public final class SeriesDetailViewModel: BaseViewModel {
                 self.actionErrorMessage = self.mapToAppError(error).errorDescription
             }
         }
+    }
+
+    public func postComment() {
+        let trimmed = commentDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty, !isPostingComment else { return }
+        isPostingComment = true
+
+        Task { [weak self] in
+            guard let self else { return }
+            defer { Task { @MainActor in self.isPostingComment = false } }
+            do {
+                let newComment = try await self.commentRepository.postSeriesComment(
+                    seriesId: self.seriesId, content: trimmed
+                )
+                if var current = self.commentsState.value {
+                    current.insert(newComment, at: 0)
+                    self.commentsState = .loaded(current)
+                } else {
+                    self.commentsState = .loaded([newComment])
+                }
+                self.commentDraft = ""
+            } catch {
+                self.actionErrorMessage = self.mapToAppError(error).errorDescription
+            }
+        }
+    }
+
+    public func toggleCommentLike(commentId: String) {
+        guard var comments = commentsState.value,
+              let index = findCommentIndex(commentId: commentId, in: comments) else { return }
+
+        let willLike: Bool
+        switch index {
+        case .topLevel(let i):
+            willLike = !comments[i].isLikedByMe
+            comments[i].isLikedByMe = willLike
+            comments[i].likeCount += willLike ? 1 : -1
+        case .reply(let parentIndex, let replyIndex):
+            willLike = !(comments[parentIndex].replies?[replyIndex].isLikedByMe ?? false)
+            comments[parentIndex].replies?[replyIndex].isLikedByMe = willLike
+            comments[parentIndex].replies?[replyIndex].likeCount += willLike ? 1 : -1
+        }
+        let previous = commentsState.value
+        commentsState = .loaded(comments)
+
+        Task { [weak self] in
+            guard let self else { return }
+            do {
+                try await self.commentRepository.toggleLike(commentId: commentId, isLiked: willLike)
+            } catch {
+                if let previous {
+                    self.commentsState = .loaded(previous)
+                }
+                self.actionErrorMessage = self.mapToAppError(error).errorDescription
+            }
+        }
+    }
+
+    public func startReplying(to commentId: String) {
+        replyingToCommentId = commentId
+        replyDraft = ""
+    }
+
+    public func cancelReplying() {
+        replyingToCommentId = nil
+        replyDraft = ""
+    }
+
+    public func submitReply() {
+        guard let parentId = replyingToCommentId else { return }
+        let trimmed = replyDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty, !isPostingReply else { return }
+        isPostingReply = true
+
+        Task { [weak self] in
+            guard let self else { return }
+            defer { Task { @MainActor in self.isPostingReply = false } }
+            do {
+                let newReply = try await self.commentRepository.postReply(
+                    parentCommentId: parentId, content: trimmed
+                )
+                if var comments = self.commentsState.value,
+                   let parentIndex = comments.firstIndex(where: { $0.id == parentId }) {
+                    var replies = comments[parentIndex].replies ?? []
+                    replies.append(newReply)
+                    comments[parentIndex].replies = replies
+                    self.commentsState = .loaded(comments)
+                }
+                self.cancelReplying()
+            } catch {
+                self.actionErrorMessage = self.mapToAppError(error).errorDescription
+            }
+        }
+    }
+
+    // MARK: - Private helper: Find the comment location (top-level or reply) - only supports a single level of replies.
+
+    private enum CommentLocation {
+        case topLevel(Int)
+        case reply(parentIndex: Int, replyIndex: Int)
+    }
+
+    private func findCommentIndex(commentId: String, in comments: [Comment]) -> CommentLocation? {
+        if let topIndex = comments.firstIndex(where: { $0.id == commentId }) {
+            return .topLevel(topIndex)
+        }
+        for (parentIndex, comment) in comments.enumerated() {
+            if let replyIndex = comment.replies?.firstIndex(where: { $0.id == commentId }) {
+                return .reply(parentIndex: parentIndex, replyIndex: replyIndex)
+            }
+        }
+        return nil
     }
 
     // MARK: - Dismiss action error toast

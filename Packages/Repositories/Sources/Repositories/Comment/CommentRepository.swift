@@ -24,4 +24,16 @@ public final class CommentRepository: CommentRepositoryProtocol {
     public func fetchChapterComments(chapterId: String, page: Int) async throws -> [Comment] {
         try await apiClient.request(CommentEndpoint.chapterComments(chapterId: chapterId, page: page))
     }
+
+    public func postSeriesComment(seriesId: String, content: String) async throws -> Comment {
+        try await apiClient.request(CommentEndpoint.postSeriesComment(seriesId: seriesId, content: content))
+    }
+
+    public func toggleLike(commentId: String, isLiked: Bool) async throws {
+        try await apiClient.requestWithoutResponse(CommentEndpoint.toggleLike(commentId: commentId, isLiked: isLiked))
+    }
+
+    public func postReply(parentCommentId: String, content: String) async throws -> Comment {
+        try await apiClient.request(CommentEndpoint.postReply(parentCommentId: parentCommentId, content: content))
+    }
 }

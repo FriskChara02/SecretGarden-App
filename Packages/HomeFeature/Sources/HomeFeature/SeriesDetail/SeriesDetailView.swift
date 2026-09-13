@@ -638,7 +638,7 @@ public struct SeriesDetailView: View {
             VStack(alignment: .leading, spacing: DSSpacing.md) {
                 sectionTitle("Bình luận (\(viewModel.commentsState.value?.count ?? 0))")
 
-                commentComposerPlaceholder
+                commentComposer
 
                 HStack {
                     Text("Tất cả bình luận").dsFont(.subheadline).fontWeight(.semibold).foregroundStyle(DSColor.textPrimary)
@@ -665,25 +665,38 @@ public struct SeriesDetailView: View {
         }
     }
 
-    /// TODO: The comment input field currently only displays the UI - the actual submission action is not yet connected.
-    private var commentComposerPlaceholder: some View {
+    private var commentComposer: some View {
         HStack(alignment: .top, spacing: DSSpacing.sm) {
             Circle().fill(DSColor.backgroundSecondary).frame(width: 36, height: 36)
                 .overlay { Image(systemName: "person.fill").foregroundStyle(DSColor.textSecondary) }
             VStack(alignment: .leading, spacing: DSSpacing.xs) {
-                Text("Bình luận (@ để nhắc tên)...")
-                    .dsFont(.subheadline).foregroundStyle(DSColor.textSecondary)
+                TextField("Bình luận (@ để nhắc tên)...", text: $viewModel.commentDraft, axis: .vertical)
+                    .dsFont(.subheadline)
+                    .lineLimit(1...4)
                 Divider()
                 HStack {
-                    Text("0/1000").dsFont(.caption).foregroundStyle(DSColor.textSecondary)
+                    Text("\(viewModel.commentDraft.count)/1000").dsFont(.caption).foregroundStyle(DSColor.textSecondary)
                     Spacer()
                     Image(systemName: "face.smiling").foregroundStyle(DSColor.textSecondary)
                     Image(systemName: "photo").foregroundStyle(DSColor.textSecondary)
-                    Image(systemName: "paperplane.fill").foregroundStyle(DSColor.textSecondary.opacity(0.4))
+                    Button {
+                        viewModel.postComment()
+                    } label: {
+                        if viewModel.isPostingComment {
+                            ProgressView()
+                        } else {
+                            Image(systemName: "paperplane.fill")
+                                .foregroundStyle(
+                                    viewModel.commentDraft.trimmingCharacters(in: .whitespaces).isEmpty
+                                        ? DSColor.textSecondary.opacity(0.4)
+                                        : DSColor.brandPrimary
+                                )
+                        }
+                    }
+                    .disabled(viewModel.commentDraft.trimmingCharacters(in: .whitespaces).isEmpty || viewModel.isPostingComment)
                 }
             }
         }
-        .opacity(0.6) // Visual cue: this block is not yet active in Phase 10.
     }
 
     private func commentRow(_ comment: Comment) -> some View {

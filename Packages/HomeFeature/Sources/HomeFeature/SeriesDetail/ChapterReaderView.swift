@@ -624,32 +624,90 @@ public struct ChapterReaderView: View {
     }
 
     private func commentRow(_ comment: Comment) -> some View {
-        HStack(alignment: .top, spacing: DSSpacing.sm) {
-            avatarView(comment.user)
-            VStack(alignment: .leading, spacing: DSSpacing.xxs) {
-                HStack(spacing: DSSpacing.xxs) {
-                    Text(comment.user.username).dsFont(.subheadline).fontWeight(.bold).foregroundStyle(DSColor.textPrimary)
-                    Image(systemName: "diamond.inset.filled").font(.system(size: 6)).foregroundStyle(DSColor.brandPrimary)
-                    Text(Self.daysAgoShort(from: comment.createdAt)).dsFont(.caption).foregroundStyle(DSColor.textSecondary)
-                }
+        VStack(alignment: .leading, spacing: DSSpacing.xs) {
+            HStack(alignment: .top, spacing: DSSpacing.sm) {
+                avatarView(comment.user)
+                VStack(alignment: .leading, spacing: DSSpacing.xxs) {
+                    HStack(spacing: DSSpacing.xxs) {
+                        Text(comment.user.username).dsFont(.subheadline).fontWeight(.bold).foregroundStyle(DSColor.textPrimary)
+                        Image(systemName: "diamond.inset.filled").font(.system(size: 6)).foregroundStyle(DSColor.brandPrimary)
+                        Text(Self.relativeFormatter.localizedString(for: comment.createdAt, relativeTo: Date()))
+                            .dsFont(.caption).foregroundStyle(DSColor.textSecondary)
+                    }
 
-                mentionAwareText(comment.content)
-                    .dsFont(.subheadline)
-                    .padding(DSSpacing.sm).background(DSColor.backgroundSecondary)
-                    .clipShape(RoundedRectangle(cornerRadius: DSRadius.md))
+                    ZStack(alignment: .bottomTrailing) {
+                        Text(comment.content)
+                            .dsFont(.subheadline).foregroundStyle(DSColor.textPrimary)
+                            .padding(DSSpacing.sm)
+                            .background(DSColor.backgroundSecondary)
+                            .clipShape(RoundedRectangle(cornerRadius: DSRadius.md))
 
-                HStack(spacing: DSSpacing.md) {
-                    Label("Cảm xúc", systemImage: "hand.thumbsup")
-                    Label("Trả lời", systemImage: "arrowshape.turn.up.left")
-                    if comment.likeCount > 0 { Text("\(comment.likeCount)").dsFont(.caption).foregroundStyle(DSColor.textSecondary) }
-                }
-                .dsFont(.caption).foregroundStyle(DSColor.textSecondary)
+                        if comment.likeCount > 0 {
+                            HStack(spacing: 2) {
+                                Text("❤️").font(.system(size: 9))
+                                Text("\(comment.likeCount)").dsFont(.caption).foregroundStyle(DSColor.textSecondary)
+                            }
+                            .padding(.horizontal, DSSpacing.xs).padding(.vertical, 2)
+                            .background(Capsule().fill(DSColor.backgroundPrimary))
+                            .overlay(Capsule().strokeBorder(DSColor.borderDefault.opacity(0.4), lineWidth: 0.5))
+                            .offset(x: 8, y: 10)
+                        }
+                    }
 
-                if let replies = comment.replies, !replies.isEmpty {
-                    replySection(replies, parentId: comment.id)
+                    HStack(spacing: DSSpacing.md) {
+                        Button {
+                            viewModel.toggleCommentLike(commentId: comment.id)
+                        } label: {
+                            Label("Cảm xúc", systemImage: comment.isLikedByMe ? "hand.thumbsup.fill" : "hand.thumbsup")
+                        }
+                        .foregroundStyle(comment.isLikedByMe ? DSColor.brandPrimary : DSColor.textSecondary)
+
+                        Button {
+                            viewModel.startReplying(to: comment.id)
+                        } label: {
+                            Label("Trả lời", systemImage: "arrowshape.turn.up.left")
+                        }
+                        .foregroundStyle(DSColor.textSecondary)
+                    }
+                    .dsFont(.caption)
+                    .padding(.top, 2)
+
+                    if viewModel.replyingToCommentId == comment.id {
+                        replyComposer
+                    }
+
+                    if let replies = comment.replies, !replies.isEmpty {
+                        replySection(replies, parentId: comment.id)
+                    }
                 }
             }
         }
+    }
+
+    private var replyComposer: some View {
+        HStack(spacing: DSSpacing.xs) {
+            TextField("Viết trả lời...", text: $viewModel.replyDraft)
+                .dsFont(.caption)
+                .padding(DSSpacing.xs)
+                .background(DSColor.backgroundSecondary)
+                .clipShape(RoundedRectangle(cornerRadius: DSRadius.sm))
+
+            Button {
+                viewModel.submitReply()
+            } label: {
+                if viewModel.isPostingReply {
+                    ProgressView()
+                } else {
+                    Image(systemName: "paperplane.fill").font(.caption)
+                }
+            }
+            .disabled(viewModel.replyDraft.trimmingCharacters(in: .whitespaces).isEmpty || viewModel.isPostingReply)
+
+            Button("Hủy") { viewModel.cancelReplying() }
+                .dsFont(.caption)
+                .foregroundStyle(DSColor.textSecondary)
+        }
+        .padding(.top, DSSpacing.xxs)
     }
 
     /// Bold and color the "@Name" section at the beginning of the content (if present) in pink, while keeping the rest of the text in the standard color.

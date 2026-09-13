@@ -10,8 +10,13 @@ import Foundation
 
 public actor CommentRepositoryMock: CommentRepositoryProtocol {
 
-    private let seriesComments: [Comment]
-    private let chapterComments: [Comment]
+    private var seriesComments: [Comment]
+    private var chapterComments: [Comment]
+
+    /// Mock user for NEW comments/replies posted during the mock session
+    private let mockCurrentUser = User(
+        id: "mock-current-user", username: "Bạn", email: "you@example.com", joinedAt: Date()
+    )
 
     public init() {
         let user1 = User(id: "u1", username: "Thác Lác Cá", email: "a@a.com", joinedAt: Date())
@@ -61,5 +66,71 @@ public actor CommentRepositoryMock: CommentRepositoryProtocol {
 
     public func fetchChapterComments(chapterId: String, page: Int) async throws -> [Comment] {
         page == 1 ? chapterComments : []
+    }
+
+    public func postSeriesComment(seriesId: String, content: String) async throws -> Comment {
+        let newComment = Comment(
+            id: "mock-comment-\(UUID().uuidString.prefix(8))",
+            user: mockCurrentUser,
+            content: content,
+            likeCount: 0,
+            isLikedByMe: false,
+            createdAt: Date(),
+            seriesId: seriesId
+        )
+        seriesComments.insert(newComment, at: 0)
+        return newComment
+    }
+
+    public func toggleLike(commentId: String, isLiked: Bool) async throws {
+        updateCommentInPlace(commentId: commentId, in: &seriesComments) { comment in
+            comment.isLikedByMe = isLiked
+            comment.likeCount += isLiked ? 1 : -1
+        }
+        updateCommentInPlace(commentId: commentId, in: &chapterComments) { comment in
+            comment.isLikedByMe = isLiked
+            comment.likeCount += isLiked ? 1 : -1
+        }
+    }
+
+    public func postReply(parentCommentId: String, content: String) async throws -> Comment {
+        let newReply = Comment(
+            id: "mock-reply-\(UUID().uuidString.prefix(8))",
+            user: mockCurrentUser,
+            content: content,
+            likeCount: 0,
+            isLikedByMe: false,
+            createdAt: Date()
+        )
+        appendReply(newReply, toParent: parentCommentId, in: &seriesComments)
+        appendReply(newReply, toParent: parentCommentId, in: &chapterComments)
+        return newReply
+    }
+
+    // MARK: - Private helpers (Find and edit a comment nested within an array, supports only one level of replies - matching the current UI)
+
+    private func updateCommentInPlace(commentId: String, in comments: inout [Comment], mutate: (inout Comment) -> Void) {
+        for index in comments.indices {
+            if comments[index].id == commentId {
+                mutate(&comments[index])
+                return
+            }
+            if var replies = comments[index].replies {
+                for replyIndex in replies.indices where replies[replyIndex].id == commentId {
+                    mutate(&replies[replyIndex])
+                    comments[index].replies = replies
+                    return
+                }
+            }
+        }
+    }
+
+    private func appendReply(_ reply: Comment, toParent parentId: String, in comments: inout [Comment]) {
+        for index in comments.indices where comments[index].id == parentId {
+            var replies = comments[index].replies ?? []
+            replies.append(reply)
+            comments[index].replies = replies
+            return
+        }
     }
 }

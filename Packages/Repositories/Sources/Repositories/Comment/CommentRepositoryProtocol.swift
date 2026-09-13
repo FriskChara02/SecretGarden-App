@@ -17,4 +17,14 @@ public protocol CommentRepositoryProtocol {
     /// Chapter-specific comments (Reader overlay) - Completely separate from the
     /// story-wide comments above, even though they share the same `Comment` struct.
     func fetchChapterComments(chapterId: String, page: Int) async throws -> [Comment]
+
+    /// Post a new comment for the entire series — `POST /series/{id}/comments`.
+    /// The server returns the full comment (including user).
+    func postSeriesComment(seriesId: String, content: String) async throws -> Comment
+
+    /// Like/Unlike a comment - `POST /comments/{id}/like` / `DELETE`.
+    func toggleLike(commentId: String, isLiked: Bool) async throws
+
+    /// Reply to a top-level comment - `POST /comments/{id}/reply`.
+    func postReply(parentCommentId: String, content: String) async throws -> Comment
 }
