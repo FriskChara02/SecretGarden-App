@@ -20,8 +20,8 @@ public final class AuthorRepository: AuthorRepositoryProtocol {
         try await apiClient.request(AuthorEndpoint.detail(id: id))
     }
 
-    public func fetchAuthorSeries(authorId: String) async throws -> [Series] {
-        try await apiClient.request(AuthorEndpoint.series(authorId: authorId))
+    public func fetchAuthorSeries(authorId: String, page: Int) async throws -> [Series] {
+        try await apiClient.request(AuthorEndpoint.series(authorId: authorId, page: page))
     }
 
     public func toggleFollow(authorId: String, isFollowing: Bool) async throws {

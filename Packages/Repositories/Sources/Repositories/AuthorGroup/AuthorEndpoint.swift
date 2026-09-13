@@ -10,7 +10,7 @@ import Foundation
 
 enum AuthorEndpoint {
     case detail(id: String)
-    case series(authorId: String)
+    case series(authorId: String, page: Int)
     case follow(authorId: String)
     case unfollow(authorId: String)
     case notify(authorId: String, enabled: Bool)
@@ -20,7 +20,7 @@ extension AuthorEndpoint: APIEndpoint {
     var path: String {
         switch self {
         case .detail(let id): return "/authors/\(id)"
-        case .series(let authorId): return "/authors/\(authorId)/series"
+        case .series(let authorId, _): return "/authors/\(authorId)/series"
         case .follow(let authorId): return "/authors/\(authorId)/follow"
         case .unfollow(let authorId): return "/authors/\(authorId)/follow"
         case .notify(let authorId, _): return "/authors/\(authorId)/notify"
@@ -40,6 +40,15 @@ extension AuthorEndpoint: APIEndpoint {
         switch self {
         case .notify(_, let enabled):
             return try? JSONEncoder().encode(["enabled": enabled])
+        default:
+            return nil
+        }
+    }
+
+    var queryItems: [URLQueryItem]? {
+        switch self {
+        case .series(_, let page):
+            return [URLQueryItem(name: "page", value: "\(page)")]
         default:
             return nil
         }

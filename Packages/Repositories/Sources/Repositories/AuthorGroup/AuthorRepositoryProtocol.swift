@@ -19,7 +19,7 @@ public protocol AuthorRepositoryProtocol {
     func fetchAuthorDetail(id: String) async throws -> AuthorGroupCommon
 
     /// This user's list of stories - `GET /authors/{id}/series`.
-    func fetchAuthorSeries(authorId: String) async throws -> [Series]
+    func fetchAuthorSeries(authorId: String, page: Int) async throws -> [Series]
 
     /// Follow/Unfollow - `POST /authors/{id}/follow` / `DELETE`.
     func toggleFollow(authorId: String, isFollowing: Bool) async throws

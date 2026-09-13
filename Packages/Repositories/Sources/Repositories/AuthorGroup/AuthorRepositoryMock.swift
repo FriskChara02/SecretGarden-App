@@ -56,7 +56,7 @@ public actor AuthorRepositoryMock: AuthorRepositoryProtocol {
         return author
     }
 
-    public func fetchAuthorSeries(authorId: String) async throws -> [Series] {
+    public func fetchAuthorSeries(authorId: String, page: Int) async throws -> [Series] {
         seriesByAuthorId[authorId] ?? []
     }
 
