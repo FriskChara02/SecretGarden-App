@@ -15,6 +15,7 @@ import SocialFeature
 
 struct MainTabView: View {
     @State private var coordinator = MainTabCoordinator()
+    @State private var reportTarget: (seriesId: String, chapterId: String?)?
     let onLogout: () -> Void
 
     var body: some View {
@@ -53,6 +54,16 @@ struct MainTabView: View {
                 }
                 .transition(.opacity)
             }
+        }
+        .sheet(item: Binding(
+            get: { reportTarget.map { ReportSheetTarget(seriesId: $0.seriesId, chapterId: $0.chapterId) } },
+            set: { if $0 == nil { reportTarget = nil } }
+        )) { target in
+            ReportView(
+                seriesId: target.seriesId,
+                chapterId: target.chapterId,
+                seriesRepository: Container.shared.seriesRepository()
+            )
         }
     }
 
@@ -116,6 +127,18 @@ struct MainTabView: View {
                         },
                         onContinueReading: { chapterId in
                             coordinator.homeCoordinator.push(.chapterReader(seriesId: id, chapterId: chapterId))
+                        },
+                        onReportTapped: {
+                            reportTarget = (seriesId: id, chapterId: nil)
+                        },
+                        onAuthorTapped: { authorId in
+                            coordinator.homeCoordinator.push(.authorProfile(id: authorId, roleLabel: "Tác giả"))
+                        },
+                        onArtistTapped: { artistId in
+                            coordinator.homeCoordinator.push(.authorProfile(id: artistId, roleLabel: "Họa sĩ"))
+                        },
+                        onGroupTapped: { groupId in
+                            coordinator.homeCoordinator.push(.groupProfile(id: groupId))
                         }
                     )
                 case .chapterReader(let seriesId, let chapterId):
@@ -177,6 +200,18 @@ struct MainTabView: View {
                         },
                         onContinueReading: { chapterId in
                             coordinator.searchCoordinator.push(.chapterReader(seriesId: id, chapterId: chapterId))
+                        },
+                        onReportTapped: {
+                            reportTarget = (seriesId: id, chapterId: nil)
+                        },
+                        onAuthorTapped: { authorId in
+                            coordinator.searchCoordinator.push(.authorProfile(id: authorId, roleLabel: "Tác giả"))
+                        },
+                        onArtistTapped: { artistId in
+                            coordinator.searchCoordinator.push(.authorProfile(id: artistId, roleLabel: "Họa sĩ"))
+                        },
+                        onGroupTapped: { groupId in
+                            coordinator.searchCoordinator.push(.groupProfile(id: groupId))
                         }
                     )
                 case .chapterReader(let seriesId, let chapterId):
@@ -289,4 +324,10 @@ struct MainTabView: View {
             set: { coordinator.path = $0 }
         )
     }
+}
+
+internal struct ReportSheetTarget: Identifiable {
+    let seriesId: String
+    let chapterId: String?
+    var id: String { "\(seriesId)-\(chapterId ?? "series")" }
 }

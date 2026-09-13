@@ -18,6 +18,7 @@ import CoreArchitecture
 
 struct SideMenuView: View {
     @Bindable var coordinator: SideMenuCoordinator
+    @State private var reportTarget: (seriesId: String, chapterId: String?)?
 
     private struct DrawerItem: Identifiable {
         let id = UUID()
@@ -39,6 +40,16 @@ struct SideMenuView: View {
             .navigationDestination(for: SideMenuRoute.self) { route in
                 destinationView(for: route)
             }
+        }
+        .sheet(item: Binding(
+            get: { reportTarget.map { ReportSheetTarget(seriesId: $0.seriesId, chapterId: $0.chapterId) } },
+            set: { if $0 == nil { reportTarget = nil } }
+        )) { target in
+            ReportView(
+                seriesId: target.seriesId,
+                chapterId: target.chapterId,
+                seriesRepository: Container.shared.seriesRepository()
+            )
         }
     }
 
@@ -149,6 +160,18 @@ struct SideMenuView: View {
             },
             onContinueReading: { chapterId in
                 coordinator.contentCoordinator.push(.chapterReader(seriesId: id, chapterId: chapterId))
+            },
+            onReportTapped: {
+                reportTarget = (seriesId: id, chapterId: nil)
+            },
+            onAuthorTapped: { authorId in
+                coordinator.contentCoordinator.push(.authorProfile(id: authorId, roleLabel: "Tác giả"))
+            },
+            onArtistTapped: { artistId in
+                coordinator.contentCoordinator.push(.authorProfile(id: artistId, roleLabel: "Họa sĩ"))
+            },
+            onGroupTapped: { groupId in
+                coordinator.contentCoordinator.push(.groupProfile(id: groupId))
             }
         )
     }

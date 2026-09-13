@@ -158,6 +158,7 @@ public struct SeriesDetailView: View {
                 favoriteButton(series)
                 readingStatusDropdown(series)
                 shareRow
+                reportButton
             }
             .padding(.horizontal, DSSpacing.lg)
             .padding(.bottom, DSSpacing.lg)
@@ -486,6 +487,20 @@ public struct SeriesDetailView: View {
             }
             Spacer()
         }
+    }
+
+    // MARK: - Report Button
+    
+    private var reportButton: some View {
+        Button(action: onReportTapped) {
+            HStack(spacing: DSSpacing.xs) {
+                Image(systemName: "exclamationmark.triangle")
+                Text("Báo cáo vi phạm")
+            }
+            .dsFont(.footnote)
+            .foregroundStyle(DSColor.statusError)
+        }
+        .frame(maxWidth: .infinity)
     }
 
     // MARK: - Formatters
