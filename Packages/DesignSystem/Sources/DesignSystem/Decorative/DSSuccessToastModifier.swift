@@ -19,14 +19,16 @@ private struct DSSuccessToastModifier: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .overlay {
+            .overlay(alignment: .top) {
                 if let message {
-                    toastOverlay(message)
-                        .transition(.opacity.combined(with: .scale(scale: 0.92)))
+                    toastCard(message)
+                        .padding(.horizontal, DSSpacing.md)
+                        .padding(.top, DSSpacing.sm)
+                        .transition(.move(edge: .top).combined(with: .opacity))
                         .zIndex(1)
                 }
             }
-            .animation(.spring(response: 0.35, dampingFraction: 0.8), value: message)
+            .animation(.spring(response: 0.4, dampingFraction: 0.85), value: message)
             .onChange(of: message) { _, newValue in
                 dismissTask?.cancel()
                 guard newValue != nil else { return }
@@ -36,6 +38,22 @@ private struct DSSuccessToastModifier: ViewModifier {
                     await MainActor.run { message = nil }
                 }
             }
+    }
+
+    private func toastCard(_ text: String) -> some View {
+        DSDecorativeCard {
+            VStack(spacing: DSSpacing.sm) {
+                HStack(spacing: DSSpacing.xs) {
+                    Image(systemName: "diamond.inset.filled").font(.caption2)
+                    Text("THÀNH CÔNG").dsFont(.headline).fontWeight(.bold)
+                    Image(systemName: "diamond.inset.filled").font(.caption2)
+                }
+                .foregroundStyle(DSColor.brandPrimary)
+                Text(text).dsFont(.subheadline).foregroundStyle(DSColor.textPrimary)
+            }
+            .padding(.vertical, DSSpacing.md)
+            .frame(maxWidth: .infinity)
+        }
     }
 
     private func toastOverlay(_ text: String) -> some View {

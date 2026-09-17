@@ -15,7 +15,8 @@ import SocialFeature
 
 struct MainTabView: View {
     @State private var coordinator = MainTabCoordinator()
-    @State private var reportTarget: (seriesId: String, chapterId: String?)?
+    @State private var reportTarget: ReportSheetTarget?
+    @State private var globalToastMessage: String?
     let onLogout: () -> Void
 
     var body: some View {
@@ -55,16 +56,20 @@ struct MainTabView: View {
                 .transition(.opacity)
             }
         }
-        .sheet(item: Binding(
-            get: { reportTarget.map { ReportSheetTarget(seriesId: $0.seriesId, chapterId: $0.chapterId) } },
-            set: { if $0 == nil { reportTarget = nil } }
-        )) { target in
-            ReportView(
-                seriesId: target.seriesId,
-                chapterId: target.chapterId,
-                seriesRepository: Container.shared.seriesRepository()
-            )
+        .overlay {
+            if let target = reportTarget {
+                ReportView(
+                    seriesId: target.seriesId,
+                    chapterId: target.chapterId,
+                    seriesRepository: Container.shared.seriesRepository(),
+                    onDismiss: { reportTarget = nil },
+                    onSubmitted: { message in globalToastMessage = message }
+                )
+                .transition(.opacity)
+            }
         }
+        .animation(.easeInOut(duration: 0.15), value: reportTarget != nil)
+        .dsSuccessToast(message: $globalToastMessage)
     }
 
     // MARK: - Profile tab icon (guest vs logged-in)
@@ -129,7 +134,7 @@ struct MainTabView: View {
                             coordinator.homeCoordinator.push(.chapterReader(seriesId: id, chapterId: chapterId))
                         },
                         onReportTapped: {
-                            reportTarget = (seriesId: id, chapterId: nil)
+                            reportTarget = ReportSheetTarget(seriesId: id, chapterId: nil)
                         },
                         onAuthorTapped: { authorId in
                             coordinator.homeCoordinator.push(.authorProfile(id: authorId, roleLabel: "Tác giả"))
@@ -151,7 +156,8 @@ struct MainTabView: View {
                         onSeriesSelected: { newSeriesId in
                             coordinator.homeCoordinator.push(.seriesDetail(id: newSeriesId))
                         },
-                        onBackToDetailTapped: { coordinator.homeCoordinator.pop() }
+                        onBackToDetailTapped: { coordinator.homeCoordinator.pop() },
+                        onReportTapped: { reportTarget = ReportSheetTarget(seriesId: seriesId, chapterId: chapterId) }
                     )
                 case .groupProfile(let id):
                     GroupProfileView(
@@ -202,7 +208,7 @@ struct MainTabView: View {
                             coordinator.searchCoordinator.push(.chapterReader(seriesId: id, chapterId: chapterId))
                         },
                         onReportTapped: {
-                            reportTarget = (seriesId: id, chapterId: nil)
+                            reportTarget = ReportSheetTarget(seriesId: id, chapterId: nil)
                         },
                         onAuthorTapped: { authorId in
                             coordinator.searchCoordinator.push(.authorProfile(id: authorId, roleLabel: "Tác giả"))
@@ -224,7 +230,8 @@ struct MainTabView: View {
                         onSeriesSelected: { newSeriesId in
                             coordinator.searchCoordinator.push(.seriesDetail(id: newSeriesId))
                         },
-                        onBackToDetailTapped: { coordinator.searchCoordinator.pop() }
+                        onBackToDetailTapped: { coordinator.searchCoordinator.pop() },
+                        onReportTapped: { reportTarget = ReportSheetTarget(seriesId: seriesId, chapterId: chapterId) }
                     )
                 case .groupProfile(let id):
                     GroupProfileView(

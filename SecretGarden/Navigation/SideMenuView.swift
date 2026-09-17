@@ -18,7 +18,8 @@ import CoreArchitecture
 
 struct SideMenuView: View {
     @Bindable var coordinator: SideMenuCoordinator
-    @State private var reportTarget: (seriesId: String, chapterId: String?)?
+    @State private var reportTarget: ReportSheetTarget?
+    @State private var globalToastMessage: String?
 
     private struct DrawerItem: Identifiable {
         let id = UUID()
@@ -41,16 +42,20 @@ struct SideMenuView: View {
                 destinationView(for: route)
             }
         }
-        .sheet(item: Binding(
-            get: { reportTarget.map { ReportSheetTarget(seriesId: $0.seriesId, chapterId: $0.chapterId) } },
-            set: { if $0 == nil { reportTarget = nil } }
-        )) { target in
-            ReportView(
-                seriesId: target.seriesId,
-                chapterId: target.chapterId,
-                seriesRepository: Container.shared.seriesRepository()
-            )
+        .overlay {
+            if let target = reportTarget {
+                ReportView(
+                    seriesId: target.seriesId,
+                    chapterId: target.chapterId,
+                    seriesRepository: Container.shared.seriesRepository(),
+                    onDismiss: { reportTarget = nil },
+                    onSubmitted: { message in globalToastMessage = message }
+                )
+                .transition(.opacity)
+            }
         }
+        .animation(.easeInOut(duration: 0.15), value: reportTarget != nil)
+        .dsSuccessToast(message: $globalToastMessage)
     }
 
     private var drawerItems: [DrawerItem] {
@@ -162,7 +167,7 @@ struct SideMenuView: View {
                 coordinator.contentCoordinator.push(.chapterReader(seriesId: id, chapterId: chapterId))
             },
             onReportTapped: {
-                reportTarget = (seriesId: id, chapterId: nil)
+                reportTarget = ReportSheetTarget(seriesId: id, chapterId: nil)
             },
             onAuthorTapped: { authorId in
                 coordinator.contentCoordinator.push(.authorProfile(id: authorId, roleLabel: "Tác giả"))

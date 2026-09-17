@@ -44,7 +44,17 @@ public actor GroupRepositoryMock: GroupRepositoryProtocol {
                 followerCount: 290,
                 members: members,
                 isFollowedByMe: false,
-                isNotifyEnabled: false
+                isNotifyEnabled: false,
+                createdAt: Date(timeIntervalSince1970: 05/04/2026)
+            ),
+            
+            "group-2": TranslationGroup(
+                id: "group-2", name: "Knights of Yuri",
+                avatarURL: URL(string: "https://picsum.photos/seed/group-2/200/200"),
+                description: "Nhóm dịch lười dần theo tháng năm, dịch vì đam mê chia sẻ những bộ Yuri yêu thích. Page phụ núp hầm.",
+                socialLinks: ["facebook": "https://facebook.com/knights.of.yuri"],
+                followerCount: 1169, members: members, isFollowedByMe: false, isNotifyEnabled: false,
+                createdAt: Date(timeIntervalSince1970: 20/04/2026)
             )
         ]
 

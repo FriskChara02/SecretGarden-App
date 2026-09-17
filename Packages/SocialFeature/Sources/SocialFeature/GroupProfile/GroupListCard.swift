@@ -22,10 +22,10 @@ struct GroupListCard: View {
                 content
             }
             .background(DSColor.backgroundPrimary)
-            .clipShape(RoundedRectangle(cornerRadius: DSRadius.lg))
             .overlay {
                 RoundedRectangle(cornerRadius: DSRadius.lg).strokeBorder(DSColor.borderDefault, lineWidth: 1)
             }
+            .clipShape(RoundedRectangle(cornerRadius: DSRadius.lg))
         }
         .buttonStyle(.plain)
     }
@@ -58,23 +58,33 @@ struct GroupListCard: View {
 
     private var content: some View {
         VStack(alignment: .leading, spacing: DSSpacing.xxs) {
-            Text(group.name)
-                .dsFont(.headline)
-                .fontWeight(.bold)
-                .foregroundStyle(DSColor.textPrimary)
+            Text(group.name).dsFont(.headline).fontWeight(.bold).foregroundStyle(DSColor.textPrimary)
 
-            HStack(spacing: DSSpacing.xs) {
-                Image(systemName: "person.2.fill").font(.caption2)
-                Text("\(group.followerCount) người theo dõi")
+            HStack(spacing: DSSpacing.lg) {
+                HStack(spacing: 4) {
+                    Image(systemName: "person.2").font(.caption2)
+                    Text("\(group.followerCount) người theo dõi")
+                }
+                HStack(spacing: 4) {
+                    Image(systemName: "calendar").font(.caption2)
+                    Text(Self.dateFormatter.string(from: group.createdAt))
+                }
             }
             .dsFont(.caption)
             .foregroundStyle(DSColor.textSecondary)
 
-            Text(group.description ?? "Chưa có mô tả")
-                .dsFont(.footnote)
-                .foregroundStyle(group.description == nil ? DSColor.textSecondary.opacity(0.6) : DSColor.textSecondary)
-                .lineLimit(2)
+            if let description = group.description, !description.isEmpty {
+                Text(description)
+                    .dsFont(.footnote)
+                    .foregroundStyle(DSColor.textSecondary)
+                    .lineLimit(2)
+                    .truncationMode(.tail)
+            }
         }
         .padding(DSSpacing.md)
     }
+
+    private static let dateFormatter: DateFormatter = {
+        let f = DateFormatter(); f.dateFormat = "dd/MM/yyyy"; return f
+    }()
 }

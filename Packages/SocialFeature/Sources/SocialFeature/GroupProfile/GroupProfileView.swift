@@ -14,39 +14,59 @@ import SwiftUI
 public struct GroupProfileView: View {
     @StateObject private var viewModel: GroupProfileViewModel
     @State private var seriesLayout: SeriesCardLayout = .list
+    @Environment(\.colorScheme) private var colorScheme
+    let onHeaderTapped: () -> Void
     let onSeriesSelected: (String) -> Void
 
     public init(
-        groupId: String,
-        groupRepository: GroupRepositoryProtocol,
+        groupId: String, groupRepository: GroupRepositoryProtocol,
+        onHeaderTapped: @escaping () -> Void = {},
         onSeriesSelected: @escaping (String) -> Void
     ) {
-        _viewModel = StateObject(wrappedValue: GroupProfileViewModel(
-            groupId: groupId,
-            groupRepository: groupRepository
-        ))
+        _viewModel = StateObject(wrappedValue: GroupProfileViewModel(groupId: groupId, groupRepository: groupRepository))
+        self.onHeaderTapped = onHeaderTapped
         self.onSeriesSelected = onSeriesSelected
     }
 
     public var body: some View {
         ScrollView {
-            VStack(spacing: DSSpacing.lg) {
+            VStack(alignment: .leading, spacing: 0) {
+                GardenHeaderView(onTap: onHeaderTapped)
+
                 switch viewModel.detailState {
                 case .idle, .loading:
-                    ProgressView().padding(.top, DSSpacing.xxl)
+                    ProgressView().frame(maxWidth: .infinity).padding(.top, DSSpacing.xxl)
                 case .loaded(let group):
                     headerSection(group)
-                    DSSectionDivider()
+                        .padding(.bottom, DSSpacing.xxl)
                     membersSection
+                        .padding(.bottom, DSSpacing.lg)
                     DSSectionDivider()
+                        .padding(.vertical, DSSpacing.lg)
                     seriesSection
+                        .padding(.bottom, DSSpacing.lg)
                     DSSectionDivider()
+                        .padding(.vertical, DSSpacing.lg)
                     highlightsSection
                 case .failed:
                     errorState
                 }
+
+                GardenFooterView(
+                    policyLinks: [
+                        GardenFooterLink(title: "Chính sách bảo mật", action: {}),
+                        GardenFooterLink(title: "Quy định", action: {}),
+                        GardenFooterLink(title: "Điều khoản", action: {})
+                    ],
+                    socialLinks: [
+                        GardenFooterLink(title: "Discord", action: {}),
+                        GardenFooterLink(title: "Facebook", action: {})
+                    ],
+                    backgroundColor: colorScheme == .dark ? DSColor.backgroundSecondary : DSColor.backgroundPrimary,
+                    onPolicyTapped: {}
+                )
+                .padding(.top, DSSpacing.xl)
             }
-            .padding(.bottom, DSSpacing.xl)
         }
         .background(DSColor.backgroundSecondary)
         .onAppear { viewModel.onAppear() }
@@ -67,41 +87,49 @@ public struct GroupProfileView: View {
     // MARK: - Header (banner + avatar + follow + notify)
 
     private func headerSection(_ group: TranslationGroup) -> some View {
-        VStack(spacing: 0) {
+        VStack(alignment: .leading, spacing: 0) {
             bannerAndAvatar(group)
 
             VStack(alignment: .leading, spacing: DSSpacing.md) {
                 followRow(group)
+            }
+            .padding(.horizontal, DSSpacing.md)
+            .padding(.top, DSSpacing.sm)
+
+            VStack(alignment: .leading, spacing: DSSpacing.sm) {
                 infoRows(group)
             }
-            .padding(DSSpacing.md)
+            .padding(.horizontal, DSSpacing.md)
+            .padding(.top, DSSpacing.md)
         }
     }
 
     private func bannerAndAvatar(_ group: TranslationGroup) -> some View {
-        ZStack(alignment: .bottomLeading) {
-            LinearGradient(
-                colors: [DSColor.brandPrimaryLight.opacity(0.4), DSColor.brandPrimary.opacity(0.6)],
-                startPoint: .top, endPoint: .bottom
-            )
-            .frame(height: 160)
+        GeometryReader { proxy in
+            ZStack(alignment: .bottomLeading) {
+                LinearGradient(colors: [DSColor.brandPrimaryLight.opacity(0.4), DSColor.brandPrimary.opacity(0.6)],
+                                startPoint: .top, endPoint: .bottom)
 
-            avatarImage(group.avatarURL)
-                .offset(x: DSSpacing.md, y: 36)
+                LinearGradient(colors: [.white.opacity(0.9), .white.opacity(0)], startPoint: .leading, endPoint: .trailing)
+                    .frame(width: proxy.size.width - 60, height: 52.5)
+                    .offset(x: 60)
+            }
+            .frame(width: proxy.size.width, height: proxy.size.height)
+        }
+        .frame(height: 160)
+        .clipped()
+        .overlay(alignment: .bottomLeading) {
+            HStack(alignment: .center, spacing: DSSpacing.lg) {
+                avatarImage(group.avatarURL)
+                VStack(alignment: .leading, spacing: DSSpacing.xxs) {
+                    Text(group.name).dsFont(.title3).fontWeight(.bold)
+                    Text("@\(group.id)").dsFont(.subheadline).foregroundStyle(DSColor.textSecondary)
+                }
+            }
+            .padding(.leading, DSSpacing.md)
+            .offset(y: 36)
         }
         .padding(.bottom, 36)
-        .overlay(alignment: .bottomLeading) {
-            VStack(alignment: .leading, spacing: DSSpacing.xxs) {
-                Text(group.name)
-                    .dsFont(.title3)
-                    .fontWeight(.bold)
-                Text("@\(group.id)")
-                    .dsFont(.subheadline)
-                    .foregroundStyle(DSColor.textSecondary)
-            }
-            .padding(.leading, 112)
-            .padding(.bottom, DSSpacing.sm)
-        }
     }
 
     private func avatarImage(_ url: URL?) -> some View {
@@ -120,51 +148,65 @@ public struct GroupProfileView: View {
 
     private func followRow(_ group: TranslationGroup) -> some View {
         HStack(spacing: DSSpacing.md) {
-            DSButton(
-                group.isFollowedByMe ? "Đang theo dõi" : "Theo dõi",
-                variant: group.isFollowedByMe ? .outline : .primary,
-                isLoading: viewModel.isTogglingFollow
-            ) {
-                viewModel.toggleFollow()
+            Button { viewModel.toggleFollow() } label: {
+                HStack(spacing: DSSpacing.xxs) {
+                    Image(systemName: group.isFollowedByMe ? "person.fill.checkmark" : "person.badge.plus")
+                    Text(group.isFollowedByMe ? "Đang theo dõi" : "Theo dõi")
+                }
+                .dsFont(.subheadline).fontWeight(.bold)
+                .foregroundStyle(group.isFollowedByMe ? DSColor.brandPrimary : .white)
+                .lineLimit(1)
+                .padding(.horizontal, DSSpacing.lg)
+                .padding(.vertical, DSSpacing.sm)
+                .frame(minWidth: 150)
+                .fixedSize(horizontal: true, vertical: false)
+                .background(Capsule().fill(group.isFollowedByMe ? DSColor.brandPrimary.opacity(0.15) : DSColor.brandPrimary))
+                .overlay {
+                    if group.isFollowedByMe { Capsule().strokeBorder(DSColor.brandPrimary, lineWidth: 1.5) }
+                }
             }
+            .disabled(viewModel.isTogglingFollow)
 
-            Toggle("Nhận thông báo", isOn: Binding(
-                get: { group.isNotifyEnabled },
-                set: { _ in viewModel.toggleNotify() }
-            ))
-            .labelsHidden()
-            .toggleStyle(DSBellToggleStyle())
-            .disabled(!group.isFollowedByMe || viewModel.isTogglingNotify)
-            .opacity(group.isFollowedByMe ? 1 : 0.4)
+            Toggle("", isOn: Binding(get: { group.isNotifyEnabled }, set: { _ in viewModel.toggleNotify() }))
+                .labelsHidden().toggleStyle(DSBellToggleStyle())
+                .disabled(!group.isFollowedByMe || viewModel.isTogglingNotify)
+                .opacity(group.isFollowedByMe ? 1 : 0.4)
 
-            Text("Nhận thông báo")
-                .dsFont(.subheadline)
-                .foregroundStyle(DSColor.textPrimary)
+            Text("Nhận thông báo").dsFont(.subheadline).fontWeight(.bold)
         }
+        .frame(height: 44)
     }
 
     private func infoRows(_ group: TranslationGroup) -> some View {
-        VStack(alignment: .leading, spacing: DSSpacing.sm) {
-            infoRow(icon: "info.circle", text: group.description ?? "Chưa có mô tả")
-            infoRow(icon: "person.2.fill", text: "\(group.followerCount) người theo dõi")
-            if let socialLinks = group.socialLinks, !socialLinks.isEmpty {
-                socialLinksRow(socialLinks)
-            }
-            infoRow(icon: "person.fill", text: "\(group.members?.count ?? 0) thành viên")
-        }
-    }
-
-    private func infoRow(icon: String, text: String) -> some View {
         HStack(alignment: .top, spacing: DSSpacing.sm) {
-            Image(systemName: icon).foregroundStyle(DSColor.brandPrimary)
-            Text(text).dsFont(.subheadline).foregroundStyle(DSColor.textPrimary)
+            VStack(alignment: .center, spacing: DSSpacing.sm) {
+                Image(systemName: "info.circle")
+                Image(systemName: "person.2.fill")
+                if let socialLinks = group.socialLinks, !socialLinks.isEmpty {
+                    Image(systemName: "globe")
+                }
+                Image(systemName: "person.fill")
+            }
+            .foregroundStyle(DSColor.brandPrimary)
+            .frame(width: 20)
+
+            VStack(alignment: .leading, spacing: DSSpacing.sm) {
+                Text(group.description ?? "Chưa có mô tả")
+                    .dsFont(.subheadline).foregroundStyle(DSColor.textPrimary)
+                Text("\(group.followerCount) người theo dõi")
+                    .dsFont(.subheadline).foregroundStyle(DSColor.textPrimary)
+                if let socialLinks = group.socialLinks, !socialLinks.isEmpty {
+                    socialLinksRow(socialLinks)
+                }
+                Text("\(group.members?.count ?? 0) thành viên")
+                    .dsFont(.subheadline).foregroundStyle(DSColor.textPrimary)
+            }
         }
     }
 
     private func socialLinksRow(_ links: [String: String]) -> some View {
         HStack(spacing: DSSpacing.sm) {
-            Image(systemName: "globe").foregroundStyle(DSColor.brandPrimary)
-            Text("Mạng xã hội:").dsFont(.subheadline)
+            Text("Mạng xã hội:").dsFont(.subheadline).foregroundStyle(DSColor.textPrimary)
             ForEach(links.keys.sorted(), id: \.self) { key in
                 if let url = links[key], let linkURL = URL(string: url) {
                     Link(destination: linkURL) {
@@ -178,67 +220,49 @@ public struct GroupProfileView: View {
     // MARK: - Members section
 
     private var membersSection: some View {
-        VStack(alignment: .leading, spacing: DSSpacing.sm) {
-            sectionTitle("Thành viên nhóm")
+        DSDecorativeCard {
+            VStack(alignment: .leading, spacing: DSSpacing.md) {
+                sectionTitle("Thành viên nhóm")
 
-            switch viewModel.membersState {
-            case .idle, .loading:
-                ProgressView()
-            case .loaded(let members):
-                DSDecorativeCard {
-                    VStack(spacing: 0) {
-                        ForEach(Array(members.enumerated()), id: \.element.id) { index, member in
-                            memberRow(member)
-                            if index < members.count - 1 {
-                                Divider().padding(.leading, 70)
-                            }
-                        }
+                switch viewModel.membersState {
+                case .loaded(let members):
+                    VStack(spacing: DSSpacing.lg) {
+                        ForEach(members) { memberRow($0) }
                     }
+                default:
+                    ProgressView()
                 }
-                .padding(.horizontal, DSSpacing.md)
-            case .failed:
-                Text("Không tải được danh sách thành viên")
-                    .dsFont(.footnote)
-                    .foregroundStyle(DSColor.textSecondary)
-                    .padding(.horizontal, DSSpacing.md)
             }
+            .padding(DSSpacing.lg)
         }
+        .padding(.horizontal, DSSpacing.md)
     }
 
     private func memberRow(_ member: GroupMember) -> some View {
-        HStack(spacing: DSSpacing.sm) {
+        HStack(alignment: .top, spacing: DSSpacing.md) {
+            Image(systemName: "diamond.fill").font(.system(size: 7)).foregroundStyle(.brown.opacity(0.55)).padding(.top, 4)
+
             AsyncImage(url: member.user.avatarURL) { phase in
-                if case .success(let image) = phase {
-                    image.resizable().aspectRatio(contentMode: .fill)
-                } else {
-                    Circle().fill(DSColor.backgroundSecondary)
-                }
+                if case .success(let img) = phase { img.resizable().aspectRatio(contentMode: .fill) }
+                else { Circle().fill(DSColor.backgroundSecondary) }
             }
-            .frame(width: 52, height: 52)
-            .clipShape(Circle())
+            .frame(width: 52, height: 52).clipShape(Circle())
             .overlay { Circle().strokeBorder(DSColor.brandPrimary, lineWidth: 2) }
 
             VStack(alignment: .leading, spacing: DSSpacing.xxs) {
                 HStack(spacing: DSSpacing.xs) {
                     Text(member.user.username).dsFont(.headline).fontWeight(.bold)
-                    if member.role.lowercased() == "leader" {
-                        leaderBadge
-                    }
+                    if member.role.lowercased() == "leader" { leaderBadge }
                 }
+                Rectangle().fill(DSColor.brandPrimary.opacity(0.35)).frame(height: 1)
                 if let bio = member.user.bio, !bio.isEmpty {
-                    Text(bio)
-                        .dsFont(.caption)
-                        .foregroundStyle(DSColor.textSecondary)
-                        .lineLimit(1)
+                    Text(bio).dsFont(.caption).foregroundStyle(DSColor.textSecondary)
                 } else {
-                    Text("Chưa có giới thiệu")
-                        .dsFont(.caption)
-                        .foregroundStyle(DSColor.textSecondary.opacity(0.6))
+                    Text("Chưa có giới thiệu").dsFont(.caption).foregroundStyle(DSColor.textSecondary.opacity(0.6))
                 }
             }
             Spacer(minLength: 0)
         }
-        .padding(DSSpacing.sm)
     }
 
     private var leaderBadge: some View {
@@ -281,20 +305,20 @@ public struct GroupProfileView: View {
 
     private var layoutToggle: some View {
         HStack(spacing: DSSpacing.sm) {
-            Button { seriesLayout = .grid } label: {
-                Image(systemName: "square.grid.2x2")
-                    .foregroundStyle(seriesLayout == .grid ? .white : DSColor.brandPrimary)
-                    .padding(DSSpacing.xs)
-                    .background(Circle().fill(seriesLayout == .grid ? DSColor.brandPrimary : .clear))
-                    .overlay { Circle().strokeBorder(DSColor.brandPrimary, lineWidth: seriesLayout == .grid ? 0 : 1.5) }
-            }
-            Button { seriesLayout = .list } label: {
-                Image(systemName: "list.bullet")
-                    .foregroundStyle(seriesLayout == .list ? .white : DSColor.brandPrimary)
-                    .padding(DSSpacing.xs)
-                    .background(Circle().fill(seriesLayout == .list ? DSColor.brandPrimary : .clear))
-                    .overlay { Circle().strokeBorder(DSColor.brandPrimary, lineWidth: seriesLayout == .list ? 0 : 1.5) }
-            }
+            toggleIcon(systemName: "square.grid.2x2.fill", isActive: seriesLayout == .grid) { seriesLayout = .grid }
+            toggleIcon(systemName: "list.bullet", isActive: seriesLayout == .list) { seriesLayout = .list }
+        }
+    }
+
+    private func toggleIcon(systemName: String, isActive: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: systemName)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(isActive ? .white : DSColor.brandPrimary)
+                .frame(width: 32, height: 32)
+                .background(isActive ? DSColor.brandPrimary : DSColor.backgroundPrimary)
+                .clipShape(Circle())
+                .overlay { Circle().strokeBorder(DSColor.brandPrimary, lineWidth: isActive ? 0 : 1.5) }
         }
     }
 

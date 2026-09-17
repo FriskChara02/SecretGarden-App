@@ -18,133 +18,106 @@ public struct AuthorProfileView: View {
     @StateObject private var viewModel: AuthorProfileViewModel
     @State private var seriesLayout: SeriesCardLayout = .list
     let roleLabel: String
+    let onHeaderTapped: () -> Void
     let onSeriesSelected: (String) -> Void
 
     public init(
-        authorId: String,
-        roleLabel: String,
-        authorRepository: AuthorRepositoryProtocol,
+        authorId: String, roleLabel: String, authorRepository: AuthorRepositoryProtocol,
+        onHeaderTapped: @escaping () -> Void = {},
         onSeriesSelected: @escaping (String) -> Void
     ) {
-        _viewModel = StateObject(wrappedValue: AuthorProfileViewModel(
-            authorId: authorId,
-            authorRepository: authorRepository
-        ))
+        _viewModel = StateObject(wrappedValue: AuthorProfileViewModel(authorId: authorId, authorRepository: authorRepository))
         self.roleLabel = roleLabel
+        self.onHeaderTapped = onHeaderTapped
         self.onSeriesSelected = onSeriesSelected
     }
 
     public var body: some View {
         ScrollView {
-            VStack(spacing: DSSpacing.lg) {
+            VStack(alignment: .leading, spacing: 0) {
+                GardenHeaderView(onTap: onHeaderTapped)
+
                 switch viewModel.detailState {
                 case .idle, .loading:
-                    ProgressView().padding(.top, DSSpacing.xxl)
+                    ProgressView().frame(maxWidth: .infinity).padding(.top, DSSpacing.xxl)
                 case .loaded(let author):
-                    headerSection(author)
-                    DSSectionDivider()
+                    headerRow(author)
+                    linkBlock(author)
+                    Rectangle().fill(DSColor.borderDefault.opacity(0.6)).frame(height: 1)
+                        .padding(.horizontal, DSSpacing.md).padding(.vertical, DSSpacing.md)
                     seriesSection
+                        .frame(minHeight: 260)
                 case .failed:
                     errorState
                 }
+
+                GardenFooterView(
+                    policyLinks: [
+                        GardenFooterLink(title: "Chính sách bảo mật", action: {}),
+                        GardenFooterLink(title: "Quy định", action: {}),
+                        GardenFooterLink(title: "Điều khoản", action: {})
+                    ],
+                    socialLinks: [
+                        GardenFooterLink(title: "Discord", action: {}),
+                        GardenFooterLink(title: "Facebook", action: {})
+                    ],
+                    backgroundColor: DSColor.backgroundSecondary,
+                    onPolicyTapped: {}
+                )
+                .padding(.top, DSSpacing.xl)
             }
-            .padding(.bottom, DSSpacing.xl)
         }
         .background(DSColor.backgroundSecondary)
         .onAppear { viewModel.onAppear() }
-        .dsSuccessToast(message: $viewModel.successMessage)
-        .alert(
-            "Có lỗi xảy ra",
-            isPresented: Binding(
-                get: { viewModel.actionErrorMessage != nil },
-                set: { if !$0 { viewModel.dismissActionError() } }
-            )
-        ) {
-            Button("Đóng", role: .cancel) { viewModel.dismissActionError() }
-        } message: {
-            Text(viewModel.actionErrorMessage ?? "")
-        }
     }
 
-    // MARK: - Header
-
-    private func headerSection(_ author: AuthorGroupCommon) -> some View {
-        VStack(alignment: .leading, spacing: DSSpacing.md) {
-            HStack(spacing: DSSpacing.md) {
-                avatarImage(author.avatarURL)
-                VStack(alignment: .leading, spacing: DSSpacing.xxs) {
-                    Text("\(roleLabel): \(author.name)")
-                        .dsFont(.title3)
-                        .fontWeight(.bold)
-                    if let socialLink = author.socialLink, let url = URL(string: socialLink) {
-                        Link(socialLink, destination: url)
-                            .dsFont(.footnote)
-                            .foregroundStyle(DSColor.info)
-                            .lineLimit(1)
-                    }
-                }
+    private func headerRow(_ author: AuthorGroupCommon) -> some View {
+        HStack {
+            HStack(spacing: DSSpacing.xs) {
+                Image(systemName: "diamond.inset.filled").font(.caption2)
+                Text("\(roleLabel): \(author.name)").dsFont(.title3)
+                Text("(\(viewModel.seriesState.value?.count ?? 0))").dsFont(.title3)
+                Image(systemName: "diamond.inset.filled").font(.caption2)
             }
-
-            followRow(author)
-
-            Text(author.bio ?? "Chưa có mô tả")
-                .dsFont(.subheadline)
-                .foregroundStyle(author.bio == nil ? DSColor.textSecondary.opacity(0.6) : DSColor.textPrimary)
+            .foregroundStyle(DSColor.brandPrimary)
+            Spacer()
+            HStack(spacing: DSSpacing.sm) {
+                toggleIcon(systemName: "square.grid.2x2.fill", isActive: seriesLayout == .grid) { seriesLayout = .grid }
+                toggleIcon(systemName: "list.bullet", isActive: seriesLayout == .list) { seriesLayout = .list }
+            }
         }
         .padding(.horizontal, DSSpacing.md)
         .padding(.top, DSSpacing.lg)
     }
 
-    private func avatarImage(_ url: URL?) -> some View {
-        AsyncImage(url: url) { phase in
-            if case .success(let image) = phase {
-                image.resizable().aspectRatio(contentMode: .fill)
-            } else {
-                Circle().fill(DSColor.backgroundSecondary)
+    private func linkBlock(_ author: AuthorGroupCommon) -> some View {
+        VStack(alignment: .leading, spacing: DSSpacing.xxs) {
+            ForEach(author.socialLinks ?? [], id: \.self) { link in
+                if let url = URL(string: link) {
+                    Link(link, destination: url)
+                        .dsFont(.subheadline)
+                        .foregroundStyle(DSColor.textSecondary)
+                }
             }
         }
-        .frame(width: 72, height: 72)
-        .clipShape(Circle())
-        .overlay { Circle().strokeBorder(DSColor.brandPrimary, lineWidth: 2) }
+        .padding(.horizontal, DSSpacing.md)
+        .padding(.top, DSSpacing.sm)
     }
 
-    private func followRow(_ author: AuthorGroupCommon) -> some View {
-        HStack(spacing: DSSpacing.md) {
-            DSButton(
-                author.isFollowedByMe ? "Đang theo dõi" : "Theo dõi",
-                variant: author.isFollowedByMe ? .outline : .primary,
-                size: .medium,
-                isLoading: viewModel.isTogglingFollow
-            ) {
-                viewModel.toggleFollow()
-            }
-
-            HStack(spacing: DSSpacing.xs) {
-                Toggle("", isOn: Binding(
-                    get: { author.isNotifyEnabled },
-                    set: { _ in viewModel.toggleNotify() }
-                ))
-                .labelsHidden()
-                .toggleStyle(DSBellToggleStyle())
-                .disabled(!author.isFollowedByMe || viewModel.isTogglingNotify)
-                .opacity(author.isFollowedByMe ? 1 : 0.4)
-
-                Text("Nhận thông báo").dsFont(.subheadline)
-            }
+    private func toggleIcon(systemName: String, isActive: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: systemName)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(isActive ? .white : DSColor.brandPrimary)
+                .frame(width: 32, height: 32)
+                .background(isActive ? DSColor.brandPrimary : DSColor.backgroundPrimary)
+                .clipShape(Circle())
+                .overlay { Circle().strokeBorder(DSColor.brandPrimary, lineWidth: isActive ? 0 : 1.5) }
         }
     }
-
-    // MARK: - Series section (reusing SeriesCardView + GroupSeriesCardMapper in the same package)
 
     private var seriesSection: some View {
-        VStack(alignment: .leading, spacing: DSSpacing.sm) {
-            HStack {
-                sectionTitle("Truyện của \(roleLabel)")
-                Spacer()
-                layoutToggle
-            }
-            .padding(.horizontal, DSSpacing.md)
-
+        Group {
             switch viewModel.seriesState {
             case .idle, .loading:
                 ProgressView().frame(maxWidth: .infinity).padding(.vertical, DSSpacing.lg)
@@ -154,38 +127,14 @@ public struct AuthorProfileView: View {
             case .loaded(let series):
                 seriesList(series)
                 if viewModel.totalPages > 1 {
-                    DSPageIndicator(
-                        currentPage: viewModel.currentPage,
-                        totalPages: viewModel.totalPages
-                    ) { page in
-                        viewModel.loadSeries(page: page)
+                    DSPageIndicator(currentPage: viewModel.currentPage, totalPages: viewModel.totalPages) {
+                        viewModel.loadSeries(page: $0)
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding(.top, DSSpacing.sm)
+                    .frame(maxWidth: .infinity).padding(.top, DSSpacing.sm)
                 }
             case .failed:
-                Text("Không tải được danh sách truyện")
-                    .dsFont(.footnote).foregroundStyle(DSColor.textSecondary)
+                Text("Không tải được danh sách truyện").dsFont(.footnote).foregroundStyle(DSColor.textSecondary)
                     .padding(.horizontal, DSSpacing.md)
-            }
-        }
-    }
-
-    private var layoutToggle: some View {
-        HStack(spacing: DSSpacing.sm) {
-            Button { seriesLayout = .grid } label: {
-                Image(systemName: "square.grid.2x2")
-                    .foregroundStyle(seriesLayout == .grid ? .white : DSColor.brandPrimary)
-                    .padding(DSSpacing.xs)
-                    .background(Circle().fill(seriesLayout == .grid ? DSColor.brandPrimary : .clear))
-                    .overlay { Circle().strokeBorder(DSColor.brandPrimary, lineWidth: seriesLayout == .grid ? 0 : 1.5) }
-            }
-            Button { seriesLayout = .list } label: {
-                Image(systemName: "list.bullet")
-                    .foregroundStyle(seriesLayout == .list ? .white : DSColor.brandPrimary)
-                    .padding(DSSpacing.xs)
-                    .background(Circle().fill(seriesLayout == .list ? DSColor.brandPrimary : .clear))
-                    .overlay { Circle().strokeBorder(DSColor.brandPrimary, lineWidth: seriesLayout == .list ? 0 : 1.5) }
             }
         }
     }
@@ -196,31 +145,18 @@ public struct AuthorProfileView: View {
         case .list:
             VStack(spacing: DSSpacing.md) {
                 ForEach(series) { item in
-                    SeriesCardView(data: GroupSeriesCardMapper.map(item), layout: .list) {
-                        onSeriesSelected(item.id)
-                    }
+                    SeriesCardView(data: GroupSeriesCardMapper.map(item), layout: .list) { onSeriesSelected(item.id) }
                 }
             }
             .padding(.horizontal, DSSpacing.md)
         case .grid:
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: DSSpacing.md) {
                 ForEach(series) { item in
-                    SeriesCardView(data: GroupSeriesCardMapper.map(item), layout: .grid) {
-                        onSeriesSelected(item.id)
-                    }
+                    SeriesCardView(data: GroupSeriesCardMapper.map(item), layout: .grid) { onSeriesSelected(item.id) }
                 }
             }
             .padding(.horizontal, DSSpacing.md)
         }
-    }
-
-    private func sectionTitle(_ text: String) -> some View {
-        HStack(spacing: DSSpacing.xs) {
-            Image(systemName: "diamond.inset.filled").font(.caption2)
-            Text(text).dsFont(.title3)
-            Image(systemName: "diamond.inset.filled").font(.caption2)
-        }
-        .foregroundStyle(DSColor.brandPrimary)
     }
 
     private var errorState: some View {
@@ -229,7 +165,6 @@ public struct AuthorProfileView: View {
             Text("Không tải được trang \(roleLabel.lowercased())").dsFont(.subheadline)
             DSButton("Thử lại", variant: .outline) { viewModel.loadDetail() }
         }
-        .frame(maxWidth: .infinity)
-        .padding(.top, DSSpacing.xxl)
+        .frame(maxWidth: .infinity).padding(.top, DSSpacing.xxl)
     }
 }

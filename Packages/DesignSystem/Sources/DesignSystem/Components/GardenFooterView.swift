@@ -27,6 +27,7 @@ public struct GardenFooterView: View {
     private let email: String
     private let policyLinks: [GardenFooterLink]
     private let socialLinks: [GardenFooterLink]
+    private let backgroundColor: Color
     private let onPolicyTapped: () -> Void
 
     public init(
@@ -36,6 +37,7 @@ public struct GardenFooterView: View {
         email: String = "contact@secretgarden.app",               // TODO: change to real email
         policyLinks: [GardenFooterLink],
         socialLinks: [GardenFooterLink],
+        backgroundColor: Color = DSColor.backgroundPrimary,
         onPolicyTapped: @escaping () -> Void
     ) {
         self.appName = appName
@@ -44,6 +46,7 @@ public struct GardenFooterView: View {
         self.email = email
         self.policyLinks = policyLinks
         self.socialLinks = socialLinks
+        self.backgroundColor = backgroundColor
         self.onPolicyTapped = onPolicyTapped
     }
 
@@ -83,7 +86,7 @@ public struct GardenFooterView: View {
         }
         .padding(.vertical, DSSpacing.xl)
         .frame(maxWidth: .infinity)
-        .background(DSColor.backgroundPrimary)
+        .background(backgroundColor)
     }
 
     @ViewBuilder
@@ -100,7 +103,7 @@ public struct GardenFooterView: View {
 
     private var bottomBlock: some View {
         ZStack(alignment: .top) {
-            DSColor.backgroundPrimary
+            backgroundColor
             DiagonalRiseShape()
                 .fill(
                     LinearGradient(

@@ -13,7 +13,7 @@ public struct AuthorGroupCommon: Codable, Identifiable, Equatable {
     public let id: String
     public var name: String
     public var avatarURL: URL?
-    public var socialLink: String?
+    public var socialLinks: [String]?
     public var bio: String?
     public var isFollowedByMe: Bool
     public var isNotifyEnabled: Bool
@@ -22,7 +22,7 @@ public struct AuthorGroupCommon: Codable, Identifiable, Equatable {
         id: String,
         name: String,
         avatarURL: URL? = nil,
-        socialLink: String? = nil,
+        socialLinks: [String]? = nil,
         bio: String? = nil,
         isFollowedByMe: Bool = false,
         isNotifyEnabled: Bool = false
@@ -30,7 +30,7 @@ public struct AuthorGroupCommon: Codable, Identifiable, Equatable {
         self.id = id
         self.name = name
         self.avatarURL = avatarURL
-        self.socialLink = socialLink
+        self.socialLinks = socialLinks
         self.bio = bio
         self.isFollowedByMe = isFollowedByMe
         self.isNotifyEnabled = isNotifyEnabled
@@ -47,6 +47,7 @@ public struct TranslationGroup: Codable, Identifiable, Equatable {
     public var members: [GroupMember]?
     public var isFollowedByMe: Bool
     public var isNotifyEnabled: Bool
+    public var createdAt: Date
 
     public init(
         id: String,
@@ -57,7 +58,8 @@ public struct TranslationGroup: Codable, Identifiable, Equatable {
         followerCount: Int = 0,
         members: [GroupMember]? = nil,
         isFollowedByMe: Bool = false,
-        isNotifyEnabled: Bool = false
+        isNotifyEnabled: Bool = false,
+        createdAt: Date = Date()
     ) {
         self.id = id
         self.name = name
@@ -68,6 +70,7 @@ public struct TranslationGroup: Codable, Identifiable, Equatable {
         self.members = members
         self.isFollowedByMe = isFollowedByMe
         self.isNotifyEnabled = isNotifyEnabled
+        self.createdAt = createdAt
     }
 }
 

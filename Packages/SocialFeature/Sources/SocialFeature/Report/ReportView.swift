@@ -17,30 +17,43 @@ import SwiftUI
 public struct ReportView: View {
     @StateObject private var viewModel: ReportViewModel
     @State private var isReasonMenuExpanded = false
-    @Environment(\.dismiss) private var dismiss
+    let onDismiss: () -> Void
+    let onSubmitted: (String) -> Void
 
-    public init(seriesId: String, chapterId: String? = nil, seriesRepository: SeriesRepositoryProtocol) {
+    public init(
+        seriesId: String, chapterId: String? = nil,
+        seriesRepository: SeriesRepositoryProtocol,
+        onDismiss: @escaping () -> Void,
+        onSubmitted: @escaping (String) -> Void
+    ) {
         _viewModel = StateObject(wrappedValue: ReportViewModel(
-            seriesId: seriesId,
-            chapterId: chapterId,
-            seriesRepository: seriesRepository
+            seriesId: seriesId, chapterId: chapterId, seriesRepository: seriesRepository
         ))
+        self.onDismiss = onDismiss
+        self.onSubmitted = onSubmitted
     }
 
     public var body: some View {
-        DSDecorativeCard {
-            VStack(spacing: DSSpacing.lg) {
-                header
-                reasonField
-                actionButtons
+        ZStack {
+            Color.black.opacity(0.45)
+                .ignoresSafeArea()
+                .onTapGesture { onDismiss() }
+
+            DSDecorativeCard {
+                VStack(spacing: DSSpacing.lg) {
+                    header
+                    reasonField
+                    actionButtons
+                }
+                .padding(DSSpacing.lg)
             }
-            .padding(DSSpacing.lg)
+            .padding(.horizontal, DSSpacing.xl)
         }
-        .padding(DSSpacing.md)
-        .dsSuccessToast(message: $viewModel.successMessage)
-        .onChange(of: viewModel.successMessage) { _, newValue in
-            // Toast auto-hides after 4s — close the sheet as soon as the toast starts appearing
-            if newValue != nil { dismiss() }
+        .onChange(of: viewModel.submissionState) { _, newValue in
+            if newValue == .succeeded {
+                onSubmitted(viewModel.successMessage ?? "Đã gửi báo cáo")
+                onDismiss()
+            }
         }
         .alert(
             "Gửi báo cáo thất bại",
@@ -67,16 +80,19 @@ public struct ReportView: View {
             Spacer()
         }
         .overlay(alignment: .trailing) {
-            Button { dismiss() } label: {
+            Button { onDismiss() } label: {
                 Image(systemName: "xmark")
-                    .foregroundStyle(DSColor.textSecondary)
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(DSColor.brandPrimary)
+                    .frame(width: 26, height: 26)
+                    .overlay(Circle().strokeBorder(DSColor.brandPrimary, lineWidth: 1.2))
             }
         }
     }
 
     private var reasonField: some View {
         VStack(alignment: .leading, spacing: DSSpacing.sm) {
-            Text("Lý do").dsFont(.subheadline).foregroundStyle(DSColor.textPrimary)
+            Text("Lý do").dsFont(.subheadline).fontWeight(.bold).foregroundStyle(DSColor.textPrimary)
 
             VStack(spacing: 0) {
                 Button {
@@ -85,28 +101,30 @@ public struct ReportView: View {
                     HStack {
                         Text(viewModel.selectedReason?.displayName ?? "Chọn lý do...")
                             .dsFont(.callout)
+                            .fontWeight(.bold)
                             .foregroundStyle(viewModel.selectedReason == nil ? DSColor.textSecondary : DSColor.textPrimary)
                         Spacer()
                         Image(systemName: "chevron.down")
-                            .foregroundStyle(DSColor.brandPrimary)
+                            .foregroundStyle(DSColor.textSecondary)
                             .rotationEffect(.degrees(isReasonMenuExpanded ? 180 : 0))
                     }
                     .padding(DSSpacing.md)
-                    .overlay(RoundedRectangle(cornerRadius: DSRadius.md).strokeBorder(DSColor.brandPrimary, lineWidth: 1.5))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: DSRadius.md)
+                            .strokeBorder(DSColor.borderDefault, lineWidth: 1.5)
+                    )
                 }
 
                 if isReasonMenuExpanded {
                     VStack(spacing: 0) {
                         ForEach(ReportReason.allCases) { reason in
                             reasonOptionRow(reason)
-                            if reason != ReportReason.allCases.last {
-                                Divider()
-                            }
+                            if reason != ReportReason.allCases.last { Divider() }
                         }
                     }
                     .background(DSColor.backgroundPrimary)
                     .clipShape(RoundedRectangle(cornerRadius: DSRadius.md))
-                    .overlay(RoundedRectangle(cornerRadius: DSRadius.md).strokeBorder(DSColor.borderDefault, lineWidth: 1))
+                    .overlay(RoundedRectangle(cornerRadius: DSRadius.md).strokeBorder(Color.black, lineWidth: 1.5))
                     .padding(.top, DSSpacing.xs)
                     .transition(.opacity.combined(with: .move(edge: .top)))
                 }
@@ -122,6 +140,7 @@ public struct ReportView: View {
             HStack {
                 Text(reason.displayName)
                     .dsFont(.callout)
+                    .fontWeight(.bold)
                     .foregroundStyle(reason == viewModel.selectedReason ? DSColor.brandPrimary : DSColor.textPrimary)
                 Spacer()
                 if reason == viewModel.selectedReason {
@@ -135,18 +154,18 @@ public struct ReportView: View {
 
     private var actionButtons: some View {
         VStack(spacing: DSSpacing.sm) {
-            DSButton(
-                "Gửi báo cáo",
-                variant: .primary,
-                isLoading: viewModel.submissionState.isSubmitting
-            ) {
+            DSButton("Gửi báo cáo", variant: .primary, isLoading: viewModel.submissionState.isSubmitting) {
                 viewModel.submit()
             }
             .disabled(!viewModel.canSubmit)
 
-            DSButton("Hủy", variant: .outline) {
-                dismiss()
-            }
+            Button("Hủy") { onDismiss() }
+                .dsFont(.headline)
+                .foregroundStyle(DSColor.textSecondary)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, DSSpacing.md)
+                .background(DSColor.backgroundSecondary)
+                .clipShape(RoundedRectangle(cornerRadius: DSRadius.md))
         }
     }
 }

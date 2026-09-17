@@ -25,7 +25,7 @@ public actor AuthorRepositoryMock: AuthorRepositoryProtocol {
             id: "author-1",
             name: "Radish",
             avatarURL: URL(string: "https://picsum.photos/seed/author-1/200/200"),
-            socialLink: "https://x.com/radish_sample",
+            socialLinks: ["https://x.com/radish_sample"],
             bio: nil, // No description yet - empty state
             isFollowedByMe: false,
             isNotifyEnabled: false
@@ -35,7 +35,7 @@ public actor AuthorRepositoryMock: AuthorRepositoryProtocol {
             id: "artist-1",
             name: "Radish",
             avatarURL: URL(string: "https://picsum.photos/seed/artist-1/200/200"),
-            socialLink: nil,
+            socialLinks: nil,
             bio: "Hoạ sĩ tự do, yêu thích vẽ các nhân vật fantasy.",
             isFollowedByMe: true,
             isNotifyEnabled: true

@@ -158,7 +158,6 @@ public struct SeriesDetailView: View {
                 favoriteButton(series)
                 readingStatusDropdown(series)
                 shareRow
-                reportButton
             }
             .padding(.horizontal, DSSpacing.lg)
             .padding(.bottom, DSSpacing.lg)
@@ -360,26 +359,18 @@ public struct SeriesDetailView: View {
             Text("Nhận thông báo")
                 .dsFont(.subheadline).fontWeight(.bold)
                 .foregroundStyle(DSColor.textPrimary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.85)
+                .lineLimit(1).minimumScaleFactor(0.85)
 
-            Image(systemName: "exclamationmark.triangle")
-                .font(.caption)
-                .foregroundStyle(.orange)
-                .frame(width: 24, height: 24)
-                .overlay(Circle().strokeBorder(.orange, lineWidth: 1.2))
+            Button(action: onReportTapped) {
+                Image(systemName: "exclamationmark.triangle")
+                    .font(.caption)
+                    .foregroundStyle(.orange)
+                    .frame(width: 24, height: 24)
+                    .overlay(Circle().strokeBorder(.orange, lineWidth: 1.2))
+            }
 
             Spacer()
         }
-    }
-
-    /// Bell icon inside a circle — matching the style of the warning icon in the "Report Violation" modal.
-    private func circledBellIcon(isOn: Bool) -> some View {
-        Image(systemName: isOn ? "bell.fill" : "bell")
-            .font(.caption)
-            .foregroundStyle(.orange)
-            .frame(width: 22, height: 22)
-            .overlay(Circle().strokeBorder(.orange, lineWidth: 1.2))
     }
 
     // MARK: - Favorite
@@ -487,20 +478,6 @@ public struct SeriesDetailView: View {
             }
             Spacer()
         }
-    }
-
-    // MARK: - Report Button
-    
-    private var reportButton: some View {
-        Button(action: onReportTapped) {
-            HStack(spacing: DSSpacing.xs) {
-                Image(systemName: "exclamationmark.triangle")
-                Text("Báo cáo vi phạm")
-            }
-            .dsFont(.footnote)
-            .foregroundStyle(DSColor.statusError)
-        }
-        .frame(maxWidth: .infinity)
     }
 
     // MARK: - Formatters
