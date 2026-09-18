@@ -143,4 +143,17 @@ extension Container {
         }
         .singleton
     }
+
+    /// "Profile" domain - decoupled from authRepository ("Auth: login/token" domain).
+    @MainActor
+    var userRepository: Factory<UserRepositoryProtocol> {
+        self {
+            if AppConfig.isDebugEnvironment {
+                return UserRepositoryMock()
+            } else {
+                return UserRepository(apiClient: self.apiClient())
+            }
+        }
+        .singleton
+    }
 }

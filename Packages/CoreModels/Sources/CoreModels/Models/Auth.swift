@@ -35,6 +35,43 @@ public struct RegisterRequest: Codable, Equatable, Sendable {
     }
 }
 
+// MARK: - Profile Update
+
+public struct UpdateProfileRequest: Codable, Sendable {
+    public var bio: String?
+    public var birthday: Date?
+    public var gender: String?
+    public var address: String?
+    public var interests: String?
+    public var socialLinks: [String: String]?
+
+    public init(
+        bio: String? = nil,
+        birthday: Date? = nil,
+        gender: String? = nil,
+        address: String? = nil,
+        interests: String? = nil,
+        socialLinks: [String: String]? = nil
+    ) {
+        self.bio = bio
+        self.birthday = birthday
+        self.gender = gender
+        self.address = address
+        self.interests = interests
+        self.socialLinks = socialLinks
+    }
+}
+
+public struct UpdateAccountRequest: Codable, Sendable {
+    public var username: String
+    public var email: String
+
+    public init(username: String, email: String) {
+        self.username = username
+        self.email = email
+    }
+}
+
 public struct ForgotPasswordRequest: Codable, Equatable, Sendable {
     public var email: String
 
