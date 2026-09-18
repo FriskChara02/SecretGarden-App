@@ -17,7 +17,8 @@ import SwiftUI
 struct RootView: View {
     @State private var rootCoordinator = RootCoordinator()
     @StateObject private var appRootViewModel = AppRootViewModel(
-        keychainManager: Container.shared.keychainManager()
+        keychainManager: Container.shared.keychainManager(),
+        userRepository: Container.shared.userRepository()
     )
 
     var body: some View {
@@ -31,12 +32,15 @@ struct RootView: View {
                     appRootViewModel.markAuthenticated()
                 })
             case .main:
-                MainTabView(onLogout: {
-                    Task {
-                        try? await Container.shared.authRepository().logout()
-                        appRootViewModel.markUnauthenticated()
+                MainTabView(
+                    currentUser: appRootViewModel.currentUser,
+                    onLogout: {
+                        Task {
+                            try? await Container.shared.authRepository().logout()
+                            appRootViewModel.markUnauthenticated()
+                        }
                     }
-                })
+                )
             }
         }
         .task {

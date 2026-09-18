@@ -8,6 +8,7 @@
 import SwiftUI
 import DesignSystem
 import CoreArchitecture
+import CoreModels
 import HomeFeature
 import FactoryKit
 import SearchFeature
@@ -17,6 +18,7 @@ struct MainTabView: View {
     @State private var coordinator = MainTabCoordinator()
     @State private var reportTarget: ReportSheetTarget?
     @State private var globalToastMessage: String?
+    let currentUser: User?
     let onLogout: () -> Void
 
     var body: some View {
@@ -74,9 +76,7 @@ struct MainTabView: View {
 
     // MARK: - Profile tab icon (guest vs logged-in)
 
-    /// TODO: Replace `avatarURL` with the actual session (AuthViewModel/KeychainManager) once
-    /// Profile & Settings are implemented. Currently, it always returns `nil` -> displays the guest icon.
-    private var avatarURL: URL? { nil }
+    private var avatarURL: URL? { currentUser?.avatarURL }
 
     @ViewBuilder
     private var profileTabLabel: some View {
