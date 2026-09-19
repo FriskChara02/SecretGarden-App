@@ -47,7 +47,11 @@ struct ProfileDetailView: View {
                         placeholderTab("Vui lòng đăng nhập để xem Tài khoản")
                     }
                 case .notifications:
-                    placeholderTab("Thông báo — Step 12.8")
+                    if currentUser != nil {
+                        NotificationSettingsView(repository: Container.shared.notificationSettingsRepository())
+                    } else {
+                        placeholderTab("Vui lòng đăng nhập để xem Thông báo")
+                    }
                 case .blockList:
                     placeholderTab("Danh sách chặn — Step 12.9-10")
                 }

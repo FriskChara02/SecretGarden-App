@@ -42,28 +42,3 @@ public struct AppNotification: Codable, Identifiable, Equatable {
 public enum NotificationType: String, Codable {
     case newChapter, commentReply, commentLike, mention
 }
-
-public struct NotificationSettings: Codable, Equatable {
-    public var pushEnabled: Bool
-    public var followedSeriesNewChapter: Bool
-    public var followedGroupNewChapter: Bool
-    public var commentReply: Bool
-    public var commentLike: Bool
-    public var mention: Bool
-
-    public init(
-        pushEnabled: Bool = true,
-        followedSeriesNewChapter: Bool = true,
-        followedGroupNewChapter: Bool = true,
-        commentReply: Bool = true,
-        commentLike: Bool = true,
-        mention: Bool = true
-    ) {
-        self.pushEnabled = pushEnabled
-        self.followedSeriesNewChapter = followedSeriesNewChapter
-        self.followedGroupNewChapter = followedGroupNewChapter
-        self.commentReply = commentReply
-        self.commentLike = commentLike
-        self.mention = mention
-    }
-}

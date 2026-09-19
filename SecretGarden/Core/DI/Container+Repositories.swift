@@ -156,4 +156,16 @@ extension Container {
         }
         .singleton
     }
+
+    @MainActor
+    var notificationSettingsRepository: Factory<NotificationSettingsRepositoryProtocol> {
+        self {
+            if AppConfig.isDebugEnvironment {
+                return NotificationSettingsRepositoryMock()
+            } else {
+                return NotificationSettingsRepository(apiClient: self.apiClient())
+            }
+        }
+        .singleton
+    }
 }
