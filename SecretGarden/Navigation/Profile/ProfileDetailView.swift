@@ -7,6 +7,8 @@
 
 import CoreModels
 import DesignSystem
+import FactoryKit
+import Repositories
 import SwiftUI
 
 enum ProfileDetailTab: String, CaseIterable {
@@ -20,6 +22,7 @@ struct ProfileDetailView: View {
     let currentUser: User?
     let onHeaderTapped: () -> Void
     let onEditTapped: () -> Void
+    let onUserUpdated: (User) -> Void
 
     @State private var selectedTab: ProfileDetailTab = .info
 
@@ -33,7 +36,16 @@ struct ProfileDetailView: View {
                 case .info:
                     ProfileInfoTabView(currentUser: currentUser, onEditTapped: onEditTapped)
                 case .account:
-                    placeholderTab("Tài khoản — Step 12.7")
+                    if let currentUser {
+                        AccountSettingsView(
+                            currentUser: currentUser,
+                            userRepository: Container.shared.userRepository(),
+                            authRepository: Container.shared.authRepository(),
+                            onUserUpdated: onUserUpdated
+                        )
+                    } else {
+                        placeholderTab("Vui lòng đăng nhập để xem Tài khoản")
+                    }
                 case .notifications:
                     placeholderTab("Thông báo — Step 12.8")
                 case .blockList:

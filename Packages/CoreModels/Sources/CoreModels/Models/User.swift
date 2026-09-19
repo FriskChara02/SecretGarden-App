@@ -14,6 +14,7 @@ public struct User: Codable, Identifiable, Equatable {
     public var username: String
     public var displayName: String?
     public var email: String
+    public var authProvider: AuthProvider
     public var avatarURL: URL?
     public var bannerURL: URL?
     public var bio: String?
@@ -31,6 +32,7 @@ public struct User: Codable, Identifiable, Equatable {
         username: String,
         displayName: String? = nil,
         email: String,
+        authProvider: AuthProvider = .email,
         avatarURL: URL? = nil,
         bannerURL: URL? = nil,
         bio: String? = nil,
@@ -47,6 +49,7 @@ public struct User: Codable, Identifiable, Equatable {
         self.username = username
         self.displayName = displayName
         self.email = email
+        self.authProvider = authProvider
         self.avatarURL = avatarURL
         self.bannerURL = bannerURL
         self.bio = bio
@@ -63,4 +66,9 @@ public struct User: Codable, Identifiable, Equatable {
 
 public enum UserRole: String, Codable {
     case user, translator, admin
+}
+
+public enum AuthProvider: String, Codable {
+    case email
+    case google
 }

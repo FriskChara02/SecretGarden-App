@@ -18,6 +18,7 @@ public actor UserRepositoryMock: UserRepositoryProtocol {
             username: "Nguyễn Bảo Lợi",
             displayName: "FriskChara",
             email: "friskchara@gmail.com",
+            authProvider: .email,
             avatarURL: nil,
             bannerURL: nil,
             bio: "Hiiiiiiiiiiii ^^",

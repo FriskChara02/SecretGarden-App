@@ -36,7 +36,8 @@ enum ProfileDestinationBuilder {
             ProfileDetailView(
                 currentUser: context.currentUser,
                 onHeaderTapped: { coordinator.popToRoot() },
-                onEditTapped: { coordinator.push(.editProfile) }
+                onEditTapped: { coordinator.push(.editProfile) },
+                onUserUpdated: context.onProfileUpdated
             )
         case .editProfile:
             if let currentUser = context.currentUser {
