@@ -15,7 +15,8 @@ public actor UserRepositoryMock: UserRepositoryProtocol {
     public init() {
         self.currentUser = User(
             id: "mock-user-1",
-            username: "Frisk(Chara)",
+            username: "Nguyễn Bảo Lợi",
+            displayName: "FriskChara",
             email: "friskchara@gmail.com",
             avatarURL: nil,
             bannerURL: nil,
@@ -39,6 +40,7 @@ public actor UserRepositoryMock: UserRepositoryProtocol {
     }
 
     public func updateProfile(_ request: UpdateProfileRequest) async throws -> User {
+        if let displayName = request.displayName { currentUser.displayName = displayName }
         if let bio = request.bio { currentUser.bio = bio }
         if let birthday = request.birthday { currentUser.birthday = birthday }
         if let gender = request.gender { currentUser.gender = gender }

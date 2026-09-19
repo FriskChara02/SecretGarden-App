@@ -19,6 +19,7 @@ struct MainTabView: View {
     @State private var reportTarget: ReportSheetTarget?
     @State private var globalToastMessage: String?
     let currentUser: User?
+    let onAuthenticated: () -> Void
     let onLogout: () -> Void
 
     var body: some View {
@@ -40,18 +41,18 @@ struct MainTabView: View {
                 .tag(MainTab.profile)
         }
         .tint(DSColor.brandPrimary)
-        .animation(.easeInOut(duration: 0.25), value: coordinator.sideMenuCoordinator.isPresented)
+        .animation(.easeInOut(duration: 0.25), value: coordinator.profileDrawerCoordinator.isPresented)
         .overlay {
-            if coordinator.sideMenuCoordinator.isPresented {
+            if coordinator.profileDrawerCoordinator.isPresented {
                 ZStack(alignment: .trailing) {
                     Color.black.opacity(0.3)
                         .ignoresSafeArea()
                         .onTapGesture {
                             withAnimation(.easeInOut(duration: 0.25)) {
-                                coordinator.sideMenuCoordinator.isPresented = false
+                                coordinator.profileDrawerCoordinator.isPresented = false
                             }
                         }
-                    SideMenuView(coordinator: coordinator.sideMenuCoordinator)
+                    ProfileDrawerView(coordinator: coordinator.profileDrawerCoordinator, onAuthenticated: onAuthenticated)
                         .frame(width: 300)
                         .transition(.move(edge: .trailing))
                 }
@@ -290,38 +291,30 @@ struct MainTabView: View {
     // MARK: - Profile Tab
 
     private var profileTab: some View {
-        NavigationStack(path: pathBinding(for: coordinator.profileCoordinator)) {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 0) {
-                    GardenHeaderView {
-                        coordinator.profileCoordinator.popToRoot()
+            NavigationStack(path: pathBinding(for: coordinator.profileCoordinator)) {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 0) {
+                        GardenHeaderView { coordinator.profileCoordinator.popToRoot() }
+                        ProfileMenuContentView(
+                            currentUser: currentUser,
+                            onLoginTapped: { coordinator.profileCoordinator.push(.login) },
+                            onLogoutTapped: onLogout,
+                            onRowTapped: { route in coordinator.profileCoordinator.push(route) }
+                        )
                     }
-
-                    VStack(spacing: DSSpacing.lg) {
-                        Text("Cá nhân — Phase 12 sẽ thay bằng ProfileView thật")
-                            .dsFont(.headline)
-
-                        DSButton("Xem demo Edit Profile", variant: .primary) {
-                            coordinator.profileCoordinator.push(.editProfile)
-                        }
-                    }
-                    .padding(DSSpacing.lg)
                 }
-            }
-            .background(DSColor.backgroundPrimary)
-            .toolbar(.hidden, for: .navigationBar)
-            .navigationDestination(for: ProfileRoute.self) { route in
-                switch route {
-                case .editProfile:
-                    Text("Edit Profile (demo)")
-                        .dsFont(.title1)
-                case .accountSettings:
-                    Text("Account Settings (demo)")
-                        .dsFont(.title1)
+                .background(DSColor.backgroundPrimary)
+                .toolbar(.hidden, for: .navigationBar)
+                .navigationDestination(for: ProfileRoute.self) { route in
+                    ProfileDestinationBuilder.destination(
+                        for: route,
+                        coordinator: coordinator.profileCoordinator,
+                        onReportTapped: { reportTarget = $0 },
+                        onAuthenticated: onAuthenticated
+                    )
                 }
             }
         }
-    }
 
     // MARK: - Helper
 

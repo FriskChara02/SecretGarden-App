@@ -38,6 +38,7 @@ public struct RegisterRequest: Codable, Equatable, Sendable {
 // MARK: - Profile Update
 
 public struct UpdateProfileRequest: Codable, Sendable {
+    public var displayName: String?
     public var bio: String?
     public var birthday: Date?
     public var gender: String?
@@ -46,6 +47,7 @@ public struct UpdateProfileRequest: Codable, Sendable {
     public var socialLinks: [String: String]?
 
     public init(
+        displayName: String? = nil,
         bio: String? = nil,
         birthday: Date? = nil,
         gender: String? = nil,
@@ -53,6 +55,7 @@ public struct UpdateProfileRequest: Codable, Sendable {
         interests: String? = nil,
         socialLinks: [String: String]? = nil
     ) {
+        self.displayName = displayName
         self.bio = bio
         self.birthday = birthday
         self.gender = gender

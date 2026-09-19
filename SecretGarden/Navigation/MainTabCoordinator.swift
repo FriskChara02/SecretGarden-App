@@ -22,15 +22,9 @@ final class MainTabCoordinator {
     let searchCoordinator = Coordinator<SearchRoute>()
     let notificationsCoordinator = Coordinator<NotificationsRoute>()
     let profileCoordinator = Coordinator<ProfileRoute>()
-    let sideMenuCoordinator = SideMenuCoordinator()
+    let profileDrawerCoordinator = ProfileDrawerCoordinator()
 
-    init() {
-        sideMenuCoordinator.onNavigateToProfileTab = { [weak self] in
-            self?.selectedTab = .profile
-        }
-    }
+    init() {}
 
-    func selectTab(_ tab: MainTab) {
-        selectedTab = tab
-    }
+    func selectTab(_ tab: MainTab) { selectedTab = tab }
 }

@@ -28,12 +28,13 @@ struct RootView: View {
                 // Very brief pause while reading the Keychain
                 Color.clear
             case .auth:
-                AuthFlowView(onAuthenticated: {
-                    appRootViewModel.markAuthenticated()
-                })
+                AuthFlowView(onAuthenticated: { appRootViewModel.markAuthenticated() })
             case .main:
                 MainTabView(
                     currentUser: appRootViewModel.currentUser,
+                    onAuthenticated: {
+                        appRootViewModel.markAuthenticated()
+                    },
                     onLogout: {
                         Task {
                             try? await Container.shared.authRepository().logout()
@@ -43,17 +44,13 @@ struct RootView: View {
                 )
             }
         }
-        .task {
-            appRootViewModel.checkSession()
-        }
+        .task { appRootViewModel.checkSession() }
         .onChange(of: appRootViewModel.sessionState) { _, newState in
             switch newState {
             case .checking:
-                break // No turning back after the initial .checking
-            case .authenticated:
+                break
+            case .authenticated, .unauthenticated:
                 rootCoordinator.switchToMain()
-            case .unauthenticated:
-                rootCoordinator.switchToAuth()
             }
         }
     }

@@ -12,6 +12,7 @@ import Foundation
 public struct User: Codable, Identifiable, Equatable {
     public let id: String
     public var username: String
+    public var displayName: String?
     public var email: String
     public var avatarURL: URL?
     public var bannerURL: URL?
@@ -28,6 +29,7 @@ public struct User: Codable, Identifiable, Equatable {
     public init(
         id: String,
         username: String,
+        displayName: String? = nil,
         email: String,
         avatarURL: URL? = nil,
         bannerURL: URL? = nil,
@@ -43,6 +45,7 @@ public struct User: Codable, Identifiable, Equatable {
     ) {
         self.id = id
         self.username = username
+        self.displayName = displayName
         self.email = email
         self.avatarURL = avatarURL
         self.bannerURL = bannerURL

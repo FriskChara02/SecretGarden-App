@@ -73,13 +73,8 @@ public struct LoginView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
 
-                DSButton(
-                    "Đăng nhập",
-                    variant: .primary,
-                    isLoading: viewModel.loginState.isSubmitting
-                ) {
-                    //viewModel.login()
-                    onLoginSuccess()
+                DSButton("Đăng nhập", variant: .primary, isLoading: viewModel.loginState.isSubmitting) {
+                    viewModel.login()
                 }
 
                 DSButton("Khôi phục mật khẩu?", variant: .text, size: .medium) {
