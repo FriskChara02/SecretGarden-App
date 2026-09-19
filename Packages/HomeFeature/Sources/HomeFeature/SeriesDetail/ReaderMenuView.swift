@@ -7,6 +7,7 @@
 
 // Popup menu — slides in from the right, following the standard pattern (using the default .sheet, provides the correct behavior).
 
+import CoreArchitecture
 import CoreModels
 import DesignSystem
 import SwiftUI
@@ -14,8 +15,7 @@ import SwiftUI
 struct ReaderMenuView: View {
     @ObservedObject var viewModel: ChapterReaderViewModel
     let onHomeTapped: () -> Void
-    /// TODO: Replace with the actual ThemeManager. Local placeholder to prevent the UI from freezing.
-    @State private var isDarkModePlaceholder = false
+    @EnvironmentObject private var themeManager: ThemeManager
     @State private var isReadingStatusExpanded = false
 
     private let contentVerticalOffset: CGFloat = 60
@@ -61,7 +61,16 @@ struct ReaderMenuView: View {
                         set: { _ in viewModel.toggleNotify() }
                     ))
                     Divider()
-                    toggleRow(icon: "sun.max", activeIcon: "moon.stars.fill", title: "Chế độ sáng/tối", isOn: $isDarkModePlaceholder, useThemeStyle: true)
+                    toggleRow(
+                            icon: "sun.max",
+                            activeIcon: "moon.stars.fill",
+                            title: "Chế độ sáng/tối",
+                            isOn: Binding(
+                                get: { themeManager.isDarkMode },
+                                set: { _ in themeManager.toggle() }
+                            ),
+                            useThemeStyle: true
+                        )
                 }
 
                 readingStatusDropdown

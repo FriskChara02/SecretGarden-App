@@ -5,6 +5,7 @@
 //  Created by Loi Nguyen on 19/9/26.
 //
 
+import CoreArchitecture
 import CoreModels
 import DesignSystem
 import SwiftUI
@@ -15,9 +16,7 @@ struct ProfileMenuContentView: View {
     let onLogoutTapped: () -> Void
     let onRowTapped: (ProfileRoute) -> Void
 
-    /// TODO: replace with the actual ThemeManager - local placeholder,
-    /// following the same pattern as ReaderMenuView.
-    @State private var isDarkModePlaceholder = false
+    @EnvironmentObject private var themeManager: ThemeManager
 
     private struct MenuRow: Identifiable {
         let id = UUID()
@@ -88,7 +87,10 @@ struct ProfileMenuContentView: View {
                     .dsFont(.subheadline).fontWeight(.bold)
                     .foregroundStyle(DSColor.brandPrimary)
                 }
-                Toggle("", isOn: $isDarkModePlaceholder)
+                Toggle("", isOn: Binding(
+                        get: { themeManager.isDarkMode },
+                        set: { _ in themeManager.toggle() }
+                    ))
                     .labelsHidden()
                     .toggleStyle(DSThemeToggleStyle())
             }

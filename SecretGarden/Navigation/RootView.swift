@@ -10,12 +10,14 @@
 // RootCoordinator itself knows nothing about Auth/Keychain.
 
 import AuthFeature
+import CoreArchitecture
 import FactoryKit
 import Repositories
 import SwiftUI
 
 struct RootView: View {
     @State private var rootCoordinator = RootCoordinator()
+    @StateObject private var themeManager = ThemeManager()
     @StateObject private var appRootViewModel = AppRootViewModel(
         keychainManager: Container.shared.keychainManager(),
         userRepository: Container.shared.userRepository()
@@ -44,6 +46,8 @@ struct RootView: View {
                 )
             }
         }
+        .environmentObject(themeManager)
+        .preferredColorScheme(themeManager.isDarkMode ? .dark : .light)
         .task { appRootViewModel.checkSession() }
         .onChange(of: appRootViewModel.sessionState) { _, newState in
             switch newState {
