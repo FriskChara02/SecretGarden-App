@@ -7,6 +7,7 @@
 
 import AuthFeature
 import CoreArchitecture
+import CoreModels
 import HomeFeature
 import SearchFeature
 import SocialFeature
@@ -21,11 +22,20 @@ enum ProfileDestinationBuilder {
     static func destination(
         for route: ProfileRoute,
         coordinator: Coordinator<ProfileRoute>,
+        currentUser: User?,
         onReportTapped: @escaping (ReportSheetTarget) -> Void,
         onAuthenticated: @escaping () -> Void
     ) -> some View {
         switch route {
-        case .personalInfo, .favorites, .history, .category, .yuriList, .uploadRegistration, .rules:
+        case .personalInfo:
+            ProfileDetailView(
+                currentUser: currentUser,
+                onHeaderTapped: { coordinator.popToRoot() },
+                onEditTapped: { coordinator.push(.editProfile) }
+            )
+        case .editProfile:
+            Text("Edit Profile (demo) — Step 12.6").dsFont(.title1)
+        case .favorites, .history, .category, .yuriList, .uploadRegistration, .rules:
             placeholderDestination(for: route)
         case .followedGroups, .discoverGroups, .groupProfile, .authorProfile:
             socialDestination(for: route, coordinator: coordinator)

@@ -52,7 +52,11 @@ struct MainTabView: View {
                                 coordinator.profileDrawerCoordinator.isPresented = false
                             }
                         }
-                    ProfileDrawerView(coordinator: coordinator.profileDrawerCoordinator, onAuthenticated: onAuthenticated)
+                    ProfileDrawerView(
+                        coordinator: coordinator.profileDrawerCoordinator,
+                        currentUser: currentUser,
+                        onAuthenticated: onAuthenticated
+                    )
                         .frame(width: 300)
                         .transition(.move(edge: .trailing))
                 }
@@ -309,6 +313,7 @@ struct MainTabView: View {
                     ProfileDestinationBuilder.destination(
                         for: route,
                         coordinator: coordinator.profileCoordinator,
+                        currentUser: currentUser,
                         onReportTapped: { reportTarget = $0 },
                         onAuthenticated: onAuthenticated
                     )

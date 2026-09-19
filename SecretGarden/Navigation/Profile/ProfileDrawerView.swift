@@ -15,9 +15,11 @@ import FactoryKit
 import SwiftUI
 import DesignSystem
 import CoreArchitecture
+import CoreModels
 
 struct ProfileDrawerView: View {
     @Bindable var coordinator: ProfileDrawerCoordinator
+    let currentUser: User?
     let onAuthenticated: () -> Void
     @State private var reportTarget: ReportSheetTarget?
     @State private var globalToastMessage: String?
@@ -55,6 +57,7 @@ struct ProfileDrawerView: View {
                 ProfileDestinationBuilder.destination(
                     for: route,
                     coordinator: coordinator.contentCoordinator,
+                    currentUser: currentUser,
                     onReportTapped: { reportTarget = $0 },
                     onAuthenticated: onAuthenticated
                 )

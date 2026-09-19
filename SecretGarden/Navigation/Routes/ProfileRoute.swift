@@ -11,6 +11,7 @@ import Foundation
 
 enum ProfileRoute: Hashable {
     case personalInfo
+    case editProfile
     case favorites
     case followedGroups
     case history
