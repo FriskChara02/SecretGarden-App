@@ -20,6 +20,7 @@ struct MainTabView: View {
     @State private var globalToastMessage: String?
     let currentUser: User?
     let onAuthenticated: () -> Void
+    let onProfileUpdated: (User) -> Void
     let onLogout: () -> Void
 
     var body: some View {
@@ -55,7 +56,8 @@ struct MainTabView: View {
                     ProfileDrawerView(
                         coordinator: coordinator.profileDrawerCoordinator,
                         currentUser: currentUser,
-                        onAuthenticated: onAuthenticated
+                        onAuthenticated: onAuthenticated,
+                        onProfileUpdated: onProfileUpdated
                     )
                         .frame(width: 300)
                         .transition(.move(edge: .trailing))
@@ -313,9 +315,12 @@ struct MainTabView: View {
                     ProfileDestinationBuilder.destination(
                         for: route,
                         coordinator: coordinator.profileCoordinator,
-                        currentUser: currentUser,
-                        onReportTapped: { reportTarget = $0 },
-                        onAuthenticated: onAuthenticated
+                        context: ProfileDestinationContext(
+                            currentUser: currentUser,
+                            onAuthenticated: onAuthenticated,
+                            onProfileUpdated: onProfileUpdated
+                        ),
+                        onReportTapped: { reportTarget = $0 }
                     )
                 }
             }

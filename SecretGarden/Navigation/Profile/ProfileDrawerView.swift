@@ -21,6 +21,7 @@ struct ProfileDrawerView: View {
     @Bindable var coordinator: ProfileDrawerCoordinator
     let currentUser: User?
     let onAuthenticated: () -> Void
+    let onProfileUpdated: (User) -> Void
     @State private var reportTarget: ReportSheetTarget?
     @State private var globalToastMessage: String?
 
@@ -57,9 +58,12 @@ struct ProfileDrawerView: View {
                 ProfileDestinationBuilder.destination(
                     for: route,
                     coordinator: coordinator.contentCoordinator,
-                    currentUser: currentUser,
-                    onReportTapped: { reportTarget = $0 },
-                    onAuthenticated: onAuthenticated
+                    context: ProfileDestinationContext(
+                        currentUser: currentUser,
+                        onAuthenticated: onAuthenticated,
+                        onProfileUpdated: onProfileUpdated
+                    ),
+                    onReportTapped: { reportTarget = $0 }
                 )
             }
         }

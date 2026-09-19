@@ -8,13 +8,19 @@
 import AuthFeature
 import CoreArchitecture
 import CoreModels
+import DesignSystem
+import FactoryKit
 import HomeFeature
+import Repositories
 import SearchFeature
 import SocialFeature
-import Repositories
-import FactoryKit
 import SwiftUI
-import DesignSystem
+
+struct ProfileDestinationContext {
+    let currentUser: User?
+    let onAuthenticated: () -> Void
+    let onProfileUpdated: (User) -> Void
+}
 
 enum ProfileDestinationBuilder {
 
@@ -22,19 +28,30 @@ enum ProfileDestinationBuilder {
     static func destination(
         for route: ProfileRoute,
         coordinator: Coordinator<ProfileRoute>,
-        currentUser: User?,
-        onReportTapped: @escaping (ReportSheetTarget) -> Void,
-        onAuthenticated: @escaping () -> Void
+        context: ProfileDestinationContext,
+        onReportTapped: @escaping (ReportSheetTarget) -> Void
     ) -> some View {
         switch route {
         case .personalInfo:
             ProfileDetailView(
-                currentUser: currentUser,
+                currentUser: context.currentUser,
                 onHeaderTapped: { coordinator.popToRoot() },
                 onEditTapped: { coordinator.push(.editProfile) }
             )
         case .editProfile:
-            Text("Edit Profile (demo) — Step 12.6").dsFont(.title1)
+            if let currentUser = context.currentUser {
+                EditProfileView(
+                    currentUser: currentUser,
+                    userRepository: Container.shared.userRepository(),
+                    onSaved: { updated in
+                        context.onProfileUpdated(updated)
+                        coordinator.pop()
+                    },
+                    onCancel: { coordinator.pop() }
+                )
+            } else {
+                EmptyView()
+            }
         case .favorites, .history, .category, .yuriList, .uploadRegistration, .rules:
             placeholderDestination(for: route)
         case .followedGroups, .discoverGroups, .groupProfile, .authorProfile:
@@ -50,7 +67,7 @@ enum ProfileDestinationBuilder {
         case .login:
             AuthFlowView(onAuthenticated: {
                 coordinator.popToRoot()
-                onAuthenticated()
+                context.onAuthenticated()
             })
         }
     }
@@ -75,14 +92,17 @@ enum ProfileDestinationBuilder {
         case .rules:
             Text("Rules/Policy (demo)").dsFont(.title1)
         default:
-            EmptyView() // unreachable — caller only forwards these 7 cases here
+            EmptyView()
         }
     }
 
     // MARK: - Group/Author (SocialFeature)
 
     @ViewBuilder
-    private static func socialDestination(for route: ProfileRoute, coordinator: Coordinator<ProfileRoute>) -> some View {
+    private static func socialDestination(
+        for route: ProfileRoute,
+        coordinator: Coordinator<ProfileRoute>
+    ) -> some View {
         switch route {
         case .followedGroups:
             FollowedGroupsView(
@@ -109,7 +129,7 @@ enum ProfileDestinationBuilder {
                 onSeriesSelected: { seriesId in coordinator.push(.seriesDetail(id: seriesId)) }
             )
         default:
-            EmptyView() // unreachable — caller only forwards these 4 cases here
+            EmptyView()
         }
     }
 
@@ -147,7 +167,7 @@ enum ProfileDestinationBuilder {
                 onReportTapped: { onReportTapped(ReportSheetTarget(seriesId: seriesId, chapterId: chapterId)) }
             )
         default:
-            EmptyView() // unreachable — caller only forwards these 2 cases here
+            EmptyView()
         }
     }
 }

@@ -37,6 +37,9 @@ struct RootView: View {
                     onAuthenticated: {
                         appRootViewModel.markAuthenticated()
                     },
+                    onProfileUpdated: { updatedUser in
+                        appRootViewModel.updateCachedUser(updatedUser)
+                    },
                     onLogout: {
                         Task {
                             try? await Container.shared.authRepository().logout()
