@@ -168,4 +168,16 @@ extension Container {
         }
         .singleton
     }
+
+    @MainActor
+    var blockListRepository: Factory<BlockListRepositoryProtocol> {
+        self {
+            if AppConfig.isDebugEnvironment {
+                return BlockListRepositoryMock()
+            } else {
+                return BlockListRepository(apiClient: self.apiClient())
+            }
+        }
+        .singleton
+    }
 }
