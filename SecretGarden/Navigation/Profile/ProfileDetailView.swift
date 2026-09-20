@@ -53,7 +53,14 @@ struct ProfileDetailView: View {
                         placeholderTab("Vui lòng đăng nhập để xem Thông báo")
                     }
                 case .blockList:
-                    placeholderTab("Danh sách chặn — Step 12.9-10")
+                    if currentUser != nil {
+                        BlockListView(
+                            repository: Container.shared.blockListRepository(),
+                            searchRepository: Container.shared.searchRepository()
+                        )
+                    } else {
+                        placeholderTab("Vui lòng đăng nhập để xem Danh sách chặn")
+                    }
                 }
             }
         }

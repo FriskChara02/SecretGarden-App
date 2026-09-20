@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct BlockedTagItem: Codable, Identifiable, Sendable {
+public struct BlockedTagItem: Codable, Identifiable, Equatable, Sendable {
     public let id: String
     public var tag: Tag
     public var blockedAt: Date
