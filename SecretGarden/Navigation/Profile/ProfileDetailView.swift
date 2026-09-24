@@ -21,20 +21,26 @@ enum ProfileDetailTab: String, CaseIterable {
 struct ProfileDetailView: View {
     let currentUser: User?
     let onHeaderTapped: () -> Void
-    let onEditTapped: () -> Void
     let onUserUpdated: (User) -> Void
+    let onSuccessMessage: (String) -> Void
 
     @State private var selectedTab: ProfileDetailTab = .info
+    @State private var isEditProfilePresented = false
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
                 GardenHeaderView(onTap: onHeaderTapped)
-                tabBar
+                ProfileSubTabBar(selectedTab: $selectedTab)
 
                 switch selectedTab {
                 case .info:
-                    ProfileInfoTabView(currentUser: currentUser, onEditTapped: onEditTapped)
+                    ProfileInfoTabView(
+                        currentUser: currentUser,
+                        onEditTapped: { isEditProfilePresented = true },
+                        userRepository: Container.shared.userRepository(),
+                        onUserUpdated: onUserUpdated
+                    )
                 case .account:
                     if let currentUser {
                         AccountSettingsView(
@@ -56,7 +62,8 @@ struct ProfileDetailView: View {
                     if currentUser != nil {
                         BlockListView(
                             repository: Container.shared.blockListRepository(),
-                            searchRepository: Container.shared.searchRepository()
+                            searchRepository: Container.shared.searchRepository(),
+                            onSuccessMessage: onSuccessMessage
                         )
                     } else {
                         placeholderTab("Vui lòng đăng nhập để xem Danh sách chặn")
@@ -66,31 +73,19 @@ struct ProfileDetailView: View {
         }
         .background(DSColor.backgroundPrimary)
         .toolbar(.hidden, for: .navigationBar)
-    }
-
-    private var tabBar: some View {
-        HStack(spacing: 0) {
-            ForEach(ProfileDetailTab.allCases, id: \.self) { tab in
-                Button {
-                    withAnimation(.easeInOut(duration: 0.2)) { selectedTab = tab }
-                } label: {
-                    VStack(spacing: DSSpacing.xs) {
-                        Text(tab.rawValue)
-                            .dsFont(.subheadline)
-                            .fontWeight(selectedTab == tab ? .bold : .regular)
-                            .foregroundStyle(selectedTab == tab ? DSColor.brandPrimary : DSColor.textSecondary)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.7)
-                        Rectangle()
-                            .fill(selectedTab == tab ? DSColor.brandPrimary : .clear)
-                            .frame(height: 2)
-                    }
-                }
-                .frame(maxWidth: .infinity)
+        .sheet(isPresented: $isEditProfilePresented) {
+            if let currentUser {
+                EditProfileView(
+                    currentUser: currentUser,
+                    userRepository: Container.shared.userRepository(),
+                    onSaved: { updated in
+                        onUserUpdated(updated)
+                        isEditProfilePresented = false
+                    },
+                    onCancel: { isEditProfilePresented = false }
+                )
             }
         }
-        .padding(.top, DSSpacing.sm)
-        .background(DSColor.backgroundPrimary)
     }
 
     private func placeholderTab(_ text: String) -> some View {
@@ -99,5 +94,41 @@ struct ProfileDetailView: View {
             .foregroundStyle(DSColor.textSecondary)
             .frame(maxWidth: .infinity)
             .padding(.top, DSSpacing.xxl)
+    }
+}
+
+struct ProfileSubTabBar: View {
+    @Binding var selectedTab: ProfileDetailTab
+
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: DSSpacing.lg) {
+                ForEach(ProfileDetailTab.allCases, id: \.self) { tab in
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.2)) { selectedTab = tab }
+                    } label: {
+                        VStack(spacing: DSSpacing.xxs) {
+                            Text(tab.rawValue.uppercased())
+                                .font(.system(size: 15, weight: selectedTab == tab ? .bold : .semibold))
+                                .foregroundStyle(selectedTab == tab ? .white : .white.opacity(0.6))
+                                .fixedSize()
+                            Rectangle()
+                                .fill(selectedTab == tab ? .white : .clear)
+                                .frame(height: 2)
+                        }
+                    }
+                }
+            }
+            .padding(.horizontal, DSSpacing.md)
+        }
+        .padding(.vertical, DSSpacing.sm)
+        .frame(maxWidth: .infinity)
+        .background(
+            LinearGradient(
+                colors: [DSColor.brandPrimary, DSColor.brandPrimary.opacity(0.85)],
+                startPoint: .leading,
+                endPoint: .trailing
+            )
+        )
     }
 }

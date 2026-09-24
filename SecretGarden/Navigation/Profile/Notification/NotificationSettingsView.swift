@@ -19,44 +19,68 @@ struct NotificationSettingsView: View {
     }
 
     var body: some View {
-        VStack(spacing: DSSpacing.lg) {
-            sectionTitle
+            VStack(spacing: DSSpacing.lg) {
+                sectionTitle
+                DSSectionDivider()
+                    .padding(.bottom, DSSpacing.md)
 
-            switch viewModel.state {
-            case .idle, .loading:
-                ProgressView().padding(.top, DSSpacing.xxl)
-            case .failed(let error):
-                VStack(spacing: DSSpacing.md) {
-                    Text(error.errorDescription ?? "Đã có lỗi xảy ra.")
-                        .dsFont(.subheadline).foregroundStyle(DSColor.textSecondary)
-                    DSButton("Thử lại", variant: .primary) { viewModel.load() }
+                VStack(spacing: DSSpacing.lg) {
+                    switch viewModel.state {
+                    case .idle, .loading:
+                        ProgressView().padding(.top, DSSpacing.xxl)
+                    case .failed(let error):
+                        VStack(spacing: DSSpacing.md) {
+                            Text(error.errorDescription ?? "Đã có lỗi xảy ra.")
+                                .font(.system(size: 15))
+                                .foregroundStyle(DSColor.textSecondary)
+                            DSButton("Thử lại", variant: .primary) { viewModel.load() }
+                        }
+                        .padding(.top, DSSpacing.xxl)
+                    case .loaded(let settings):
+                        settingsRows(settings)
+                    }
+                    if let error = viewModel.actionErrorMessage {
+                        Text(error).font(.caption).foregroundStyle(DSColor.statusError)
+                    }
                 }
-                .padding(.top, DSSpacing.xxl)
-            case .loaded(let settings):
-                settingsRows(settings)
-            }
+                .padding(.horizontal, DSSpacing.md)
 
-            if let error = viewModel.actionErrorMessage {
-                Text(error).dsFont(.footnote).foregroundStyle(DSColor.statusError)
+                DSSectionDivider()
+
+                GardenFooterView(
+                    policyLinks: [GardenFooterLink(title: "Chính sách", action: {})],
+                    socialLinks: [
+                        GardenFooterLink(title: "Discord", action: {}),
+                        GardenFooterLink(title: "Facebook", action: {})
+                    ],
+                    onPolicyTapped: {}
+                )
             }
+            .padding(.vertical, DSSpacing.lg)
+            .onAppear { viewModel.onAppear() }
         }
-        .padding(DSSpacing.lg)
-        .onAppear { viewModel.onAppear() }
-    }
 
     private var sectionTitle: some View {
         HStack {
-            Image(systemName: "diamond.inset.filled").font(.system(size: 8)).foregroundStyle(DSColor.brandPrimary)
-            Text("Thông báo").dsFont(.headline).fontWeight(.bold).foregroundStyle(DSColor.brandPrimary)
-            Image(systemName: "diamond.inset.filled").font(.system(size: 8)).foregroundStyle(DSColor.brandPrimary)
+            Image(systemName: "diamond.inset.filled")
+                .font(.system(size: 9))
+                .foregroundStyle(DSColor.brandPrimary)
+            Text("Thông báo")
+                .font(.system(size: 20, weight: .bold))
+                .foregroundStyle(DSColor.brandPrimary)
+            Image(systemName: "diamond.inset.filled")
+                .font(.system(size: 9))
+                .foregroundStyle(DSColor.brandPrimary)
         }
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, DSSpacing.md)
     }
 
     @ViewBuilder
     private func settingsRows(_ settings: NotificationSettings) -> some View {
         toggleRow(
             title: "Nhận thông báo đẩy trên thiết bị này",
-            subtitle: settings.pushEnabled ? "Trạng thái: Đang bật trên thiết bị này" : "Trạng thái: Đang tắt",
+            subtitle: settings.pushEnabled ? "Trạng thái: Đang bật trên thiết bị này" : "Trạng thái: Chưa bật trên thiết bị này",
             subtitleColor: settings.pushEnabled ? DSColor.statusSuccess : DSColor.textSecondary,
             isOn: settings.pushEnabled,
             toggle: { viewModel.toggle(\.pushEnabled) }
@@ -90,23 +114,20 @@ struct NotificationSettingsView: View {
     }
 
     private func toggleRow(
-        title: String,
-        subtitle: String? = nil,
-        subtitleColor: Color = DSColor.textSecondary,
-        isOn: Bool,
-        toggle: @escaping () -> Void
+        title: String, subtitle: String? = nil, subtitleColor: Color = DSColor.textSecondary,
+        isOn: Bool, toggle: @escaping () -> Void
     ) -> some View {
         HStack(alignment: .top) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title).dsFont(.subheadline).fontWeight(.bold).foregroundStyle(DSColor.textPrimary)
-                if let subtitle {
-                    Text(subtitle).dsFont(.caption).foregroundStyle(subtitleColor)
-                }
-            }
-            Spacer()
             Toggle("", isOn: Binding(get: { isOn }, set: { _ in toggle() }))
                 .labelsHidden()
                 .toggleStyle(DSBellToggleStyle())
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title).font(.system(size: 17, weight: .bold)).foregroundStyle(DSColor.textPrimary)
+                if let subtitle {
+                    Text(subtitle).font(.system(size: 13)).foregroundStyle(subtitleColor)
+                }
+            }
+            Spacer()
         }
         .padding(.vertical, DSSpacing.xs)
     }

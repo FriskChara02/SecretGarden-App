@@ -29,6 +29,7 @@ public struct DSThemeToggleStyle: ToggleStyle {
                             .foregroundStyle(.white.opacity(0.6))
                             .padding(.trailing, 7)
                     }
+                    .frame(width: 50, height: 30)
                 }
 
                 Circle()

@@ -14,34 +14,49 @@ import CoreArchitecture
 struct AuthFlowView: View {
     @State private var authCoordinator = AuthCoordinator()
     let onAuthenticated: () -> Void
+    var embedsOwnNavigationStack: Bool = true
 
     var body: some View {
-        NavigationStack(path: pathBinding) {
-            LoginView(
+        Group {
+            if embedsOwnNavigationStack {
+                NavigationStack(path: pathBinding) {
+                    loginContent
+                        .navigationDestination(for: AuthRoute.self, destination: destinationView)
+                }
+            } else {
+                loginContent
+                    .navigationDestination(for: AuthRoute.self, destination: destinationView)
+            }
+        }
+    }
+
+    private var loginContent: some View {
+        LoginView(
+            repository: Container.shared.authRepository(),
+            googleAuthService: makeGoogleAuthService(),
+            onLoginSuccess: onAuthenticated,
+            onNavigateToRegister: { authCoordinator.show(.register) },
+            onNavigateToForgotPassword: { authCoordinator.show(.forgotPassword) }
+        )
+    }
+
+    @ViewBuilder
+    private func destinationView(for route: AuthRoute) -> some View {
+        switch route {
+        case .register:
+            RegisterView(
+                repository: Container.shared.authRepository(),
+                googleAuthService: makeGoogleAuthService(),
+                onRegisterSuccess: onAuthenticated,
+                onNavigateToLogin: { authCoordinator.showLogin() }
+            )
+        case .forgotPassword:
+            ForgotPasswordView(
                 repository: Container.shared.authRepository(),
                 googleAuthService: makeGoogleAuthService(),
                 onLoginSuccess: onAuthenticated,
-                onNavigateToRegister: { authCoordinator.show(.register) },
-                onNavigateToForgotPassword: { authCoordinator.show(.forgotPassword) }
+                onNavigateBackToLogin: { authCoordinator.showLogin() }
             )
-            .navigationDestination(for: AuthRoute.self) { route in
-                switch route {
-                case .register:
-                    RegisterView(
-                        repository: Container.shared.authRepository(),
-                        googleAuthService: makeGoogleAuthService(),
-                        onRegisterSuccess: onAuthenticated,
-                        onNavigateToLogin: { authCoordinator.showLogin() }
-                    )
-                case .forgotPassword:
-                    ForgotPasswordView(
-                        repository: Container.shared.authRepository(),
-                        googleAuthService: makeGoogleAuthService(),
-                        onLoginSuccess: onAuthenticated,
-                        onNavigateBackToLogin: { authCoordinator.showLogin() }
-                    )
-                }
-            }
         }
     }
 

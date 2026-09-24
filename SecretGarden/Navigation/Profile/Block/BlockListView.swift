@@ -15,62 +15,118 @@ struct BlockListView: View {
     @StateObject private var viewModel: BlockListViewModel
     @State private var isCategoryPickerExpanded = false
     @State private var isAddBlockModalPresented = false
+    let onSuccessMessage: (String) -> Void
 
-    init(repository: BlockListRepositoryProtocol, searchRepository: SearchRepositoryProtocol) {
-        _viewModel = StateObject(wrappedValue: BlockListViewModel(repository: repository, searchRepository: searchRepository))
+    init(
+        repository: BlockListRepositoryProtocol,
+        searchRepository: SearchRepositoryProtocol,
+        onSuccessMessage: @escaping (String) -> Void
+    ) {
+        _viewModel = StateObject(
+            wrappedValue: BlockListViewModel(
+                repository: repository,
+                searchRepository: searchRepository
+            )
+        )
+        self.onSuccessMessage = onSuccessMessage
     }
 
     var body: some View {
-        VStack(spacing: DSSpacing.lg) {
-            sectionTitle
-            categoryPicker
+        VStack(spacing: 0) {
+            VStack(spacing: DSSpacing.lg) {
+                sectionTitle
+                categoryPicker
 
-            switch viewModel.selectedCategory {
-            case .series:
-                seriesContent
-            case .tags:
-                tagsContent
+                VStack(spacing: DSSpacing.sm) {
+                    switch viewModel.selectedCategory {
+                    case .series: seriesContent
+                    case .tags: tagsContent
+                    }
+                }
+                .padding(.top, DSSpacing.xxl)
             }
+            .padding(.horizontal, DSSpacing.md)
+            .padding(.top, DSSpacing.lg)
+
+            DSSectionDivider()
+                .padding(.top, 300)
+                .padding(.bottom, 10)
+
+            GardenFooterView(
+                policyLinks: [GardenFooterLink(title: "Chính sách", action: {})],
+                socialLinks: [GardenFooterLink(title: "Discord", action: {}), GardenFooterLink(title: "Facebook", action: {})],
+                onPolicyTapped: {}
+            )
         }
-        .padding(DSSpacing.lg)
         .onAppear { viewModel.onAppear() }
-        .sheet(isPresented: $isAddBlockModalPresented) {
-            AddBlockModalView(viewModel: viewModel, category: viewModel.selectedCategory)
+        // BlockListView.swift
+        .fullScreenCover(isPresented: $isAddBlockModalPresented) {
+            AddBlockModalView(viewModel: viewModel, category: viewModel.selectedCategory) {
+                isAddBlockModalPresented = false
+            }
+            .ignoresSafeArea(.all)
+        }
+        .transaction { transaction in
+            transaction.disablesAnimations = true
         }
         .alert(
             "Có lỗi xảy ra",
-            isPresented: Binding(get: { viewModel.actionErrorMessage != nil }, set: { if !$0 { viewModel.dismissActionError() } })
+            isPresented: Binding(
+                get: { viewModel.actionErrorMessage != nil },
+                set: { if !$0 { viewModel.dismissActionError() } }
+            )
         ) {
             Button("Đã hiểu", role: .cancel) { viewModel.dismissActionError() }
         } message: {
             Text(viewModel.actionErrorMessage ?? "")
         }
+        .onChange(of: viewModel.successMessage) { _, newValue in
+            if let newValue {
+                onSuccessMessage(newValue)
+            }
+        }
     }
 
     private var sectionTitle: some View {
         HStack {
-            Image(systemName: "diamond.inset.filled").font(.system(size: 8)).foregroundStyle(DSColor.brandPrimary)
-            Text("Danh sách chặn").dsFont(.headline).fontWeight(.bold).foregroundStyle(DSColor.brandPrimary)
-            Image(systemName: "diamond.inset.filled").font(.system(size: 8)).foregroundStyle(DSColor.brandPrimary)
+            Image(systemName: "diamond.inset.filled")
+                .font(.system(size: 8))
+                .foregroundStyle(DSColor.brandPrimary)
+            Text("Danh sách chặn")
+                .dsFont(.headline)
+                .fontWeight(.bold)
+                .foregroundStyle(DSColor.brandPrimary)
+            Image(systemName: "diamond.inset.filled")
+                .font(.system(size: 8))
+                .foregroundStyle(DSColor.brandPrimary)
         }
     }
 
     private var categoryPicker: some View {
         HStack {
             Button {
-                withAnimation(.easeInOut(duration: 0.2)) { isCategoryPickerExpanded.toggle() }
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    isCategoryPickerExpanded.toggle()
+                }
             } label: {
                 HStack {
                     Text("Chọn danh sách: \(viewModel.selectedCategory.rawValue)")
                     Spacer()
                     Image(systemName: isCategoryPickerExpanded ? "chevron.up" : "chevron.down")
                 }
-                .dsFont(.subheadline).fontWeight(.semibold)
+                .dsFont(.subheadline)
+                .fontWeight(.semibold)
                 .foregroundStyle(DSColor.brandPrimary)
-                .padding(.horizontal, DSSpacing.md).padding(.vertical, DSSpacing.sm)
+                .padding(.horizontal, DSSpacing.md)
+                .padding(.vertical, DSSpacing.sm)
                 .overlay(Capsule().strokeBorder(DSColor.brandPrimary, lineWidth: 1.5))
             }
-            Button { isAddBlockModalPresented = true } label: {
+
+            Button {
+                withAnimation {
+                    isAddBlockModalPresented = true
+                }
+            } label: {
                 Image(systemName: "plus")
                     .foregroundStyle(DSColor.brandPrimary)
                     .frame(width: 40, height: 40)
@@ -79,7 +135,9 @@ struct BlockListView: View {
         }
         .overlay(alignment: .topLeading) {
             if isCategoryPickerExpanded {
-                categoryDropdown.offset(y: 46).zIndex(1)
+                categoryDropdown
+                    .offset(y: 46)
+                    .zIndex(1)
             }
         }
     }
@@ -96,14 +154,21 @@ struct BlockListView: View {
                         Text(category.rawValue)
                         Spacer()
                         if viewModel.selectedCategory == category {
-                            Circle().fill(DSColor.brandPrimary).frame(width: 6, height: 6)
+                            Circle()
+                                .fill(DSColor.brandPrimary)
+                                .frame(width: 6, height: 6)
                         }
                     }
-                    .dsFont(.subheadline).fontWeight(.semibold)
+                    .dsFont(.subheadline)
+                    .fontWeight(.semibold)
                     .foregroundStyle(DSColor.textPrimary)
                     .padding(DSSpacing.md)
                 }
-                .background(viewModel.selectedCategory == category ? DSColor.brandPrimaryLight.opacity(0.15) : Color.clear)
+                .background(
+                    viewModel.selectedCategory == category
+                        ? DSColor.brandPrimaryLight.opacity(0.15)
+                        : Color.clear
+                )
             }
         }
         .background(DSColor.backgroundPrimary)
@@ -116,9 +181,12 @@ struct BlockListView: View {
     private var seriesContent: some View {
         switch viewModel.blockedSeriesState {
         case .idle, .loading:
-            ProgressView().padding(.top, DSSpacing.xxl)
+            ProgressView()
+                .padding(.top, DSSpacing.xxl)
         case .failed(let error):
-            errorView(error.errorDescription ?? "Đã có lỗi xảy ra.") { viewModel.loadBlockedSeries() }
+            errorView(error.errorDescription ?? "Đã có lỗi xảy ra.") {
+                viewModel.loadBlockedSeries()
+            }
         case .loaded(let items) where items.isEmpty:
             emptyState
         case .loaded(let items):
@@ -136,9 +204,12 @@ struct BlockListView: View {
     private var tagsContent: some View {
         switch viewModel.blockedTagsState {
         case .idle, .loading:
-            ProgressView().padding(.top, DSSpacing.xxl)
+            ProgressView()
+                .padding(.top, DSSpacing.xxl)
         case .failed(let error):
-            errorView(error.errorDescription ?? "Đã có lỗi xảy ra.") { viewModel.loadBlockedTags() }
+            errorView(error.errorDescription ?? "Đã có lỗi xảy ra.") {
+                viewModel.loadBlockedTags()
+            }
         case .loaded(let items) where items.isEmpty:
             emptyState
         case .loaded(let items):
@@ -152,7 +223,11 @@ struct BlockListView: View {
         }
     }
 
-    private func blockedRow(title: String, imageURL: URL?, onDelete: @escaping () -> Void) -> some View {
+    private func blockedRow(
+        title: String,
+        imageURL: URL?,
+        onDelete: @escaping () -> Void
+    ) -> some View {
         HStack(spacing: DSSpacing.sm) {
             if let imageURL {
                 AsyncImage(url: imageURL) { phase in
@@ -171,19 +246,33 @@ struct BlockListView: View {
                     .background(DSColor.backgroundSecondary)
                     .clipShape(RoundedRectangle(cornerRadius: DSRadius.sm))
             }
-            Text(title).dsFont(.subheadline).fontWeight(.semibold).foregroundStyle(DSColor.textPrimary)
+
+            Text(title.uppercased())
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundStyle(DSColor.textPrimary)
+
             Spacer()
+
             Button(action: onDelete) {
-                Image(systemName: "trash").foregroundStyle(DSColor.textSecondary)
+                Image(systemName: "trash")
+                    .foregroundStyle(DSColor.textSecondary)
             }
         }
     }
 
     private var emptyState: some View {
-        VStack(spacing: DSSpacing.sm) {
-            Image(systemName: "questionmark.circle").font(.system(size: 44)).foregroundStyle(DSColor.textSecondary.opacity(0.5))
-            Text("Danh sách trống").dsFont(.headline).fontWeight(.bold).foregroundStyle(DSColor.textPrimary)
-            Text("Bạn chưa chặn bất kỳ ai/mục nào.").dsFont(.footnote).foregroundStyle(DSColor.textSecondary)
+        VStack(spacing: DSSpacing.md) {
+            Image(systemName: "questionmark.circle")
+                .font(.system(size: 48))
+                .foregroundStyle(DSColor.textSecondary.opacity(0.5))
+            VStack(spacing: DSSpacing.xs) {
+                Text("Danh sách trống")
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundStyle(DSColor.textPrimary)
+                Text("Bạn chưa chặn bất kỳ ai/mục nào.")
+                    .font(.system(size: 14))
+                    .foregroundStyle(DSColor.textSecondary)
+            }
         }
         .frame(maxWidth: .infinity)
         .padding(.top, DSSpacing.xxl)
@@ -191,7 +280,9 @@ struct BlockListView: View {
 
     private func errorView(_ message: String, retry: @escaping () -> Void) -> some View {
         VStack(spacing: DSSpacing.md) {
-            Text(message).dsFont(.subheadline).foregroundStyle(DSColor.textSecondary)
+            Text(message)
+                .dsFont(.subheadline)
+                .foregroundStyle(DSColor.textSecondary)
             DSButton("Thử lại", variant: .primary, action: retry)
         }
         .padding(.top, DSSpacing.xxl)

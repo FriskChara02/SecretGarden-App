@@ -7,6 +7,7 @@
 
 import CoreModels
 import CoreNetworking
+import Foundation
 
 public final class UserRepository: UserRepositoryProtocol {
 
@@ -26,5 +27,9 @@ public final class UserRepository: UserRepositoryProtocol {
 
     public func updateAccount(_ request: UpdateAccountRequest) async throws -> User {
         try await apiClient.request(UserEndpoint.updateAccount(request))
+    }
+
+    public func uploadAvatar(imageData: Data, fileName: String, mimeType: String) async throws -> User {
+        try await apiClient.request(UploadAvatarEndpoint(imageData: imageData, fileName: fileName, mimeType: mimeType))
     }
 }

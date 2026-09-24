@@ -61,7 +61,8 @@ struct ProfileDrawerView: View {
                     context: ProfileDestinationContext(
                         currentUser: currentUser,
                         onAuthenticated: onAuthenticated,
-                        onProfileUpdated: onProfileUpdated
+                        onProfileUpdated: onProfileUpdated,
+                        onSuccessMessage: { globalToastMessage = $0 }
                     ),
                     onReportTapped: { reportTarget = $0 }
                 )

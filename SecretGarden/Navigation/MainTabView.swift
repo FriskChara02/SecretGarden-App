@@ -5,19 +5,21 @@
 //  Created by Loi Nguyen on 20/8/26.
 //
 
-import SwiftUI
-import DesignSystem
 import CoreArchitecture
 import CoreModels
-import HomeFeature
+import DesignSystem
 import FactoryKit
+import HomeFeature
 import SearchFeature
 import SocialFeature
+import SwiftUI
+import UIKit
 
 struct MainTabView: View {
     @State private var coordinator = MainTabCoordinator()
     @State private var reportTarget: ReportSheetTarget?
     @State private var globalToastMessage: String?
+    @State private var avatarTabImage: UIImage?
     let currentUser: User?
     let onAuthenticated: () -> Void
     let onProfileUpdated: (User) -> Void
@@ -43,42 +45,13 @@ struct MainTabView: View {
         }
         .tint(DSColor.brandPrimary)
         .animation(.easeInOut(duration: 0.25), value: coordinator.profileDrawerCoordinator.isPresented)
-        .overlay {
-            if coordinator.profileDrawerCoordinator.isPresented {
-                ZStack(alignment: .trailing) {
-                    Color.black.opacity(0.3)
-                        .ignoresSafeArea()
-                        .onTapGesture {
-                            withAnimation(.easeInOut(duration: 0.25)) {
-                                coordinator.profileDrawerCoordinator.isPresented = false
-                            }
-                        }
-                    ProfileDrawerView(
-                        coordinator: coordinator.profileDrawerCoordinator,
-                        currentUser: currentUser,
-                        onAuthenticated: onAuthenticated,
-                        onProfileUpdated: onProfileUpdated
-                    )
-                        .frame(width: 300)
-                        .transition(.move(edge: .trailing))
-                }
-                .transition(.opacity)
-            }
-        }
-        .overlay {
-            if let target = reportTarget {
-                ReportView(
-                    seriesId: target.seriesId,
-                    chapterId: target.chapterId,
-                    seriesRepository: Container.shared.seriesRepository(),
-                    onDismiss: { reportTarget = nil },
-                    onSubmitted: { message in globalToastMessage = message }
-                )
-                .transition(.opacity)
-            }
-        }
+        .overlay { drawerOverlay }
+        .overlay { reportOverlay }
         .animation(.easeInOut(duration: 0.15), value: reportTarget != nil)
         .dsSuccessToast(message: $globalToastMessage)
+        .task(id: currentUser?.avatarURL) {
+            await loadAvatarTabImage()
+        }
     }
 
     // MARK: - Profile tab icon (guest vs logged-in)
@@ -87,35 +60,107 @@ struct MainTabView: View {
 
     @ViewBuilder
     private var profileTabLabel: some View {
-        if let avatarURL {
+        if let avatarTabImage {
             Label {
                 Text(MainTab.profile.title)
             } icon: {
-                AsyncImage(url: avatarURL) { phase in
-                    if case .success(let image) = phase {
-                        image.resizable().aspectRatio(contentMode: .fill)
-                    } else {
-                        Circle().fill(DSColor.backgroundSecondary)
-                    }
-                }
-                .frame(width: 24, height: 24)
-                .clipShape(Circle())
-                .overlay {
-                    // Pink border ONLY when the Personal tab is selected.
-                    if coordinator.selectedTab == .profile {
-                        Circle().strokeBorder(DSColor.brandPrimary, lineWidth: 2)
-                    }
-                }
+                Image(uiImage: avatarTabImage)
+                    .renderingMode(.original)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 22, height: 22)
             }
         } else {
-            // Guest: person icon, auto-filled when selected (default SF Symbol behavior in TabView).
             Label(MainTab.profile.title, systemImage: "person")
         }
     }
 
-    // MARK: - Home Tab
+    private func loadAvatarTabImage() async {
+        guard let url = currentUser?.avatarURL else {
+            avatarTabImage = nil
+            return
+        }
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            guard let original = UIImage(data: data) else {
+                avatarTabImage = nil
+                return
+            }
+            let isSelected = coordinator.selectedTab == .profile
+            let finalImage = Self.drawAvatarWithBorder(
+                original,
+                targetSize: CGSize(width: 44, height: 44),
+                borderColor: isSelected ? UIColor(DSColor.brandPrimary) : .clear
+            )
+            avatarTabImage = finalImage.withRenderingMode(.alwaysOriginal)
+        } catch {
+            avatarTabImage = nil
+        }
+    }
 
-    private var homeTab: some View {
+    private static func drawAvatarWithBorder(_ image: UIImage, targetSize: CGSize, borderColor: UIColor) -> UIImage {
+        let renderer = UIGraphicsImageRenderer(size: targetSize)
+        return renderer.image { _ in
+            let rect = CGRect(origin: .zero, size: targetSize)
+            let borderWidth: CGFloat = 2.0
+
+            let avatarRect = rect.insetBy(dx: borderWidth / 2, dy: borderWidth / 2)
+            let avatarPath = UIBezierPath(ovalIn: avatarRect)
+            avatarPath.addClip()
+            image.draw(in: rect)
+
+            if borderColor != .clear {
+                let borderPath = UIBezierPath(ovalIn: avatarRect)
+                borderColor.setStroke()
+                borderPath.lineWidth = borderWidth
+                borderPath.stroke()
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var drawerOverlay: some View {
+        if coordinator.profileDrawerCoordinator.isPresented {
+            ZStack(alignment: .trailing) {
+                Color.black.opacity(0.3)
+                    .ignoresSafeArea()
+                    .onTapGesture {
+                        withAnimation(.easeInOut(duration: 0.25)) {
+                            coordinator.profileDrawerCoordinator.isPresented = false
+                        }
+                    }
+                ProfileDrawerView(
+                    coordinator: coordinator.profileDrawerCoordinator,
+                    currentUser: currentUser,
+                    onAuthenticated: onAuthenticated,
+                    onProfileUpdated: onProfileUpdated
+                )
+                .frame(width: 300)
+                .transition(.move(edge: .trailing))
+            }
+            .transition(.opacity)
+        }
+    }
+
+    @ViewBuilder
+    private var reportOverlay: some View {
+        if let target = reportTarget {
+            ReportView(
+                seriesId: target.seriesId,
+                chapterId: target.chapterId,
+                seriesRepository: Container.shared.seriesRepository(),
+                onDismiss: { reportTarget = nil },
+                onSubmitted: { message in globalToastMessage = message }
+            )
+            .transition(.opacity)
+        }
+    }
+}
+
+// MARK: - Tab Views Extension (Tách ra để giảm dòng cho main struct)
+
+private extension MainTabView {
+    var homeTab: some View {
         NavigationStack(path: pathBinding(for: coordinator.homeCoordinator)) {
             HomeView(
                 repository: Container.shared.homeRepository(),
@@ -184,9 +229,7 @@ struct MainTabView: View {
         }
     }
 
-    // MARK: - Search Tab
-
-    private var searchTab: some View {
+    var searchTab: some View {
         NavigationStack(path: pathBinding(for: coordinator.searchCoordinator)) {
             SearchView(
                 repository: Container.shared.searchRepository(),
@@ -258,9 +301,7 @@ struct MainTabView: View {
         }
     }
 
-    // MARK: - Notifications Tab
-
-    private var notificationsTab: some View {
+    var notificationsTab: some View {
         NavigationStack(path: pathBinding(for: coordinator.notificationsCoordinator)) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
@@ -294,41 +335,38 @@ struct MainTabView: View {
         }
     }
 
-    // MARK: - Profile Tab
-
-    private var profileTab: some View {
-            NavigationStack(path: pathBinding(for: coordinator.profileCoordinator)) {
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 0) {
-                        GardenHeaderView { coordinator.profileCoordinator.popToRoot() }
-                        ProfileMenuContentView(
-                            currentUser: currentUser,
-                            onLoginTapped: { coordinator.profileCoordinator.push(.login) },
-                            onLogoutTapped: onLogout,
-                            onRowTapped: { route in coordinator.profileCoordinator.push(route) }
-                        )
-                    }
-                }
-                .background(DSColor.backgroundPrimary)
-                .toolbar(.hidden, for: .navigationBar)
-                .navigationDestination(for: ProfileRoute.self) { route in
-                    ProfileDestinationBuilder.destination(
-                        for: route,
-                        coordinator: coordinator.profileCoordinator,
-                        context: ProfileDestinationContext(
-                            currentUser: currentUser,
-                            onAuthenticated: onAuthenticated,
-                            onProfileUpdated: onProfileUpdated
-                        ),
-                        onReportTapped: { reportTarget = $0 }
+    var profileTab: some View {
+        NavigationStack(path: pathBinding(for: coordinator.profileCoordinator)) {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 0) {
+                    GardenHeaderView { coordinator.profileCoordinator.popToRoot() }
+                    ProfileMenuContentView(
+                        currentUser: currentUser,
+                        onLoginTapped: { coordinator.profileCoordinator.push(.login) },
+                        onLogoutTapped: onLogout,
+                        onRowTapped: { route in coordinator.profileCoordinator.push(route) }
                     )
                 }
             }
+            .background(DSColor.backgroundPrimary)
+            .toolbar(.hidden, for: .navigationBar)
+            .navigationDestination(for: ProfileRoute.self) { route in
+                ProfileDestinationBuilder.destination(
+                    for: route,
+                    coordinator: coordinator.profileCoordinator,
+                    context: ProfileDestinationContext(
+                        currentUser: currentUser,
+                        onAuthenticated: onAuthenticated,
+                        onProfileUpdated: onProfileUpdated,
+                        onSuccessMessage: { globalToastMessage = $0 }
+                    ),
+                    onReportTapped: { reportTarget = $0 }
+                )
+            }
         }
+    }
 
-    // MARK: - Helper
-
-    private func pathBinding<Route: Hashable>(for coordinator: Coordinator<Route>) -> Binding<NavigationPath> {
+    func pathBinding<Route: Hashable>(for coordinator: Coordinator<Route>) -> Binding<NavigationPath> {
         Binding(
             get: { coordinator.path },
             set: { coordinator.path = $0 }

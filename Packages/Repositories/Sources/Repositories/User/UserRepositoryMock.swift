@@ -56,4 +56,10 @@ public actor UserRepositoryMock: UserRepositoryProtocol {
         currentUser.email = request.email
         return currentUser
     }
+
+    public func uploadAvatar(imageData: Data, fileName: String, mimeType: String) async throws -> User {
+        let base64 = imageData.base64EncodedString()
+        currentUser.avatarURL = URL(string: "data:\(mimeType);base64,\(base64)")
+        return currentUser
+    }
 }

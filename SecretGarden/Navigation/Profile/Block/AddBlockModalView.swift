@@ -13,29 +13,55 @@ import SwiftUI
 struct AddBlockModalView: View {
     @ObservedObject var viewModel: BlockListViewModel
     let category: BlockListCategory
-    @Environment(\.dismiss) private var dismiss
+    let onDismiss: () -> Void
+
+    @State private var isDismissing = false
 
     var body: some View {
-        VStack(spacing: 0) {
-            header
-            searchField
-            resultsList
+        BottomSheetContainer(
+            isDismissing: isDismissing,
+            onTapOutside: dismissWithAnimation
+        ) {
+            VStack(spacing: 0) {
+                header
+                searchField
+                resultsList
+            }
+            .frame(height: 620, alignment: .top)
         }
+        .ignoresSafeArea()
         .onAppear {
-            if category == .tags { viewModel.loadTagOptions() }
+            if category == .tags {
+                viewModel.loadTagOptions()
+            }
+        }
+    }
+
+    private func dismissWithAnimation() {
+        isDismissing = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+            onDismiss()
         }
     }
 
     private var header: some View {
         HStack {
-            Spacer()
+            Image(systemName: "diamond.inset.filled")
+                .font(.system(size: 9))
+                .foregroundStyle(DSColor.brandPrimary)
             Text(category == .series ? "Chặn truyện" : "Chặn Tags")
-                .dsFont(.headline).fontWeight(.bold).foregroundStyle(DSColor.brandPrimary)
-            Spacer()
+                .font(.system(size: 18, weight: .bold))
+                .foregroundStyle(DSColor.brandPrimary)
+            Image(systemName: "diamond.inset.filled")
+                .font(.system(size: 9))
+                .foregroundStyle(DSColor.brandPrimary)
         }
+        .frame(maxWidth: .infinity)
         .overlay(alignment: .trailing) {
-            Button { dismiss() } label: {
-                Image(systemName: "xmark.circle").foregroundStyle(DSColor.textSecondary)
+            Button(action: dismissWithAnimation) {
+                Image(systemName: "xmark.circle.fill")
+                    .font(.system(size: 22))
+                    .foregroundStyle(DSColor.brandPrimary)
             }
         }
         .padding(DSSpacing.lg)
@@ -43,17 +69,21 @@ struct AddBlockModalView: View {
 
     private var searchField: some View {
         HStack {
-            Image(systemName: "magnifyingglass").foregroundStyle(DSColor.textSecondary)
-            TextField(category == .series ? "Nhập tên truyện..." : "Tìm tag...", text: Binding(
-                get: { category == .series ? viewModel.seriesSearchQuery : viewModel.tagSearchQuery },
-                set: { newValue in
-                    if category == .series {
-                        viewModel.searchSeries(query: newValue)
-                    } else {
-                        viewModel.tagSearchQuery = newValue
+            Image(systemName: "magnifyingglass")
+                .foregroundStyle(DSColor.textSecondary)
+            TextField(
+                category == .series ? "Nhập tên truyện..." : "Tìm tag...",
+                text: Binding(
+                    get: { category == .series ? viewModel.seriesSearchQuery : viewModel.tagSearchQuery },
+                    set: { newValue in
+                        if category == .series {
+                            viewModel.searchSeries(query: newValue)
+                        } else {
+                            viewModel.tagSearchQuery = newValue
+                        }
                     }
-                }
-            ))
+                )
+            )
         }
         .padding(DSSpacing.sm)
         .background(DSColor.backgroundSecondary)
@@ -77,15 +107,18 @@ struct AddBlockModalView: View {
         case .idle:
             emptyHint("Nhập từ khóa để tìm kiếm")
         case .loading:
-            ProgressView().padding(.top, DSSpacing.xl)
+            ProgressView()
+                .padding(.top, DSSpacing.xl)
         case .failed:
             emptyHint("Không tìm được kết quả.")
+        case .loaded(let results) where results.isEmpty:
+            emptyHint("Không tìm thấy kết quả")
         case .loaded(let results):
             ScrollView {
                 VStack(spacing: DSSpacing.sm) {
                     ForEach(results) { series in
                         resultRow(
-                            title: series.title,
+                            title: series.title.uppercased(),
                             imageURL: series.coverURL,
                             isBlocked: viewModel.isSeriesBlocked(series.id)
                         ) {
@@ -102,14 +135,20 @@ struct AddBlockModalView: View {
     private var tagResults: some View {
         switch viewModel.tagOptionsState {
         case .idle, .loading:
-            ProgressView().padding(.top, DSSpacing.xl)
+            ProgressView()
+                .padding(.top, DSSpacing.xl)
         case .failed:
             emptyHint("Không tải được danh sách tag.")
         case .loaded:
             ScrollView {
                 VStack(spacing: DSSpacing.sm) {
                     ForEach(viewModel.filteredTagOptions) { tag in
-                        resultRow(title: tag.name, imageURL: nil, isBlocked: viewModel.isTagBlocked(tag.id)) {
+                        resultRow(
+                            title: tag.name,
+                            imageURL: nil,
+                            isBlocked: viewModel.isTagBlocked(tag.id),
+                            showTagIcon: true
+                        ) {
                             viewModel.blockTag(tag)
                         }
                     }
@@ -119,9 +158,18 @@ struct AddBlockModalView: View {
         }
     }
 
-    private func resultRow(title: String, imageURL: URL?, isBlocked: Bool, onBlock: @escaping () -> Void) -> some View {
+    private func resultRow(
+        title: String,
+        imageURL: URL?,
+        isBlocked: Bool,
+        showTagIcon: Bool = false,
+        onBlock: @escaping () -> Void
+    ) -> some View {
         HStack(spacing: DSSpacing.sm) {
-            if let imageURL {
+            if showTagIcon {
+                Image(systemName: "tag.fill")
+                    .foregroundStyle(DSColor.brandPrimary)
+            } else if let imageURL {
                 AsyncImage(url: imageURL) { phase in
                     if case .success(let image) = phase {
                         image.resizable().aspectRatio(contentMode: .fill)
@@ -132,14 +180,25 @@ struct AddBlockModalView: View {
                 .frame(width: 40, height: 40)
                 .clipShape(RoundedRectangle(cornerRadius: DSRadius.sm))
             }
-            Text(title).dsFont(.subheadline).fontWeight(.semibold).foregroundStyle(DSColor.textPrimary)
+
+            Text(title)
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(DSColor.textPrimary)
+
             Spacer()
+
             Button(action: onBlock) {
-                Text(isBlocked ? "Đã chặn" : "Chặn")
-                    .dsFont(.footnote).fontWeight(.semibold)
-                    .foregroundStyle(isBlocked ? DSColor.statusSuccess : DSColor.textPrimary)
-                    .padding(.horizontal, DSSpacing.md).padding(.vertical, DSSpacing.xs)
-                    .background(Capsule().fill(DSColor.backgroundSecondary))
+                HStack(spacing: 4) {
+                    if isBlocked {
+                        Image(systemName: "checkmark")
+                    }
+                    Text(isBlocked ? "Đã chặn" : "Chặn")
+                }
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(isBlocked ? DSColor.statusSuccess : DSColor.textPrimary)
+                .padding(.horizontal, DSSpacing.md)
+                .padding(.vertical, DSSpacing.xs)
+                .background(Capsule().fill(DSColor.backgroundSecondary))
             }
             .disabled(isBlocked)
         }
@@ -147,10 +206,15 @@ struct AddBlockModalView: View {
 
     private func emptyHint(_ text: String) -> some View {
         VStack(spacing: DSSpacing.sm) {
-            Image(systemName: "magnifyingglass").font(.system(size: 40)).foregroundStyle(DSColor.textSecondary.opacity(0.4))
-            Text(text).dsFont(.footnote).foregroundStyle(DSColor.textSecondary)
+            Image(systemName: "magnifyingglass")
+                .font(.system(size: 40))
+                .foregroundStyle(DSColor.textSecondary.opacity(0.4))
+            Text(text)
+                .font(.system(size: 15))
+                .foregroundStyle(DSColor.textSecondary)
         }
         .frame(maxWidth: .infinity)
         .padding(.top, DSSpacing.xxl)
+        .padding(.bottom, DSSpacing.xl)
     }
 }

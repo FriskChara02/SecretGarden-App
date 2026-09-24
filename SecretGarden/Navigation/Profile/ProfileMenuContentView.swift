@@ -17,6 +17,7 @@ struct ProfileMenuContentView: View {
     let onRowTapped: (ProfileRoute) -> Void
 
     @EnvironmentObject private var themeManager: ThemeManager
+    @State private var avatarImage: UIImage?
 
     private struct MenuRow: Identifiable {
         let id = UUID()
@@ -59,6 +60,9 @@ struct ProfileMenuContentView: View {
             DSSectionDivider()
         }
         .padding(DSSpacing.lg)
+        .task(id: currentUser?.avatarURL) {
+            await loadAvatar()
+        }
     }
 
     @ViewBuilder
@@ -99,21 +103,44 @@ struct ProfileMenuContentView: View {
 
     @ViewBuilder
     private var avatarView: some View {
-        if let url = currentUser?.avatarURL {
-            AsyncImage(url: url) { phase in
-                if case .success(let image) = phase {
-                    image.resizable().aspectRatio(contentMode: .fill)
-                } else {
-                    Circle().fill(DSColor.backgroundSecondary)
-                }
+        Group {
+            if let avatarImage {
+                Image(uiImage: avatarImage)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+            } else {
+                fallbackAvatar
             }
-            .frame(width: 48, height: 48)
-            .clipShape(Circle())
-        } else {
-            Image(systemName: "person.circle.fill")
-                .resizable()
-                .frame(width: 48, height: 48)
-                .foregroundStyle(DSColor.textSecondary.opacity(0.5))
+        }
+        .frame(width: 48, height: 48)
+        .clipShape(Circle())
+        .overlay(Circle().strokeBorder(DSColor.backgroundPrimary, lineWidth: 2))
+        .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
+    }
+
+    private var fallbackAvatar: some View {
+        Circle()
+            .fill(DSColor.backgroundSecondary)
+            .overlay {
+                Image(systemName: "person.fill")
+                    .foregroundStyle(DSColor.textSecondary)
+            }
+    }
+
+    private func loadAvatar() async {
+        guard let url = currentUser?.avatarURL else {
+            avatarImage = nil
+            return
+        }
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            if let downloadedImage = UIImage(data: data) {
+                avatarImage = downloadedImage
+            } else {
+                avatarImage = nil
+            }
+        } catch {
+            avatarImage = nil
         }
     }
 }

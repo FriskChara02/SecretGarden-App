@@ -20,6 +20,7 @@ struct ProfileDestinationContext {
     let currentUser: User?
     let onAuthenticated: () -> Void
     let onProfileUpdated: (User) -> Void
+    let onSuccessMessage: (String) -> Void
 }
 
 enum ProfileDestinationBuilder {
@@ -36,8 +37,8 @@ enum ProfileDestinationBuilder {
             ProfileDetailView(
                 currentUser: context.currentUser,
                 onHeaderTapped: { coordinator.popToRoot() },
-                onEditTapped: { coordinator.push(.editProfile) },
-                onUserUpdated: context.onProfileUpdated
+                onUserUpdated: context.onProfileUpdated,
+                onSuccessMessage: context.onSuccessMessage
             )
         case .editProfile:
             if let currentUser = context.currentUser {
@@ -66,10 +67,14 @@ enum ProfileDestinationBuilder {
         case .seriesDetail, .chapterReader:
             readingFlowDestination(for: route, coordinator: coordinator, onReportTapped: onReportTapped)
         case .login:
-            AuthFlowView(onAuthenticated: {
-                coordinator.popToRoot()
-                context.onAuthenticated()
-            })
+            AuthFlowView(
+                onAuthenticated: {
+                    coordinator.popToRoot()
+                    context.onAuthenticated()
+                },
+                embedsOwnNavigationStack: false
+            )
+            .toolbar(.hidden, for: .navigationBar)
         }
     }
 

@@ -36,10 +36,11 @@ extension Container {
     @MainActor
     var authRepository: Factory<AuthRepositoryProtocol> {
         self {
-            AuthRepository(
-                apiClient: self.apiClient(),
-                keychainManager: self.keychainManager()
-            )
+            if AppConfig.isDebugEnvironment {
+                return AuthRepositoryDebugMock(keychainManager: self.keychainManager())
+            } else {
+                return AuthRepository(apiClient: self.apiClient(), keychainManager: self.keychainManager())
+            }
         }
         .singleton
     }
