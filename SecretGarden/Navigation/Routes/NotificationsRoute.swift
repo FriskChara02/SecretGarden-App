@@ -10,4 +10,5 @@ import Foundation
 enum NotificationsRoute: Hashable {
     case notificationSettings
     case seriesDetail(id: String)
+    case policy
 }

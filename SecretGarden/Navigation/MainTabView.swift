@@ -169,10 +169,15 @@ private extension MainTabView {
                 },
                 onHeaderTapped: {
                     coordinator.homeCoordinator.popToRoot()
+                },
+                onPolicyTapped: {
+                    coordinator.homeCoordinator.push(.policy)
                 }
             )
             .navigationDestination(for: HomeRoute.self) { route in
                 switch route {
+                case .policy:
+                    PolicyView()
                 case .seriesDetail(let id):
                     SeriesDetailView(
                         seriesId: id,
@@ -325,8 +330,12 @@ private extension MainTabView {
             .navigationDestination(for: NotificationsRoute.self) { route in
                 switch route {
                 case .notificationSettings:
-                    Text("Notification Settings (demo)")
-                        .dsFont(.title1)
+                    NotificationSettingsView(
+                        repository: Container.shared.notificationSettingsRepository(),
+                        onPolicyTapped: { coordinator.notificationsCoordinator.push(.policy) }
+                    )
+                case .policy:
+                    PolicyView()
                 case .seriesDetail(let id):
                     Text("Series Detail (demo) — id: \(id)")
                         .dsFont(.title1)

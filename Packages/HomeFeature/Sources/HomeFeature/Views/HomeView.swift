@@ -20,15 +20,18 @@ public struct HomeView: View {
 
     private let onSeriesSelected: (String) -> Void
     private let onHeaderTapped: () -> Void
+    private let onPolicyTapped: () -> Void
 
     public init(
         repository: HomeRepositoryProtocol,
         onSeriesSelected: @escaping (String) -> Void,
-        onHeaderTapped: @escaping () -> Void
+        onHeaderTapped: @escaping () -> Void,
+        onPolicyTapped: @escaping () -> Void
     ) {
         self._viewModel = StateObject(wrappedValue: HomeViewModel(repository: repository))
         self.onSeriesSelected = onSeriesSelected
         self.onHeaderTapped = onHeaderTapped
+        self.onPolicyTapped = onPolicyTapped
     }
 
     public var body: some View {
@@ -88,14 +91,14 @@ public struct HomeView: View {
                 GardenFooterView(
                     policyLinks: [
                         GardenFooterLink(title: "Chính sách bảo mật", action: {}),
-                        GardenFooterLink(title: "Quy định", action: {}),
+                        GardenFooterLink(title: "Quy định", action: onPolicyTapped),
                         GardenFooterLink(title: "Điều khoản", action: {})
                     ],
                     socialLinks: [
                         GardenFooterLink(title: "Discord", action: {}),
                         GardenFooterLink(title: "Facebook", action: {})
                     ],
-                    onPolicyTapped: {}   // TODO: connect Rules/Policy route
+                    onPolicyTapped: onPolicyTapped
                 )
                 .padding(.top, DSSpacing.xl)
             }
@@ -110,6 +113,6 @@ public struct HomeView: View {
 
 #Preview {
     NavigationStack {
-        HomeView(repository: HomeRepositoryMock(), onSeriesSelected: { _ in }, onHeaderTapped: {})
+        HomeView(repository: HomeRepositoryMock(), onSeriesSelected: { _ in }, onHeaderTapped: {}, onPolicyTapped: {})
     }
 }
