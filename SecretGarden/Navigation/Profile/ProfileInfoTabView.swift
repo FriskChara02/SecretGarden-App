@@ -115,8 +115,10 @@ struct ProfileInfoTabView: View {
             Text(viewModel.uploadErrorMessage ?? "")
         }
     }
+}
 
-    private var sectionTitle: some View {
+private extension ProfileInfoTabView {
+    var sectionTitle: some View {
         HStack {
             HStack(spacing: DSSpacing.xs) {
                 Image(systemName: "diamond.inset.filled").font(.system(size: 12)).foregroundStyle(DSColor.brandPrimary)

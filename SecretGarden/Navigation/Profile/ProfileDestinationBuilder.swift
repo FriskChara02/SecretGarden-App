@@ -54,8 +54,10 @@ enum ProfileDestinationBuilder {
             } else {
                 EmptyView()
             }
-        case .favorites, .history, .category, .yuriList, .uploadRegistration, .rules:
+        case .favorites, .history, .category, .yuriList, .uploadRegistration:
             placeholderDestination(for: route)
+        case .rules:
+            PolicyView()
         case .followedGroups, .discoverGroups, .groupProfile, .authorProfile:
             socialDestination(for: route, coordinator: coordinator)
         case .advancedSearch:
@@ -95,8 +97,6 @@ enum ProfileDestinationBuilder {
             Text("Yuri List (demo) — Phase 10").dsFont(.title1)
         case .uploadRegistration:
             Text("Upload Registration (demo)").dsFont(.title1)
-        case .rules:
-            Text("Rules/Policy (demo)").dsFont(.title1)
         default:
             EmptyView()
         }
