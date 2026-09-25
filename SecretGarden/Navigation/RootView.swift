@@ -11,6 +11,7 @@
 
 import AuthFeature
 import CoreArchitecture
+import DesignSystem
 import FactoryKit
 import Repositories
 import SwiftUI
@@ -18,10 +19,12 @@ import SwiftUI
 struct RootView: View {
     @State private var rootCoordinator = RootCoordinator()
     @StateObject private var themeManager = ThemeManager()
+    @StateObject private var ageGateManager = AgeGateManager()
     @StateObject private var appRootViewModel = AppRootViewModel(
         keychainManager: Container.shared.keychainManager(),
         userRepository: Container.shared.userRepository()
     )
+    @State private var isTermsSheetPresented = false
 
     var body: some View {
         Group {
@@ -58,6 +61,25 @@ struct RootView: View {
                 break
             case .authenticated, .unauthenticated:
                 rootCoordinator.switchToMain()
+            }
+        }
+        .fullScreenCover(isPresented: .constant(!ageGateManager.hasConfirmedAge)) {
+            AgeGateView(
+                isDeclined: ageGateManager.isDeclined,
+                onConfirm: { ageGateManager.confirmAge() },
+                onDecline: { ageGateManager.declineAge() },
+                onViewTerms: { isTermsSheetPresented = true }
+            )
+            .interactiveDismissDisabled()
+            .sheet(isPresented: $isTermsSheetPresented) {
+                NavigationStack {
+                    PolicyView(document: PolicyContent.termsOfService)
+                        .toolbar {
+                            ToolbarItem(placement: .navigationBarTrailing) {
+                                Button("Đóng") { isTermsSheetPresented = false }
+                            }
+                        }
+                }
             }
         }
     }

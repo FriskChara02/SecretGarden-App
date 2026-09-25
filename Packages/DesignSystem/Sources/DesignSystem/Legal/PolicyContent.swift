@@ -55,7 +55,7 @@ public enum PolicyContent {
         documentTitle: "QUY ĐỊNH DÀNH CHO CỘNG ĐỒNG SECRET GARDEN",
         lastUpdatedLabel: "Cập nhật lần cuối: 07 / 08 / 2026",
         introParagraphs: [
-            "Cảm ơn bạn đã đồng hành cùng Secret Garden. Dưới đây là bộ quy định chung của cộng đồng — mong bạn dành chút thời gian đọc qua để chúng ta cùng giữ một không gian đọc truyện lành mạnh, văn minh.",
+            "Cảm ơn bạn đã đồng hành cùng Secret Garden. Dưới đây là bộ quy định chung của cộng đồng - mong bạn dành chút thời gian đọc qua để chúng ta cùng giữ một không gian đọc truyện lành mạnh, văn minh.",
             "Việc tiếp tục sử dụng Secret Garden đồng nghĩa với việc bạn đã đọc, hiểu và đồng ý với toàn bộ nội dung dưới đây."
         ],
         sections: [
@@ -67,7 +67,7 @@ public enum PolicyContent {
                     "Không mỉa mai ngoại hình hay đời sống riêng tư của người khác, kể cả qua hình ảnh/meme.",
                     "Không đùa cợt quá đà gây khó chịu cho người khác hoặc phá rối không gian chung.",
                     "Không dùng ngôn từ thô tục, xúc phạm.",
-                    "Tôn trọng sự đa dạng sở thích — không công kích thể loại truyện người khác yêu thích."
+                    "Tôn trọng sự đa dạng sở thích - không công kích thể loại truyện người khác yêu thích."
                 ]
             ),
             PolicySection(
@@ -102,14 +102,14 @@ public enum PolicyContent {
                 bullets: [
                     "Nghiêm cấm mạo danh người khác dưới mọi hình thức.",
                     "Không sử dụng hình ảnh/thông tin cá nhân của người khác khi chưa được đồng ý.",
-                    "Tôn trọng quyền riêng tư — không tự ý công khai thông tin cá nhân của người khác.",
+                    "Tôn trọng quyền riêng tư - không tự ý công khai thông tin cá nhân của người khác.",
                     "Cấm chỉnh sửa/bịa đặt nội dung liên quan tới hình ảnh, thông tin người khác nhằm bôi nhọ hoặc gây nhầm lẫn."
                 ]
             ),
             PolicySection(
                 heading: "VI. Tôn trọng đội ngũ quản trị",
                 bullets: [
-                    "Admin/Mod chịu trách nhiệm vận hành nền tảng — người dùng cần hợp tác khi được xử lý vi phạm.",
+                    "Admin/Mod chịu trách nhiệm vận hành nền tảng - người dùng cần hợp tác khi được xử lý vi phạm.",
                     "Nếu chưa hài lòng với cách xử lý, có thể phản hồi qua kênh liên hệ chính thức của Secret Garden."
                 ]
             ),
@@ -146,7 +146,7 @@ public enum PolicyContent {
         documentTitle: "ĐIỀU KHOẢN DỊCH VỤ",
         lastUpdatedLabel: "Cập nhật lần cuối: 07 / 08 / 2026",
         introParagraphs: [
-            "Cảm ơn bạn đã sử dụng Secret Garden. Khi truy cập, đăng ký tài khoản hoặc dùng bất kỳ tính năng nào của Secret Garden, bạn xác nhận đã đọc, hiểu và đồng ý với toàn bộ Điều khoản dưới đây — nếu không đồng ý, vui lòng ngừng sử dụng dịch vụ."
+            "Cảm ơn bạn đã sử dụng Secret Garden. Khi truy cập, đăng ký tài khoản hoặc dùng bất kỳ tính năng nào của Secret Garden, bạn xác nhận đã đọc, hiểu và đồng ý với toàn bộ Điều khoản dưới đây - nếu không đồng ý, vui lòng ngừng sử dụng dịch vụ."
         ],
         sections: [
             PolicySection(heading: "1. Phạm vi áp dụng", bullets: [
@@ -173,8 +173,8 @@ public enum PolicyContent {
                 "Secret Garden có quyền gỡ nội dung vi phạm và xử lý tài khoản liên quan không cần báo trước."
             ]),
             PolicySection(heading: "6. Bản quyền & miễn trừ trách nhiệm", bullets: [
-                "Secret Garden không sở hữu bản quyền các tác phẩm được đăng tải — chỉ đóng vai trò nền tảng lưu trữ/hiển thị.",
-                "Bản dịch thuộc về cá nhân/nhóm dịch — bên thứ ba đăng tải nội dung."
+                "Secret Garden không sở hữu bản quyền các tác phẩm được đăng tải - chỉ đóng vai trò nền tảng lưu trữ/hiển thị.",
+                "Bản dịch thuộc về cá nhân/nhóm dịch - bên thứ ba đăng tải nội dung."
             ]),
             PolicySection(heading: "7. Gỡ nội dung & khiếu nại bản quyền", bullets: [
                 "Secret Garden có quyền gỡ nội dung không phù hợp định hướng cộng đồng hoặc rủi ro pháp lý.",
