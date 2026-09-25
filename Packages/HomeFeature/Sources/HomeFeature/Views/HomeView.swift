@@ -20,13 +20,13 @@ public struct HomeView: View {
 
     private let onSeriesSelected: (String) -> Void
     private let onHeaderTapped: () -> Void
-    private let onPolicyTapped: () -> Void
+    private let onPolicyTapped: (PolicyKind) -> Void
 
     public init(
         repository: HomeRepositoryProtocol,
         onSeriesSelected: @escaping (String) -> Void,
         onHeaderTapped: @escaping () -> Void,
-        onPolicyTapped: @escaping () -> Void
+        onPolicyTapped: @escaping (PolicyKind) -> Void
     ) {
         self._viewModel = StateObject(wrappedValue: HomeViewModel(repository: repository))
         self.onSeriesSelected = onSeriesSelected
@@ -90,15 +90,15 @@ public struct HomeView: View {
 
                 GardenFooterView(
                     policyLinks: [
-                        GardenFooterLink(title: "Chính sách bảo mật", action: {}),
-                        GardenFooterLink(title: "Quy định", action: onPolicyTapped),
-                        GardenFooterLink(title: "Điều khoản", action: {})
+                        GardenFooterLink(title: "Chính sách bảo mật", action: { onPolicyTapped(.privacyPolicy) }),
+                        GardenFooterLink(title: "Quy định", action: { onPolicyTapped(.communityRules) }),
+                        GardenFooterLink(title: "Điều khoản", action: { onPolicyTapped(.termsOfService) })
                     ],
                     socialLinks: [
                         GardenFooterLink(title: "Discord", action: {}),
                         GardenFooterLink(title: "Facebook", action: {})
                     ],
-                    onPolicyTapped: onPolicyTapped
+                    onPolicyTapped: { onPolicyTapped(.communityRules) }
                 )
                 .padding(.top, DSSpacing.xl)
             }
@@ -113,6 +113,11 @@ public struct HomeView: View {
 
 #Preview {
     NavigationStack {
-        HomeView(repository: HomeRepositoryMock(), onSeriesSelected: { _ in }, onHeaderTapped: {}, onPolicyTapped: {})
+        HomeView(
+            repository: HomeRepositoryMock(),
+            onSeriesSelected: { _ in },
+            onHeaderTapped: {},
+            onPolicyTapped: { _ in }
+        )
     }
 }

@@ -8,6 +8,7 @@
 // Temporarily placed in the App target — these cases will be moved to the appropriate Feature package.
 
 import Foundation
+import DesignSystem
 
 enum ProfileRoute: Hashable {
     case personalInfo
@@ -20,6 +21,7 @@ enum ProfileRoute: Hashable {
     case yuriList
     case uploadRegistration
     case rules
+    case policy(PolicyKind)
     case seriesDetail(id: String)
     case chapterReader(seriesId: String, chapterId: String)
     case groupProfile(id: String)

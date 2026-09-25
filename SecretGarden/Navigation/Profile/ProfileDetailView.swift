@@ -23,6 +23,7 @@ struct ProfileDetailView: View {
     let onHeaderTapped: () -> Void
     let onUserUpdated: (User) -> Void
     let onSuccessMessage: (String) -> Void
+    let onPolicyTapped: (PolicyKind) -> Void
 
     @State private var selectedTab: ProfileDetailTab = .info
     @State private var isEditProfilePresented = false
@@ -54,7 +55,10 @@ struct ProfileDetailView: View {
                     }
                 case .notifications:
                     if currentUser != nil {
-                        NotificationSettingsView(repository: Container.shared.notificationSettingsRepository())
+                        NotificationSettingsView(
+                            repository: Container.shared.notificationSettingsRepository(),
+                            onPolicyTapped: onPolicyTapped
+                        )
                     } else {
                         placeholderTab("Vui lòng đăng nhập để xem Thông báo")
                     }

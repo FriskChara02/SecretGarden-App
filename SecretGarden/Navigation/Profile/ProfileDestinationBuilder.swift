@@ -21,6 +21,7 @@ struct ProfileDestinationContext {
     let onAuthenticated: () -> Void
     let onProfileUpdated: (User) -> Void
     let onSuccessMessage: (String) -> Void
+    let onPolicyTapped: (PolicyKind) -> Void
 }
 
 enum ProfileDestinationBuilder {
@@ -38,7 +39,8 @@ enum ProfileDestinationBuilder {
                 currentUser: context.currentUser,
                 onHeaderTapped: { coordinator.popToRoot() },
                 onUserUpdated: context.onProfileUpdated,
-                onSuccessMessage: context.onSuccessMessage
+                onSuccessMessage: context.onSuccessMessage,
+                onPolicyTapped: { kind in coordinator.push(.policy(kind)) }
             )
         case .editProfile:
             if let currentUser = context.currentUser {
@@ -58,6 +60,8 @@ enum ProfileDestinationBuilder {
             placeholderDestination(for: route)
         case .rules:
             PolicyView()
+        case .policy(let kind):
+            PolicyView(document: PolicyContent.document(for: kind))
         case .followedGroups, .discoverGroups, .groupProfile, .authorProfile:
             socialDestination(for: route, coordinator: coordinator)
         case .advancedSearch:

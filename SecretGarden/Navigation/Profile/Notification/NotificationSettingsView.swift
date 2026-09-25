@@ -13,9 +13,9 @@ import SwiftUI
 
 struct NotificationSettingsView: View {
     @StateObject private var viewModel: NotificationSettingsViewModel
-    private let onPolicyTapped: () -> Void
+    private let onPolicyTapped: (PolicyKind) -> Void
 
-    init(repository: NotificationSettingsRepositoryProtocol, onPolicyTapped: @escaping () -> Void) {
+    init(repository: NotificationSettingsRepositoryProtocol, onPolicyTapped: @escaping (PolicyKind) -> Void) {
         _viewModel = StateObject(wrappedValue: NotificationSettingsViewModel(repository: repository))
         self.onPolicyTapped = onPolicyTapped
     }
@@ -50,12 +50,12 @@ struct NotificationSettingsView: View {
                 DSSectionDivider()
 
                 GardenFooterView(
-                    policyLinks: [GardenFooterLink(title: "Chính sách", action: onPolicyTapped)],
+                    policyLinks: [GardenFooterLink(title: "Chính sách", action: { onPolicyTapped(.communityRules) })],
                     socialLinks: [
                         GardenFooterLink(title: "Discord", action: {}),
                         GardenFooterLink(title: "Facebook", action: {})
                     ],
-                    onPolicyTapped: onPolicyTapped
+                    onPolicyTapped: { onPolicyTapped(.communityRules) }
                 )
             }
             .padding(.vertical, DSSpacing.lg)

@@ -62,7 +62,8 @@ struct ProfileDrawerView: View {
                         currentUser: currentUser,
                         onAuthenticated: onAuthenticated,
                         onProfileUpdated: onProfileUpdated,
-                        onSuccessMessage: { globalToastMessage = $0 }
+                        onSuccessMessage: { globalToastMessage = $0 },
+                        onPolicyTapped: { kind in coordinator.contentCoordinator.push(.policy(kind)) }
                     ),
                     onReportTapped: { reportTarget = $0 }
                 )

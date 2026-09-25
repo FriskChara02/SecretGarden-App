@@ -170,14 +170,12 @@ private extension MainTabView {
                 onHeaderTapped: {
                     coordinator.homeCoordinator.popToRoot()
                 },
-                onPolicyTapped: {
-                    coordinator.homeCoordinator.push(.policy)
-                }
+                onPolicyTapped: { kind in coordinator.homeCoordinator.push(.policy(kind)) }
             )
             .navigationDestination(for: HomeRoute.self) { route in
                 switch route {
-                case .policy:
-                    PolicyView()
+                case .policy(let kind):
+                    PolicyView(document: PolicyContent.document(for: kind))
                 case .seriesDetail(let id):
                     SeriesDetailView(
                         seriesId: id,
@@ -332,10 +330,10 @@ private extension MainTabView {
                 case .notificationSettings:
                     NotificationSettingsView(
                         repository: Container.shared.notificationSettingsRepository(),
-                        onPolicyTapped: { coordinator.notificationsCoordinator.push(.policy) }
+                        onPolicyTapped: { kind in coordinator.notificationsCoordinator.push(.policy(kind)) }
                     )
-                case .policy:
-                    PolicyView()
+                case .policy(let kind):
+                    PolicyView(document: PolicyContent.document(for: kind))
                 case .seriesDetail(let id):
                     Text("Series Detail (demo) — id: \(id)")
                         .dsFont(.title1)
@@ -367,7 +365,8 @@ private extension MainTabView {
                         currentUser: currentUser,
                         onAuthenticated: onAuthenticated,
                         onProfileUpdated: onProfileUpdated,
-                        onSuccessMessage: { globalToastMessage = $0 }
+                        onSuccessMessage: { globalToastMessage = $0 },
+                        onPolicyTapped: { kind in coordinator.profileCoordinator.push(.policy(kind)) }
                     ),
                     onReportTapped: { reportTarget = $0 }
                 )

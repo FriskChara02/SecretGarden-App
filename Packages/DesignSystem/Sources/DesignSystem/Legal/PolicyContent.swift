@@ -42,6 +42,12 @@ public struct PolicyDocument {
     }
 }
 
+public enum PolicyKind: Hashable {
+    case communityRules
+    case privacyPolicy
+    case termsOfService
+}
+
 public enum PolicyContent {
 
     public static let communityRules = PolicyDocument(
@@ -124,6 +130,110 @@ public enum PolicyContent {
                     "Tiếp tục sử dụng sau khi Quy định thay đổi đồng nghĩa với việc bạn chấp nhận thay đổi đó."
                 ]
             )
+        ]
+    )
+
+    public static func document(for kind: PolicyKind) -> PolicyDocument {
+        switch kind {
+        case .communityRules: return communityRules
+        case .privacyPolicy: return privacyPolicy
+        case .termsOfService: return termsOfService
+        }
+    }
+
+    public static let termsOfService = PolicyDocument(
+        displayTitle: "Điều khoản",
+        documentTitle: "ĐIỀU KHOẢN DỊCH VỤ",
+        lastUpdatedLabel: "Cập nhật lần cuối: 07 / 08 / 2026",
+        introParagraphs: [
+            "Cảm ơn bạn đã sử dụng Secret Garden. Khi truy cập, đăng ký tài khoản hoặc dùng bất kỳ tính năng nào của Secret Garden, bạn xác nhận đã đọc, hiểu và đồng ý với toàn bộ Điều khoản dưới đây — nếu không đồng ý, vui lòng ngừng sử dụng dịch vụ."
+        ],
+        sections: [
+            PolicySection(heading: "1. Phạm vi áp dụng", bullets: [
+                "Điều khoản áp dụng cho mọi người dùng truy cập, đăng ký và sử dụng Secret Garden.",
+                "Dịch vụ vận hành theo nguyên tắc tự do trên internet quốc tế và pháp luật nơi đặt máy chủ, không nhắm riêng tới cá nhân hay tổ chức nào."
+            ]),
+            PolicySection(heading: "2. Thay đổi điều khoản", bullets: [
+                "Secret Garden có quyền sửa đổi Điều khoản bất kỳ lúc nào, hiệu lực ngay khi cập nhật trong app.",
+                "Tiếp tục sử dụng sau khi cập nhật đồng nghĩa với việc bạn chấp nhận thay đổi đó."
+            ]),
+            PolicySection(heading: "3. Độ tuổi sử dụng", bullets: [
+                "Người dùng cần đủ 16 tuổi trở lên để sử dụng Secret Garden.",
+                "Việc sử dụng dịch vụ đồng nghĩa với việc bạn xác nhận đáp ứng điều kiện độ tuổi này."
+            ]),
+            PolicySection(heading: "4. Tài khoản người dùng", bullets: [
+                "Cần đăng ký/đăng nhập để dùng đầy đủ tính năng.",
+                "Bạn chịu trách nhiệm bảo mật tài khoản của mình, không chia sẻ/mua bán/chuyển nhượng cho người khác.",
+                "Tên hiển thị, avatar, thông tin tài khoản phải phù hợp tiêu chuẩn cộng đồng và pháp luật.",
+                "Secret Garden có quyền chỉnh sửa, tạm khoá hoặc xoá tài khoản vi phạm Điều khoản/Quy định cộng đồng."
+            ]),
+            PolicySection(heading: "5. Nội dung người dùng đăng tải", bullets: [
+                "Bạn chịu trách nhiệm pháp lý với nội dung mình đăng tải, Secret Garden không chịu trách nhiệm liên đới.",
+                "Nghiêm cấm nội dung công kích cá nhân, phân biệt đối xử, khiêu dâm/18+, bạo lực, tục tĩu, bodyshaming.",
+                "Secret Garden có quyền gỡ nội dung vi phạm và xử lý tài khoản liên quan không cần báo trước."
+            ]),
+            PolicySection(heading: "6. Bản quyền & miễn trừ trách nhiệm", bullets: [
+                "Secret Garden không sở hữu bản quyền các tác phẩm được đăng tải — chỉ đóng vai trò nền tảng lưu trữ/hiển thị.",
+                "Bản dịch thuộc về cá nhân/nhóm dịch — bên thứ ba đăng tải nội dung."
+            ]),
+            PolicySection(heading: "7. Gỡ nội dung & khiếu nại bản quyền", bullets: [
+                "Secret Garden có quyền gỡ nội dung không phù hợp định hướng cộng đồng hoặc rủi ro pháp lý.",
+                "Chủ sở hữu bản quyền cho rằng bị vi phạm vui lòng liên hệ email hỗ trợ kèm bằng chứng sở hữu và liên kết nội dung liên quan."
+            ]),
+            PolicySection(heading: "8. Liên kết bên thứ ba", bullets: [
+                "Secret Garden không chịu trách nhiệm về nội dung/chính sách của các liên kết bên thứ ba xuất hiện trong app."
+            ]),
+            PolicySection(heading: "9. Giới hạn trách nhiệm", bullets: [
+                "Secret Garden không chịu trách nhiệm thiệt hại trực tiếp/gián tiếp phát sinh từ việc sử dụng dịch vụ."
+            ]),
+            PolicySection(heading: "10. Xử lý vi phạm & chấm dứt dịch vụ", bullets: [
+                "Secret Garden có quyền tạm dừng, hạn chế, chấm dứt tài khoản vi phạm mà không cần báo trước."
+            ]),
+            PolicySection(heading: "11. Liên hệ", bullets: [
+                "Mọi thắc mắc liên quan tới Điều khoản, vui lòng liên hệ qua email hỗ trợ trong mục Chính sách bảo mật."
+            ])
+        ]
+    )
+
+    public static let privacyPolicy = PolicyDocument(
+        displayTitle: "Chính sách bảo mật",
+        documentTitle: "CHÍNH SÁCH BẢO MẬT",
+        lastUpdatedLabel: "Cập nhật lần cuối: 07 / 08 / 2026",
+        introParagraphs: [
+            "Chính sách này mô tả cách Secret Garden thu thập, sử dụng và bảo vệ thông tin của bạn khi sử dụng dịch vụ."
+        ],
+        sections: [
+            PolicySection(heading: "1. Thông tin được thu thập", bullets: [
+                "Email, tên hiển thị và thông tin tài khoản khi đăng ký.",
+                "Nội dung bạn đăng tải, bình luận hoặc tương tác.",
+                "Dữ liệu kỹ thuật như địa chỉ IP, thiết bị, phiên bản app."
+            ]),
+            PolicySection(heading: "2. Mục đích sử dụng", bullets: [
+                "Vận hành và duy trì dịch vụ.",
+                "Quản lý tài khoản người dùng.",
+                "Cải thiện trải nghiệm sử dụng.",
+                "Ngăn chặn gian lận, vi phạm và rủi ro pháp lý."
+            ]),
+            PolicySection(heading: "3. Chia sẻ thông tin", bullets: [
+                "Secret Garden không bán, cho thuê hoặc trao đổi thông tin cá nhân của người dùng."
+            ]),
+            PolicySection(heading: "4. Liên kết bên thứ ba", bullets: [
+                "Secret Garden không chịu trách nhiệm với cách bên thứ ba thu thập/sử dụng dữ liệu người dùng qua các liên kết trong app."
+            ]),
+            PolicySection(heading: "5. Bảo mật thông tin", bullets: [
+                "Áp dụng các biện pháp kỹ thuật hợp lý để bảo vệ dữ liệu, dù không hệ thống nào an toàn tuyệt đối."
+            ]),
+            PolicySection(heading: "6. Quyền của bạn", bullets: [
+                "Xem, chỉnh sửa thông tin cá nhân.",
+                "Yêu cầu xoá tài khoản và dữ liệu liên quan.",
+                "Ngừng sử dụng dịch vụ bất cứ lúc nào."
+            ]),
+            PolicySection(heading: "7. Thay đổi chính sách", bullets: [
+                "Chính sách có thể cập nhật theo thời gian, có hiệu lực ngay khi đăng tải trong app."
+            ]),
+            PolicySection(heading: "8. Liên hệ", bullets: [
+                "Mọi thắc mắc về Chính sách bảo mật, vui lòng liên hệ qua email hỗ trợ trong ứng dụng."
+            ])
         ]
     )
 }

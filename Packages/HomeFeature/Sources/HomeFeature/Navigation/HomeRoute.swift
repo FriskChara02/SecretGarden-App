@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import DesignSystem
 
 /// Route for all navigation within the Home tab.
 /// Used by the App target (Composition Root) to initialize `Coordinator<HomeRoute>`,
@@ -15,5 +16,5 @@ public enum HomeRoute: Hashable {
     case chapterReader(seriesId: String, chapterId: String)
     case groupProfile(id: String)
     case authorProfile(id: String, roleLabel: String)
-    case policy
+    case policy(PolicyKind)
 }
