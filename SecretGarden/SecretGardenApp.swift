@@ -13,6 +13,7 @@ struct SecretGardenApp: App {
 
     init() {
         DSFontRegistrar.registerFonts()
+        DSImagePipeline.configure()
     }
 
     var body: some Scene {

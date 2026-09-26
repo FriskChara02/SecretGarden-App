@@ -171,7 +171,7 @@ private extension ProfileInfoTabView {
     @ViewBuilder
     private var bannerFill: some View {
         if let url = currentUser?.bannerURL {
-            AsyncImage(url: url) { phase in
+            DSCachedAsyncImage(url: url) { phase in
                 switch phase {
                 case .success(let image):
                     image
@@ -267,7 +267,7 @@ private extension ProfileInfoTabView {
     private var avatarImage: some View {
         Group {
             if let url = currentUser?.avatarURL {
-                AsyncImage(url: url) { phase in
+                DSCachedAsyncImage(url: url, resize: .size(CGSize(width: 88, height: 88))) { phase in
                     switch phase {
                     case .success(let image):
                         image

@@ -230,7 +230,7 @@ struct BlockListView: View {
     ) -> some View {
         HStack(spacing: DSSpacing.sm) {
             if let imageURL {
-                AsyncImage(url: imageURL) { phase in
+                DSCachedAsyncImage(url: imageURL, resize: .size(CGSize(width: 44, height: 44))) { phase in
                     if case .success(let image) = phase {
                         image.resizable().aspectRatio(contentMode: .fill)
                     } else {

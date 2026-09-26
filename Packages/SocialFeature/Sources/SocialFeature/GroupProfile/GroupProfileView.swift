@@ -133,7 +133,7 @@ public struct GroupProfileView: View {
     }
 
     private func avatarImage(_ url: URL?) -> some View {
-        AsyncImage(url: url) { phase in
+        DSCachedAsyncImage(url: url, resize: .size(CGSize(width: 88, height: 88))) { phase in
             if case .success(let image) = phase {
                 image.resizable().aspectRatio(contentMode: .fill)
             } else {
@@ -242,7 +242,7 @@ public struct GroupProfileView: View {
         HStack(alignment: .top, spacing: DSSpacing.md) {
             Image(systemName: "diamond.fill").font(.system(size: 7)).foregroundStyle(.brown.opacity(0.55)).padding(.top, 4)
 
-            AsyncImage(url: member.user.avatarURL) { phase in
+            DSCachedAsyncImage(url: member.user.avatarURL, resize: .size(CGSize(width: 52, height: 52))) { phase in
                 if case .success(let img) = phase { img.resizable().aspectRatio(contentMode: .fill) }
                 else { Circle().fill(DSColor.backgroundSecondary) }
             }

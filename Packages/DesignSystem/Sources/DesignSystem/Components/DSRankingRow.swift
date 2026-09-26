@@ -86,7 +86,7 @@ public struct DSRankingRow: View {
     }
 
     private var backgroundArtwork: some View {
-        AsyncImage(url: item.coverURL) { phase in
+        DSCachedAsyncImage(url: item.coverURL) { phase in
             if case .success(let image) = phase {
                 image.resizable().aspectRatio(contentMode: .fill)
                     .opacity(0.25)
@@ -197,7 +197,7 @@ public struct DSRankingRow: View {
 
     @ViewBuilder
     private func coverImage(width: CGFloat, height: CGFloat) -> some View {
-        AsyncImage(url: item.coverURL) { phase in
+        DSCachedAsyncImage(url: item.coverURL, resize: .size(CGSize(width: width, height: height))) { phase in
             if case .success(let image) = phase {
                 image.resizable().aspectRatio(contentMode: .fill)
             } else {

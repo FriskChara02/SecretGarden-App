@@ -24,7 +24,7 @@ public struct DSCoverFadeBackground: View {
             DSWavePatternBackground()
 
             if let coverURL {
-                AsyncImage(url: coverURL) { phase in
+                DSCachedAsyncImage(url: coverURL) { phase in
                     if case .success(let image) = phase {
                         image
                             .resizable()

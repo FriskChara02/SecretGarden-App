@@ -428,7 +428,7 @@ public struct ChapterReaderView: View {
             DSDecorativeCard {
                 LazyVStack(spacing: 0) {
                     ForEach(pages) { page in
-                        AsyncImage(url: page.imageURL) { phase in
+                        DSCachedAsyncImage(url: page.imageURL) { phase in
                             switch phase {
                             case .success(let image): image.resizable().aspectRatio(contentMode: .fit)
                             case .failure:
@@ -779,7 +779,7 @@ public struct ChapterReaderView: View {
     }
 
     private func avatarView(_ user: User, size: CGFloat = 36) -> some View {
-        AsyncImage(url: user.avatarURL) { phase in
+        DSCachedAsyncImage(url: user.avatarURL, resize: .size(CGSize(width: size, height: size))) { phase in
             if case .success(let image) = phase { image.resizable().aspectRatio(contentMode: .fill) }
             else { Circle().fill(DSColor.backgroundSecondary).overlay { Image(systemName: "person.fill").foregroundStyle(DSColor.textSecondary) } }
         }

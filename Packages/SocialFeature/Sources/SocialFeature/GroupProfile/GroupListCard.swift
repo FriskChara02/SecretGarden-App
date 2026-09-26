@@ -44,7 +44,7 @@ struct GroupListCard: View {
     }
 
     private var avatarImage: some View {
-        AsyncImage(url: group.avatarURL) { phase in
+        DSCachedAsyncImage(url: group.avatarURL, resize: .size(CGSize(width: 60, height: 60))) { phase in
             if case .success(let image) = phase {
                 image.resizable().aspectRatio(contentMode: .fill)
             } else {

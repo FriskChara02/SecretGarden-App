@@ -168,7 +168,7 @@ public struct SeriesDetailView: View {
     // MARK: - Cover
 
     private func coverImage(_ url: URL) -> some View {
-        AsyncImage(url: url) { phase in
+        DSCachedAsyncImage(url: url, resize: .size(CGSize(width: 220, height: 300))) { phase in
             if case .success(let image) = phase {
                 image.resizable().aspectRatio(contentMode: .fill)
             } else {
@@ -762,7 +762,7 @@ public struct SeriesDetailView: View {
     }
 
     private func avatarView(_ user: User, size: CGFloat = 36) -> some View {
-        AsyncImage(url: user.avatarURL) { phase in
+        DSCachedAsyncImage(url: user.avatarURL, resize: .size(CGSize(width: size, height: size))) { phase in
             if case .success(let image) = phase {
                 image.resizable().aspectRatio(contentMode: .fill)
             } else {

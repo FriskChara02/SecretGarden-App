@@ -95,7 +95,7 @@ private struct RandomYuriCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: DSSpacing.xxs) {
             GeometryReader { proxy in
-                AsyncImage(url: series.coverURL) { phase in
+                DSCachedAsyncImage(url: series.coverURL, resize: .size(CGSize(width: proxy.size.width, height: proxy.size.height))) { phase in
                     switch phase {
                     case .empty:
                         Rectangle().fill(DSColor.backgroundSecondary).overlay { ProgressView() }

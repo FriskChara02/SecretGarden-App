@@ -95,7 +95,7 @@ private struct ContinueReadingCard: View {
 
     var body: some View {
         ZStack(alignment: .bottomLeading) {
-            AsyncImage(url: item.series.coverURL) { phase in
+            DSCachedAsyncImage(url: item.series.coverURL, resize: .size(CGSize(width: 260, height: 120))) { phase in
                 switch phase {
                 case .success(let image):
                     image.resizable().scaledToFill()

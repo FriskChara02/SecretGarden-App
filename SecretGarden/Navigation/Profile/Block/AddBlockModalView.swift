@@ -170,7 +170,7 @@ struct AddBlockModalView: View {
                 Image(systemName: "tag.fill")
                     .foregroundStyle(DSColor.brandPrimary)
             } else if let imageURL {
-                AsyncImage(url: imageURL) { phase in
+                DSCachedAsyncImage(url: imageURL, resize: .size(CGSize(width: 40, height: 40))) { phase in
                     if case .success(let image) = phase {
                         image.resizable().aspectRatio(contentMode: .fill)
                     } else {

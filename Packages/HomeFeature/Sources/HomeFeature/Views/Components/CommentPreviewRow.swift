@@ -58,7 +58,7 @@ struct CommentPreviewRow: View {
 
     @ViewBuilder
     private var avatar: some View {
-        AsyncImage(url: comment.user.avatarURL) { phase in
+        DSCachedAsyncImage(url: comment.user.avatarURL, resize: .size(CGSize(width: avatarSize, height: avatarSize))) { phase in
             switch phase {
             case .success(let image):
                 image.resizable().aspectRatio(contentMode: .fill)

@@ -317,7 +317,7 @@ public struct SeriesCardView: View {
     /// Image covering the ENTIRE provided frame (used as a persistent background layer for both states).
     @ViewBuilder
     private func coverImageFill(width: CGFloat, height: CGFloat) -> some View {
-        AsyncImage(url: data.coverURL) { phase in
+        DSCachedAsyncImage(url: data.coverURL, resize: .size(CGSize(width: width, height: height))) { phase in
             switch phase {
             case .empty:
                 Rectangle().fill(DSColor.backgroundSecondary).overlay { ProgressView() }

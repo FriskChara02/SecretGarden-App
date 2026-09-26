@@ -259,7 +259,7 @@ public struct DiscoverGroupsView: View {
 
         private var content: some View {
             HStack(alignment: .center, spacing: DSSpacing.md) {
-                AsyncImage(url: group.avatarURL) { phase in
+                DSCachedAsyncImage(url: group.avatarURL, resize: .size(CGSize(width: 60, height: 60))) { phase in
                     if case .success(let img) = phase {
                         img.resizable().scaledToFill()
                     } else {
@@ -307,7 +307,7 @@ public struct DiscoverGroupsView: View {
         @ViewBuilder
         private var backgroundImage: some View {
             GeometryReader { geo in
-                AsyncImage(url: group.avatarURL) { phase in
+                DSCachedAsyncImage(url: group.avatarURL, resize: .size(CGSize(width: geo.size.width, height: geo.size.height))) { phase in
                     if case .success(let img) = phase {
                         img.resizable()
                            .scaledToFill()
