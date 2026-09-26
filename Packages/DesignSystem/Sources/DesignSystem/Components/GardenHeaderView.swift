@@ -24,7 +24,7 @@ public struct GardenHeaderView: View {
     public var body: some View {
         Button(action: onTap) {
             HStack(spacing: DSSpacing.sm) {
-                logoIcon
+                logoIcon.accessibilityHidden(true)
                 Text(title)
                     .dsFont(.title2)
                     .fontWeight(.bold)

@@ -637,6 +637,7 @@ public struct ChapterReaderView: View {
         HStack(alignment: .top, spacing: DSSpacing.sm) {
             Circle().fill(DSColor.backgroundSecondary).frame(width: 36, height: 36)
                 .overlay { Image(systemName: "person.fill").foregroundStyle(DSColor.textSecondary) }
+                .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: DSSpacing.xs) {
                 TextField("Bình luận (@ để nhắc tên)...", text: $viewModel.commentDraft, axis: .vertical)
                     .dsFont(.subheadline)
@@ -645,8 +646,8 @@ public struct ChapterReaderView: View {
                 HStack {
                     Text("\(viewModel.commentDraft.count)/1000").dsFont(.caption).foregroundStyle(DSColor.textSecondary)
                     Spacer()
-                    Image(systemName: "face.smiling").foregroundStyle(DSColor.textSecondary)
-                    Image(systemName: "photo").foregroundStyle(DSColor.textSecondary)
+                    Image(systemName: "face.smiling").foregroundStyle(DSColor.textSecondary).accessibilityHidden(true)
+                    Image(systemName: "photo").foregroundStyle(DSColor.textSecondary).accessibilityHidden(true)
                     Button {
                         viewModel.postComment()
                     } label: {
@@ -662,6 +663,7 @@ public struct ChapterReaderView: View {
                         }
                     }
                     .disabled(viewModel.commentDraft.trimmingCharacters(in: .whitespaces).isEmpty || viewModel.isPostingComment)
+                    .accessibilityLabel("Gửi bình luận")
                 }
             }
         }
@@ -746,6 +748,7 @@ public struct ChapterReaderView: View {
                 }
             }
             .disabled(viewModel.replyDraft.trimmingCharacters(in: .whitespaces).isEmpty || viewModel.isPostingReply)
+            .accessibilityLabel("Gửi trả lời")
 
             Button("Hủy") { viewModel.cancelReplying() }
                 .dsFont(.caption)

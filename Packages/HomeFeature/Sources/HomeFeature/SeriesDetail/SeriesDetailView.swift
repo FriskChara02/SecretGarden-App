@@ -181,6 +181,7 @@ public struct SeriesDetailView: View {
         .background(RoundedRectangle(cornerRadius: DSRadius.md + 4).fill(DSColor.backgroundPrimary))
         .shadow(color: .black.opacity(0.15), radius: 10, y: 4)
         .frame(maxWidth: .infinity)
+        .accessibilityHidden(true)
     }
 
     // MARK: - Title + original title
@@ -225,7 +226,7 @@ public struct SeriesDetailView: View {
 
     private func infoRow(icon: String, iconColor: Color, label: String, value: String, valueColor: Color) -> some View {
         HStack(spacing: DSSpacing.xs) {
-            Image(systemName: icon).foregroundStyle(iconColor)
+            Image(systemName: icon).foregroundStyle(iconColor).accessibilityHidden(true)
             Text(label).dsFont(.subheadline).fontWeight(.semibold).foregroundStyle(DSColor.textPrimary)
             Text(value).dsFont(.subheadline).fontWeight(.semibold).foregroundStyle(valueColor)
         }
@@ -256,6 +257,8 @@ public struct SeriesDetailView: View {
             Text(Self.numberFormatter.string(from: NSNumber(value: count)) ?? "\(count)")
                 .dsFont(.subheadline).fontWeight(.bold).foregroundStyle(DSColor.brandPrimary)
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Lượt xem: \(Self.numberFormatter.string(from: NSNumber(value: count)) ?? "\(count)")")
     }
 
     // MARK: - Status
@@ -266,6 +269,8 @@ public struct SeriesDetailView: View {
             Text("Trạng thái:").dsFont(.subheadline).fontWeight(.semibold).foregroundStyle(DSColor.textPrimary)
             Text(statusLabel(status)).dsFont(.subheadline).fontWeight(.bold).foregroundStyle(DSColor.brandPrimary)
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Trạng thái: \(statusLabel(status))")
     }
 
     private func statusLabel(_ status: SeriesStatus) -> String {
@@ -355,11 +360,13 @@ public struct SeriesDetailView: View {
             .labelsHidden()
             .toggleStyle(DSBellToggleStyle())
             .disabled(viewModel.isTogglingNotify)
+            .accessibilityLabel("Nhận thông báo")
 
             Text("Nhận thông báo")
                 .dsFont(.subheadline).fontWeight(.bold)
                 .foregroundStyle(DSColor.textPrimary)
                 .lineLimit(1).minimumScaleFactor(0.85)
+                .accessibilityHidden(true)
 
             Button(action: onReportTapped) {
                 Image(systemName: "exclamationmark.triangle")
@@ -368,6 +375,7 @@ public struct SeriesDetailView: View {
                     .frame(width: 24, height: 24)
                     .overlay(Circle().strokeBorder(.orange, lineWidth: 1.2))
             }
+            .accessibilityLabel("Báo cáo vi phạm")
 
             Spacer()
         }
@@ -475,6 +483,7 @@ public struct SeriesDetailView: View {
                     .foregroundStyle(DSColor.brandPrimary)
                     .frame(width: 32, height: 32)
                     .background(Circle().fill(DSColor.backgroundSecondary))
+                    .accessibilityHidden(true)
             }
             Spacer()
         }
@@ -503,10 +512,10 @@ public struct SeriesDetailView: View {
                 HStack {
                     sectionTitle("Danh sách chương")
                     Spacer()
-                    sortButton(icon: "arrow.up", isSelected: !viewModel.chaptersSortDescending) {
+                    sortButton(icon: "arrow.up", isSelected: !viewModel.chaptersSortDescending, accessibilityLabel: "Sắp xếp cũ nhất trước") {
                         viewModel.setChaptersSortDescending(false)
                     }
-                    sortButton(icon: "arrow.down", isSelected: viewModel.chaptersSortDescending) {
+                    sortButton(icon: "arrow.down", isSelected: viewModel.chaptersSortDescending, accessibilityLabel: "Sắp xếp mới nhất trước") {
                         viewModel.setChaptersSortDescending(true)
                     }
                 }
@@ -541,7 +550,7 @@ public struct SeriesDetailView: View {
         }
     }
 
-    private func sortButton(icon: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
+    private func sortButton(icon: String, isSelected: Bool, accessibilityLabel: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Image(systemName: icon)
                 .font(.subheadline)
@@ -549,6 +558,7 @@ public struct SeriesDetailView: View {
                 .frame(width: 32, height: 32)
                 .background(Circle().fill(isSelected ? DSColor.brandPrimary : DSColor.backgroundSecondary))
         }
+        .accessibilityLabel(accessibilityLabel)
     }
 
     private func chapterRow(_ chapter: Chapter, isLatest: Bool) -> some View {
@@ -644,8 +654,14 @@ public struct SeriesDetailView: View {
 
     private var commentComposer: some View {
         HStack(alignment: .top, spacing: DSSpacing.sm) {
-            Circle().fill(DSColor.backgroundSecondary).frame(width: 36, height: 36)
-                .overlay { Image(systemName: "person.fill").foregroundStyle(DSColor.textSecondary) }
+            Circle()
+                .fill(DSColor.backgroundSecondary).frame(width: 36, height: 36)
+                .overlay {
+                    Image(systemName: "person.fill")
+                        .foregroundStyle(DSColor.textSecondary)
+                }
+                .accessibilityHidden(true)
+
             VStack(alignment: .leading, spacing: DSSpacing.xs) {
                 TextField("Bình luận (@ để nhắc tên)...", text: $viewModel.commentDraft, axis: .vertical)
                     .dsFont(.subheadline)
@@ -654,8 +670,8 @@ public struct SeriesDetailView: View {
                 HStack {
                     Text("\(viewModel.commentDraft.count)/1000").dsFont(.caption).foregroundStyle(DSColor.textSecondary)
                     Spacer()
-                    Image(systemName: "face.smiling").foregroundStyle(DSColor.textSecondary)
-                    Image(systemName: "photo").foregroundStyle(DSColor.textSecondary)
+                    Image(systemName: "face.smiling").foregroundStyle(DSColor.textSecondary).accessibilityHidden(true)
+                    Image(systemName: "photo").foregroundStyle(DSColor.textSecondary).accessibilityHidden(true)
                     Button {
                         viewModel.postComment()
                     } label: {
@@ -671,6 +687,7 @@ public struct SeriesDetailView: View {
                         }
                     }
                     .disabled(viewModel.commentDraft.trimmingCharacters(in: .whitespaces).isEmpty || viewModel.isPostingComment)
+                    .accessibilityLabel("Gửi bình luận")
                 }
             }
         }

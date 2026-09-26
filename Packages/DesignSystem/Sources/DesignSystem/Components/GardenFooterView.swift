@@ -59,7 +59,7 @@ public struct GardenFooterView: View {
 
     private var topBlock: some View {
         VStack(spacing: DSSpacing.sm) {
-            logoIcon
+            logoIcon.accessibilityHidden(true)
 
             Text(appName)
                 .dsFont(.title2)
