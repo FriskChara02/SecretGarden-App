@@ -53,6 +53,16 @@ public struct SeriesCardData: Identifiable, Equatable {
     }
 }
 
+extension SeriesCardData {
+    var accessibilitySummary: String {
+        var parts = [title]
+        if let authorName { parts.append("Tác giả \(authorName)") }
+        if let groupName { parts.append("Nhóm dịch \(groupName)") }
+        parts.append(bookmarkLine)
+        return parts.joined(separator: ", ")
+    }
+}
+
 public struct SeriesCardView: View {
     private let data: SeriesCardData
     private let layout: SeriesCardLayout
@@ -72,10 +82,15 @@ public struct SeriesCardView: View {
     }
 
     public var body: some View {
-        switch layout {
-        case .grid: gridBody
-        case .list: listBody
+        Group {
+            switch layout {
+            case .grid: gridBody
+            case .list: listBody
+            }
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(data.accessibilitySummary)
+        .accessibilityAddTraits(.isButton)
     }
 
     // MARK: - Grid layout

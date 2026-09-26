@@ -170,6 +170,7 @@ public struct ChapterReaderView: View {
                             .background(Circle().fill(DSColor.rankHighlight.opacity(0.15)))
                             .overlay(Circle().strokeBorder(DSColor.rankHighlight, lineWidth: 1.5))
                     }
+                    .accessibilityLabel("Lên đầu trang")
                     .padding(.trailing, DSSpacing.lg)
 
                     floatingNavBar
@@ -208,6 +209,7 @@ public struct ChapterReaderView: View {
             Button { viewModel.isMenuPresented = true } label: {
                 Image(systemName: "line.3.horizontal").foregroundStyle(DSColor.textPrimary).font(.title3)
             }
+            .accessibilityLabel("Mở menu")
         }
         .padding(.horizontal, DSSpacing.md)
         .padding(.vertical, DSSpacing.sm)
@@ -258,12 +260,14 @@ public struct ChapterReaderView: View {
                         .frame(width: 30, height: 30)
                         .overlay(Circle().strokeBorder(DSColor.brandPrimary, lineWidth: 1.2))
                 }
+                .accessibilityLabel("Bình luận chương")
                 Button(action: onReportTapped) {
                     Image(systemName: "exclamationmark.triangle").font(.subheadline)
                         .foregroundStyle(DSColor.brandPrimary)
                         .frame(width: 30, height: 30)
                         .overlay(Circle().strokeBorder(DSColor.brandPrimary, lineWidth: 1.2))
                 }
+                .accessibilityLabel("Báo cáo vi phạm")
             }
             .padding(DSSpacing.md)
         }
@@ -364,7 +368,7 @@ public struct ChapterReaderView: View {
     private var infoCardNavRow: some View {
         VStack(spacing: DSSpacing.sm) {
             HStack(spacing: DSSpacing.sm) {
-                navCircleButton(icon: "arrow.left", isEnabled: viewModel.hasPreviousChapter) {
+                navCircleButton(icon: "arrow.left", isEnabled: viewModel.hasPreviousChapter, accessibilityLabel: "Chương trước") {
                     viewModel.goToPreviousChapter()
                 }
                 Button {
@@ -380,16 +384,18 @@ public struct ChapterReaderView: View {
                     .frame(maxWidth: .infinity)
                     .overlay(Capsule().strokeBorder(DSColor.brandPrimary, lineWidth: 1.5))
                 }
-                navCircleButton(icon: "arrow.right", isEnabled: viewModel.hasNextChapter) {
+                navCircleButton(icon: "arrow.right", isEnabled: viewModel.hasNextChapter, accessibilityLabel: "Chương sau") {
                     viewModel.goToNextChapter()
                 }
             }
 
             HStack {
-                Image(systemName: "house.fill").foregroundStyle(DSColor.brandPrimary)
-                    .frame(width: 32, height: 32)
-                    .overlay(Circle().strokeBorder(DSColor.brandPrimary, lineWidth: 1.5))
-                    .onTapGesture { onHomeTapped() }
+                Button(action: onHomeTapped) {
+                    Image(systemName: "house.fill").foregroundStyle(DSColor.brandPrimary)
+                        .frame(width: 32, height: 32)
+                        .overlay(Circle().strokeBorder(DSColor.brandPrimary, lineWidth: 1.5))
+                }
+                .accessibilityLabel("Về trang chủ")
                 Text("\(viewModel.pagesState.value?.count ?? 0) trang")
                     .dsFont(.subheadline).foregroundStyle(DSColor.textSecondary)
                 Spacer()
@@ -408,13 +414,14 @@ public struct ChapterReaderView: View {
         }
     }
 
-    private func navCircleButton(icon: String, isEnabled: Bool, action: @escaping () -> Void) -> some View {
+    private func navCircleButton(icon: String, isEnabled: Bool, accessibilityLabel: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Image(systemName: icon).foregroundStyle(.white)
                 .frame(width: 44, height: 44)
                 .background(Circle().fill(isEnabled ? DSColor.brandPrimary : DSColor.backgroundSecondary))
         }
         .disabled(!isEnabled)
+        .accessibilityLabel(accessibilityLabel)
     }
 
     // MARK: - Pages
@@ -503,10 +510,12 @@ public struct ChapterReaderView: View {
     private func reactionPicker(onSelect: @escaping (String) -> Void) -> some View {
         HStack(spacing: DSSpacing.md) {
             ForEach(reactionEmojis, id: \.self) { emoji in
-                Text(emoji)
-                    .font(.system(size: 30))
-                    .scaleEffect(1.0)
-                    .onTapGesture { onSelect(emoji) }
+                Button {
+                    onSelect(emoji)
+                } label: {
+                    Text(emoji).font(.system(size: 30))
+                }
+                .accessibilityLabel(Self.reactionAccessibilityLabel(for: emoji))
             }
         }
         .padding(.horizontal, DSSpacing.lg)
@@ -514,6 +523,18 @@ public struct ChapterReaderView: View {
         .background(Capsule().fill(DSColor.backgroundPrimary))
         .shadow(color: .black.opacity(0.15), radius: 8, y: 2)
         .fixedSize()
+    }
+
+    private static func reactionAccessibilityLabel(for emoji: String) -> String {
+        switch emoji {
+        case "❤️": return "Yêu thích"
+        case "😍": return "Thích mê"
+        case "😂": return "Buồn cười"
+        case "😢": return "Buồn"
+        case "😡": return "Tức giận"
+        case "👍": return "Ủng hộ"
+        default: return "Cảm xúc"
+        }
     }
 
     // MARK: - "Other Group" (avatar + name + follow + divider + grid + divider)
@@ -799,22 +820,24 @@ public struct ChapterReaderView: View {
 
     private var floatingNavBar: some View {
         HStack(spacing: DSSpacing.sm) {
-            navCircleButton(icon: "arrow.left", isEnabled: viewModel.hasPreviousChapter) { viewModel.goToPreviousChapter() }
+            navCircleButton(icon: "arrow.left", isEnabled: viewModel.hasPreviousChapter, accessibilityLabel: "Chương trước") { viewModel.goToPreviousChapter() }
             Button { viewModel.isChapterPickerPresented = true } label: {
                 HStack { Text("Chương \(Self.chapterNumberString(viewModel.currentChapter.chapterNumber))"); Image(systemName: "chevron.up") }
                     .dsFont(.subheadline).fontWeight(.semibold).foregroundStyle(DSColor.brandPrimary)
                     .padding(.vertical, DSSpacing.sm).frame(maxWidth: .infinity)
                     .overlay(Capsule().strokeBorder(DSColor.brandPrimary, lineWidth: 1.5))
             }
-            navCircleButton(icon: "arrow.right", isEnabled: viewModel.hasNextChapter) { viewModel.goToNextChapter() }
+            navCircleButton(icon: "arrow.right", isEnabled: viewModel.hasNextChapter, accessibilityLabel: "Chương sau") { viewModel.goToNextChapter() }
             Button(action: onHomeTapped) {
                 Image(systemName: "house.fill").foregroundStyle(.white).frame(width: 40, height: 40)
                     .background(Circle().fill(DSColor.brandPrimary))
             }
+            .accessibilityLabel("Về trang chủ")
             Button { withAnimation { isReactionPickerPresentedFloating.toggle() } } label: {
                 Image(systemName: "face.smiling").foregroundStyle(.white).frame(width: 40, height: 40)
                     .background(Circle().fill(DSColor.brandPrimary))
             }
+            .accessibilityLabel("Chọn cảm xúc")
         }
         .padding(.horizontal, DSSpacing.md).padding(.vertical, DSSpacing.sm)
         .background(Capsule().fill(DSColor.backgroundPrimary))
@@ -862,7 +885,7 @@ public struct ChapterReaderView: View {
             reactionBar
             Divider()
             HStack(spacing: DSSpacing.sm) {
-                navCircleButton(icon: "arrow.left", isEnabled: viewModel.hasPreviousChapter) { viewModel.goToPreviousChapter() }
+                navCircleButton(icon: "arrow.left", isEnabled: viewModel.hasPreviousChapter, accessibilityLabel: "Chương trước") { viewModel.goToPreviousChapter() }
                 Button { viewModel.isChapterPickerPresented = true } label: {
                     HStack(spacing: DSSpacing.xs) {
                         Text("Chương \(Self.chapterNumberString(viewModel.currentChapter.chapterNumber))")
@@ -874,7 +897,7 @@ public struct ChapterReaderView: View {
                     .frame(maxWidth: .infinity)
                     .overlay(Capsule().strokeBorder(DSColor.brandPrimary, lineWidth: 1.5))
                 }
-                navCircleButton(icon: "arrow.right", isEnabled: viewModel.hasNextChapter) { viewModel.goToNextChapter() }
+                navCircleButton(icon: "arrow.right", isEnabled: viewModel.hasNextChapter, accessibilityLabel: "Chương sau") { viewModel.goToNextChapter() }
             }
             Divider()
             HStack(spacing: DSSpacing.md) {
@@ -885,6 +908,7 @@ public struct ChapterReaderView: View {
                         .foregroundStyle(DSColor.brandPrimary)
                         .frame(width: 32, height: 32)
                         .background(Circle().fill(DSColor.backgroundSecondary))
+                        .accessibilityHidden(true)
                 }
                 Spacer()
             }
