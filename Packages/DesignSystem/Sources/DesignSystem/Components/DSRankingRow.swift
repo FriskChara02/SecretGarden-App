@@ -86,7 +86,7 @@ public struct DSRankingRow: View {
     }
 
     private var backgroundArtwork: some View {
-        DSCachedAsyncImage(url: item.coverURL) { phase in
+        DSCachedAsyncImage(url: item.coverURL, resize: .width(140)) { phase in
             if case .success(let image) = phase {
                 image.resizable().aspectRatio(contentMode: .fill)
                     .opacity(0.25)

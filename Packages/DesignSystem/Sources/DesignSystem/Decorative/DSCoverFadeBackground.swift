@@ -24,16 +24,18 @@ public struct DSCoverFadeBackground: View {
             DSWavePatternBackground()
 
             if let coverURL {
-                DSCachedAsyncImage(url: coverURL) { phase in
-                    if case .success(let image) = phase {
-                        image
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                            .frame(height: fadeHeight)
-                            .clipped()
-                            .blur(radius: 8)
-                            .overlay(Color.black.opacity(0.10))
-                            .mask(fadeMask)
+                GeometryReader { proxy in
+                    DSCachedAsyncImage(url: coverURL, resize: .size(CGSize(width: proxy.size.width, height: fadeHeight))) { phase in
+                        if case .success(let image) = phase {
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .frame(width: proxy.size.width, height: fadeHeight)
+                                .clipped()
+                                .blur(radius: 8)
+                                .overlay(Color.black.opacity(0.10))
+                                .mask(fadeMask)
+                        }
                     }
                 }
                 .frame(height: fadeHeight)

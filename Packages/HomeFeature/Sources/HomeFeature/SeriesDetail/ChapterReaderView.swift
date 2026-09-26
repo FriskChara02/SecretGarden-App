@@ -23,6 +23,7 @@ public struct ChapterReaderView: View {
     @State private var isFloatingBarVisible = true
     @State private var lastDragTranslationY: CGFloat = 0
     @State private var expandedReplyIDs: Set<String> = []
+    @State private var readerContentWidth: CGFloat = UIScreen.main.bounds.width
 
     let onHomeTapped: () -> Void
     let onSeriesSelected: (String) -> Void
@@ -136,6 +137,11 @@ public struct ChapterReaderView: View {
                         )
                     }
                     .padding(.bottom, DSSpacing.xl)
+                }
+                .onGeometryChange(for: CGFloat.self) { proxy in
+                    proxy.size.width
+                } action: { newWidth in
+                    readerContentWidth = newWidth
                 }
                 .simultaneousGesture(
                     DragGesture(minimumDistance: 8)
@@ -428,7 +434,10 @@ public struct ChapterReaderView: View {
             DSDecorativeCard {
                 LazyVStack(spacing: 0) {
                     ForEach(pages) { page in
-                        DSCachedAsyncImage(url: page.imageURL) { phase in
+                        DSCachedAsyncImage(
+                            url: page.imageURL,
+                            resize: .width(readerContentWidth - DSSpacing.md * 2)
+                        ) { phase in
                             switch phase {
                             case .success(let image): image.resizable().aspectRatio(contentMode: .fit)
                             case .failure:

@@ -141,7 +141,7 @@ private extension ProfileInfoTabView {
     private var bannerAndAvatar: some View {
         GeometryReader { proxy in
             ZStack(alignment: .bottomLeading) {
-                bannerFill
+                bannerFill(size: proxy.size)
                 LinearGradient(colors: [.white.opacity(0.9), .white.opacity(0)], startPoint: .leading, endPoint: .trailing)
                     .frame(width: proxy.size.width - 60, height: 52.5)
                     .offset(x: 60)
@@ -169,9 +169,9 @@ private extension ProfileInfoTabView {
     }
 
     @ViewBuilder
-    private var bannerFill: some View {
+    private func bannerFill(size: CGSize) -> some View {
         if let url = currentUser?.bannerURL {
-            DSCachedAsyncImage(url: url) { phase in
+            DSCachedAsyncImage(url: url, resize: .size(size)) { phase in
                 switch phase {
                 case .success(let image):
                     image
