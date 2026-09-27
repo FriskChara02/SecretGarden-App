@@ -77,8 +77,7 @@ enum ProfileDestinationBuilder {
                 onAuthenticated: {
                     coordinator.popToRoot()
                     context.onAuthenticated()
-                },
-                embedsOwnNavigationStack: false
+                }
             )
             .toolbar(.hidden, for: .navigationBar)
         }

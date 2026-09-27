@@ -7,20 +7,17 @@
 
 import Foundation
 import Observation
-import CoreArchitecture
 
 @Observable
 final class AuthCoordinator {
-
-    let coordinator = Coordinator<AuthRoute>()
+    var currentRoute: AuthRoute?
 
     func showLogin() {
-        coordinator.popToRoot()
+        currentRoute = nil
     }
 
     /// Auth is a peer-level flow - screen transitions always replace the current screen, not stacking.
     func show(_ route: AuthRoute) {
-        coordinator.popToRoot()
-        coordinator.push(route)
+        currentRoute = route
     }
 }
