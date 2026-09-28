@@ -31,11 +31,15 @@ struct UploadAvatarEndpoint: APIEndpoint {
 
     var body: Data? {
         var data = Data()
-        data.append("--\(boundary)\r\n".data(using: .utf8)!)
-        data.append("Content-Disposition: form-data; name=\"avatar\"; filename=\"\(fileName)\"\r\n".data(using: .utf8)!)
-        data.append("Content-Type: \(mimeType)\r\n\r\n".data(using: .utf8)!)
+        func append(_ string: String) {
+            guard let chunk = string.data(using: .utf8) else { return }
+            data.append(chunk)
+        }
+        append("--\(boundary)\r\n")
+        append("Content-Disposition: form-data; name=\"avatar\"; filename=\"\(fileName)\"\r\n")
+        append("Content-Type: \(mimeType)\r\n\r\n")
         data.append(imageData)
-        data.append("\r\n--\(boundary)--\r\n".data(using: .utf8)!)
+        append("\r\n--\(boundary)--\r\n")
         return data
     }
 }

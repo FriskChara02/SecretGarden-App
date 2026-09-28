@@ -15,7 +15,7 @@ import CoreModels
 import CoreStorage
 import Foundation
 
-public final class AuthRepositoryDebugMock: AuthRepositoryProtocol, @unchecked Sendable {
+public final class AuthRepositoryDebugMock: AuthRepositoryProtocol, Sendable {
 
     private let keychainManager: KeychainManager
 
