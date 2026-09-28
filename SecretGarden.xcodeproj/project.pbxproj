@@ -45,9 +45,16 @@
 		7A4800F13027A397001AC9C9 /* Exceptions for "SecretGarden" folder in "SecretGarden" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Configs/Base.xcconfig,
+				Configs/Development.xcconfig,
+				Configs/Production.xcconfig,
+				Configs/Staging.xcconfig,
 				Info.plist,
+				SecretGardenTests/Helpers/StubEndpoint.swift,
 				SecretGardenTests/Helpers/URLProtocolStub.swift,
 				SecretGardenTests/KeychainManagerTests.swift,
+				SecretGardenTests/Networking/APIClientTests.swift,
+				SecretGardenTests/Networking/APIEndpointBuilderTests.swift,
 				SecretGardenTests/Networking/AuthInterceptorTests.swift,
 			);
 			target = 7A21DC2E3025DFFB00AB92DD /* SecretGarden */;
@@ -55,8 +62,11 @@
 		7A4EFDF73069F57000E119FB /* Exceptions for "SecretGarden" folder in "SecretGardenTests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				SecretGardenTests/Helpers/StubEndpoint.swift,
 				SecretGardenTests/Helpers/URLProtocolStub.swift,
 				SecretGardenTests/KeychainManagerTests.swift,
+				SecretGardenTests/Networking/APIClientTests.swift,
+				SecretGardenTests/Networking/APIEndpointBuilderTests.swift,
 				SecretGardenTests/Networking/AuthInterceptorTests.swift,
 			);
 			target = 7A009FEE30697E3B00ABDBB0 /* SecretGardenTests */;
@@ -208,7 +218,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 2660;
-				LastUpgradeCheck = 2660;
+				LastUpgradeCheck = 2700;
 				TargetAttributes = {
 					7A009FEE30697E3B00ABDBB0 = {
 						CreatedOnToolsVersion = 26.6;
@@ -811,6 +821,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -916,6 +927,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -1021,6 +1033,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -1119,6 +1132,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -1217,6 +1231,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -1315,6 +1330,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				VALIDATE_PRODUCT = YES;
 			};
