@@ -46,14 +46,18 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
+				SecretGardenTests/Helpers/URLProtocolStub.swift,
 				SecretGardenTests/KeychainManagerTests.swift,
+				SecretGardenTests/Networking/AuthInterceptorTests.swift,
 			);
 			target = 7A21DC2E3025DFFB00AB92DD /* SecretGarden */;
 		};
 		7A4EFDF73069F57000E119FB /* Exceptions for "SecretGarden" folder in "SecretGardenTests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				SecretGardenTests/Helpers/URLProtocolStub.swift,
 				SecretGardenTests/KeychainManagerTests.swift,
+				SecretGardenTests/Networking/AuthInterceptorTests.swift,
 			);
 			target = 7A009FEE30697E3B00ABDBB0 /* SecretGardenTests */;
 		};

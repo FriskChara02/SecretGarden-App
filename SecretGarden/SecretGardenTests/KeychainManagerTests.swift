@@ -80,7 +80,7 @@ final class KeychainManagerTests: XCTestCase {
         try await sut.clearTokens()
     }
 
-    // MARK: - Concurrency (lý do quan trọng nhất để KeychainManager là actor)
+    // MARK: - Concurrency (the most important reason for KeychainManager being an actor)
 
     func test_concurrentWrites_doNotCrashAndActorSerializesAccess() async {
         await withTaskGroup(of: Void.self) { group in
