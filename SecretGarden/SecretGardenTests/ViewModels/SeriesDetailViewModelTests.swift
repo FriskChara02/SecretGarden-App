@@ -20,13 +20,15 @@ final class SeriesDetailViewModelTests: XCTestCase {
         series: Series = TestFixtures.series(),
         chapterCount: Int = 3,
         mutationFailure: Error? = nil,
-        mutationDelay: TimeInterval = 0
+        mutationDelay: TimeInterval = 0,
+        behaviors: [FakeSeriesRepository.Mutation: FakeSeriesRepository.Behavior] = [:]
     ) async -> (sut: SeriesDetailViewModel, repository: FakeSeriesRepository) {
         let repository = FakeSeriesRepository(
             detail: .success(series),
             chapters: .success(TestFixtures.chapters(count: chapterCount, seriesId: series.id)),
             mutationFailure: mutationFailure,
-            mutationDelay: mutationDelay
+            mutationDelay: mutationDelay,
+            behaviors: behaviors
         )
         let sut = SeriesDetailViewModel(
             seriesId: series.id,
@@ -36,6 +38,27 @@ final class SeriesDetailViewModelTests: XCTestCase {
         sut.onAppear()
         await waitUntil { sut.detailState.value != nil && sut.chaptersState.value != nil }
         return (sut, repository)
+    }
+
+    /// Actual scenario: "Like" operation proceeds slowly and fails, while the "Notification" operation succeeds.
+    /// The rollback of the "Like" operation must not undo the (successful) changes made by the "Notification" operation.
+    func test_toggleFavorite_failingAfterNotifySucceeds_keepsNotifyChange() async {
+        let error = AppError.network(.timeout)
+        let original = TestFixtures.series(favoriteCount: 10, isFavoritedByMe: false, isNotifyEnabled: false)
+        let (sut, _) = await makeLoadedSUT(
+            series: original,
+            behaviors: [.favorite: .init(delay: 0.2, failure: error)] // Default notification: immediate success
+        )
+
+        sut.toggleFavorite() // delays 0.2s, then errors out
+        sut.toggleNotify()   // immediate success, inserted in between
+
+        await waitUntil { sut.actionErrorMessage != nil } // Favorites failed and rolled back
+
+        XCTAssertEqual(sut.detailState.value?.isFavoritedByMe, false, "Yêu thích phải được hoàn lại")
+        XCTAssertEqual(sut.detailState.value?.favoriteCount, 10)
+        XCTAssertEqual(sut.detailState.value?.isNotifyEnabled, true, "Thông báo đã thành công, không được bị hoàn lại theo")
+        await waitUntil { !sut.isTogglingFavorite && !sut.isTogglingNotify }
     }
 
     // MARK: - Loading

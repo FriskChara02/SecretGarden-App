@@ -23,12 +23,20 @@ actor FakeSeriesRepository: SeriesRepositoryProtocol {
     }
     struct ProgressCall: Equatable { let seriesId: String; let chapterId: String; let page: Int }
 
+    enum Mutation: Hashable { case favorite, notify, readingStatus, removeStatus }
+
+    struct Behavior {
+        var delay: TimeInterval = 0
+        var failure: Error?
+    }
+
     private let detail: Result<Series, Error>
     private let chapters: Result<[Chapter], Error>
     private let related: Result<[Series], Error>
     private let pages: Result<[ChapterPage], Error>
     private let mutationFailure: Error?
     private let mutationDelay: TimeInterval
+    private let behaviors: [Mutation: Behavior]
 
     private(set) var favoriteCalls: [FavoriteCall] = []
     private(set) var notifyCalls: [NotifyCall] = []
@@ -42,7 +50,8 @@ actor FakeSeriesRepository: SeriesRepositoryProtocol {
         related: Result<[Series], Error> = .success([]),
         pages: Result<[ChapterPage], Error> = .success([]),
         mutationFailure: Error? = nil,
-        mutationDelay: TimeInterval = 0
+        mutationDelay: TimeInterval = 0,
+        behaviors: [Mutation: Behavior] = [:]
     ) {
         self.detail = detail
         self.chapters = chapters
@@ -50,6 +59,7 @@ actor FakeSeriesRepository: SeriesRepositoryProtocol {
         self.pages = pages
         self.mutationFailure = mutationFailure
         self.mutationDelay = mutationDelay
+        self.behaviors = behaviors
     }
 
     // MARK: - Reads
@@ -63,24 +73,24 @@ actor FakeSeriesRepository: SeriesRepositoryProtocol {
 
     func toggleFavorite(seriesId: String, isFavorited: Bool) async throws {
         favoriteCalls.append(FavoriteCall(seriesId: seriesId, isFavorited: isFavorited))
-        try await performMutation()
+        try await performMutation(.favorite)
     }
 
     func toggleNotify(seriesId: String, enabled: Bool) async throws {
         notifyCalls.append(NotifyCall(seriesId: seriesId, enabled: enabled))
-        try await performMutation()
+        try await performMutation(.notify)
     }
 
     func updateReadingStatus(seriesId: String, status: ReadingStatus, notifyNewChapter: Bool) async throws {
         readingStatusCalls.append(
             ReadingStatusCall(seriesId: seriesId, status: status, notifyNewChapter: notifyNewChapter)
         )
-        try await performMutation()
+        try await performMutation(.readingStatus)
     }
 
     func removeReadingStatus(seriesId: String) async throws {
         removeStatusCalls.append(seriesId)
-        try await performMutation()
+        try await performMutation(.removeStatus)
     }
 
     func recordReadingProgress(seriesId: String, chapterId: String, page: Int) async throws {
@@ -92,11 +102,13 @@ actor FakeSeriesRepository: SeriesRepositoryProtocol {
     // MARK: - Private
 
     /// Record the call *before* waiting, so that "in-flight" calls are also counted in the test.
-    private func performMutation() async throws {
-        if mutationDelay > 0 {
-            try await Task.sleep(nanoseconds: UInt64(mutationDelay * 1_000_000_000))
+    private func performMutation(_ mutation: Mutation) async throws {
+        // Use the specific configuration for an action if available, otherwise, use the general default.
+        let behavior = behaviors[mutation] ?? Behavior(delay: mutationDelay, failure: mutationFailure)
+        if behavior.delay > 0 {
+            try await Task.sleep(nanoseconds: UInt64(behavior.delay * 1_000_000_000))
         }
-        if let mutationFailure { throw mutationFailure }
+        if let failure = behavior.failure { throw failure }
     }
 }
 

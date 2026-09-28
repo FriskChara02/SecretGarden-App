@@ -179,7 +179,7 @@ public final class SeriesDetailViewModel: BaseViewModel {
             do {
                 try await self.seriesRepository.toggleFavorite(seriesId: previous.id, isFavorited: updated.isFavoritedByMe)
             } catch {
-                self.detailState = .loaded(previous)
+                self.rollback { $0.isFavoritedByMe = previous.isFavoritedByMe; $0.favoriteCount = previous.favoriteCount }
                 self.actionErrorMessage = self.mapToAppError(error).errorDescription
             }
         }
@@ -201,7 +201,7 @@ public final class SeriesDetailViewModel: BaseViewModel {
             do {
                 try await self.seriesRepository.toggleNotify(seriesId: previous.id, enabled: updated.isNotifyEnabled)
             } catch {
-                self.detailState = .loaded(previous)
+                self.rollback { $0.isNotifyEnabled = previous.isNotifyEnabled }
                 self.actionErrorMessage = self.mapToAppError(error).errorDescription
             }
         }
@@ -227,7 +227,7 @@ public final class SeriesDetailViewModel: BaseViewModel {
                     notifyNewChapter: updated.isNotifyEnabled
                 )
             } catch {
-                self.detailState = .loaded(previous)
+                self.rollback { $0.readingStatus = previous.readingStatus }
                 self.actionErrorMessage = self.mapToAppError(error).errorDescription
             }
         }
@@ -248,7 +248,7 @@ public final class SeriesDetailViewModel: BaseViewModel {
             do {
                 try await self.seriesRepository.removeReadingStatus(seriesId: previous.id)
             } catch {
-                self.detailState = .loaded(previous)
+                self.rollback { $0.readingStatus = previous.readingStatus }
                 self.actionErrorMessage = self.mapToAppError(error).errorDescription
             }
         }
@@ -370,6 +370,14 @@ public final class SeriesDetailViewModel: BaseViewModel {
 
     public func dismissActionError() {
         actionErrorMessage = nil
+    }
+
+    /// Revert ONLY the fields of a specific action, preserving changes made by other actions.
+    /// (Reverting the entire `previous` snapshot would also undo changes from other successful actions.)
+    private func rollback(_ revert: (inout Series) -> Void) {
+        guard var current = detailState.value else { return }
+        revert(&current)
+        detailState = .loaded(current)
     }
 
     deinit {
