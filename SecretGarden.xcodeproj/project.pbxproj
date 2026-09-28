@@ -50,24 +50,32 @@
 				Configs/Production.xcconfig,
 				Configs/Staging.xcconfig,
 				Info.plist,
+				SecretGardenTests/Helpers/FakeAPIClient.swift,
 				SecretGardenTests/Helpers/StubEndpoint.swift,
 				SecretGardenTests/Helpers/URLProtocolStub.swift,
+				"SecretGardenTests/Helpers/XCTestCase+Helpers.swift",
 				SecretGardenTests/KeychainManagerTests.swift,
 				SecretGardenTests/Networking/APIClientTests.swift,
 				SecretGardenTests/Networking/APIEndpointBuilderTests.swift,
 				SecretGardenTests/Networking/AuthInterceptorTests.swift,
+				SecretGardenTests/Repositories/AuthRepositoryTests.swift,
+				SecretGardenTests/Repositories/SeriesRepositoryTests.swift,
 			);
 			target = 7A21DC2E3025DFFB00AB92DD /* SecretGarden */;
 		};
 		7A4EFDF73069F57000E119FB /* Exceptions for "SecretGarden" folder in "SecretGardenTests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				SecretGardenTests/Helpers/FakeAPIClient.swift,
 				SecretGardenTests/Helpers/StubEndpoint.swift,
 				SecretGardenTests/Helpers/URLProtocolStub.swift,
+				"SecretGardenTests/Helpers/XCTestCase+Helpers.swift",
 				SecretGardenTests/KeychainManagerTests.swift,
 				SecretGardenTests/Networking/APIClientTests.swift,
 				SecretGardenTests/Networking/APIEndpointBuilderTests.swift,
 				SecretGardenTests/Networking/AuthInterceptorTests.swift,
+				SecretGardenTests/Repositories/AuthRepositoryTests.swift,
+				SecretGardenTests/Repositories/SeriesRepositoryTests.swift,
 			);
 			target = 7A009FEE30697E3B00ABDBB0 /* SecretGardenTests */;
 		};
