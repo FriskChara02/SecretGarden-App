@@ -55,7 +55,9 @@
 				SecretGardenTests/Auth/AuthViewModelTests.swift,
 				SecretGardenTests/Helpers/FakeAPIClient.swift,
 				SecretGardenTests/Helpers/FakeAuthRepository.swift,
+				SecretGardenTests/Helpers/FakeSeriesRepository.swift,
 				SecretGardenTests/Helpers/StubEndpoint.swift,
+				"SecretGardenTests/Helpers/TestFixtures+Series.swift",
 				SecretGardenTests/Helpers/URLProtocolStub.swift,
 				"SecretGardenTests/Helpers/XCTestCase+Async.swift",
 				"SecretGardenTests/Helpers/XCTestCase+Helpers.swift",
@@ -65,6 +67,7 @@
 				SecretGardenTests/Networking/AuthInterceptorTests.swift,
 				SecretGardenTests/Repositories/AuthRepositoryTests.swift,
 				SecretGardenTests/Repositories/SeriesRepositoryTests.swift,
+				SecretGardenTests/ViewModels/SeriesDetailViewModelTests.swift,
 			);
 			target = 7A21DC2E3025DFFB00AB92DD /* SecretGarden */;
 		};
@@ -76,7 +79,9 @@
 				SecretGardenTests/Auth/AuthViewModelTests.swift,
 				SecretGardenTests/Helpers/FakeAPIClient.swift,
 				SecretGardenTests/Helpers/FakeAuthRepository.swift,
+				SecretGardenTests/Helpers/FakeSeriesRepository.swift,
 				SecretGardenTests/Helpers/StubEndpoint.swift,
+				"SecretGardenTests/Helpers/TestFixtures+Series.swift",
 				SecretGardenTests/Helpers/URLProtocolStub.swift,
 				"SecretGardenTests/Helpers/XCTestCase+Async.swift",
 				"SecretGardenTests/Helpers/XCTestCase+Helpers.swift",
@@ -86,6 +91,7 @@
 				SecretGardenTests/Networking/AuthInterceptorTests.swift,
 				SecretGardenTests/Repositories/AuthRepositoryTests.swift,
 				SecretGardenTests/Repositories/SeriesRepositoryTests.swift,
+				SecretGardenTests/ViewModels/SeriesDetailViewModelTests.swift,
 			);
 			target = 7A009FEE30697E3B00ABDBB0 /* SecretGardenTests */;
 		};
