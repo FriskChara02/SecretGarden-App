@@ -34,6 +34,7 @@ actor FakeSeriesRepository: SeriesRepositoryProtocol {
     private let chapters: Result<[Chapter], Error>
     private let related: Result<[Series], Error>
     private let pages: Result<[ChapterPage], Error>
+    private let pagesDelay: TimeInterval
     private let mutationFailure: Error?
     private let mutationDelay: TimeInterval
     private let behaviors: [Mutation: Behavior]
@@ -49,6 +50,7 @@ actor FakeSeriesRepository: SeriesRepositoryProtocol {
         chapters: Result<[Chapter], Error> = .success([]),
         related: Result<[Series], Error> = .success([]),
         pages: Result<[ChapterPage], Error> = .success([]),
+        pagesDelay: TimeInterval = 0,
         mutationFailure: Error? = nil,
         mutationDelay: TimeInterval = 0,
         behaviors: [Mutation: Behavior] = [:]
@@ -57,6 +59,7 @@ actor FakeSeriesRepository: SeriesRepositoryProtocol {
         self.chapters = chapters
         self.related = related
         self.pages = pages
+        self.pagesDelay = pagesDelay
         self.mutationFailure = mutationFailure
         self.mutationDelay = mutationDelay
         self.behaviors = behaviors
@@ -67,7 +70,12 @@ actor FakeSeriesRepository: SeriesRepositoryProtocol {
     func fetchSeriesDetail(id: String) async throws -> Series { try detail.get() }
     func fetchChapters(seriesId: String) async throws -> [Chapter] { try chapters.get() }
     func fetchRelatedSeries(seriesId: String) async throws -> [Series] { try related.get() }
-    func fetchChapterPages(chapterId: String) async throws -> [ChapterPage] { try pages.get() }
+    func fetchChapterPages(chapterId: String) async throws -> [ChapterPage] {
+        if pagesDelay > 0 {
+            try await Task.sleep(nanoseconds: UInt64(pagesDelay * 1_000_000_000))
+        }
+        return try pages.get()
+    }
 
     // MARK: - Mutations
 

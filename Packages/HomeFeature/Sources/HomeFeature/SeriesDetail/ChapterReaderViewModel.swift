@@ -62,6 +62,8 @@ public final class ChapterReaderViewModel: BaseViewModel {
     /// Task to record reading progress - debounced based on the current page - that is NOT cancelled
     /// when switching chapters mid-process (ensuring the final record for the old chapter is sent before the user leaves).
     private var progressTask: Task<Void, Never>?
+    /// The chapter from the most recent `recordProgress` call – used to handle debouncing within the SAME chapter.
+    private var lastProgressChapterId: String?
 
     private let progressDebounceNanoseconds: UInt64 = 500_000_000 // 500ms
 
@@ -175,9 +177,18 @@ public final class ChapterReaderViewModel: BaseViewModel {
     /// The view calls this function whenever a new page "becomes the primary visible page" during scrolling
     /// (via the `.onAppear` modifier of each image page or by tracking the ScrollView's position).
     public func recordProgress(page: Int) {
-        progressTask?.cancel()
         let seriesId = self.seriesId
         let chapterId = currentChapter.id
+
+        // Only cancel the pending record if it belongs to the SAME chapter (this is true debouncing:
+        // multiple scrolls within a single chapter require sending only the final one). If it belongs
+        // to a different chapter, leave the old record to proceed—that represents the final read
+        // of the previous chapter and must not be deleted.
+        if lastProgressChapterId == chapterId {
+            progressTask?.cancel()
+        }
+        lastProgressChapterId = chapterId
+
         progressTask = Task { [weak self] in
             try? await Task.sleep(nanoseconds: self?.progressDebounceNanoseconds ?? 500_000_000)
             guard !Task.isCancelled, let self else { return }

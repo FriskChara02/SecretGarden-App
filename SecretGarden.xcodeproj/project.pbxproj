@@ -67,6 +67,7 @@
 				SecretGardenTests/Networking/AuthInterceptorTests.swift,
 				SecretGardenTests/Repositories/AuthRepositoryTests.swift,
 				SecretGardenTests/Repositories/SeriesRepositoryTests.swift,
+				SecretGardenTests/ViewModels/ChapterReaderViewModelTests.swift,
 				SecretGardenTests/ViewModels/SeriesDetailViewModelTests.swift,
 			);
 			target = 7A21DC2E3025DFFB00AB92DD /* SecretGarden */;
@@ -91,6 +92,7 @@
 				SecretGardenTests/Networking/AuthInterceptorTests.swift,
 				SecretGardenTests/Repositories/AuthRepositoryTests.swift,
 				SecretGardenTests/Repositories/SeriesRepositoryTests.swift,
+				SecretGardenTests/ViewModels/ChapterReaderViewModelTests.swift,
 				SecretGardenTests/ViewModels/SeriesDetailViewModelTests.swift,
 			);
 			target = 7A009FEE30697E3B00ABDBB0 /* SecretGardenTests */;
