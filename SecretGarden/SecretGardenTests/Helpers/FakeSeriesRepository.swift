@@ -123,31 +123,54 @@ actor FakeSeriesRepository: SeriesRepositoryProtocol {
 /// Mock repository implementation
 actor FakeCommentRepository: CommentRepositoryProtocol {
 
+    struct LikeCall: Equatable { let commentId: String; let isLiked: Bool }
+    struct ReplyCall: Equatable { let parentCommentId: String; let content: String }
+
     private let seriesComments: Result<[Comment], Error>
     private let chapterComments: Result<[Comment], Error>
+    private let postResult: Result<Comment, Error>
+    private let likeFailure: Error?
+    private let replyResult: Result<Comment, Error>
+
+    private(set) var postSeriesCalls: [String] = []
+    private(set) var postChapterCalls: [String] = []
+    private(set) var likeCalls: [LikeCall] = []
+    private(set) var replyCalls: [ReplyCall] = []
 
     init(
         seriesComments: Result<[Comment], Error> = .success([]),
-        chapterComments: Result<[Comment], Error> = .success([])
+        chapterComments: Result<[Comment], Error> = .success([]),
+        postResult: Result<Comment, Error> = .success(TestFixtures.comment()),
+        likeFailure: Error? = nil,
+        replyResult: Result<Comment, Error> = .success(TestFixtures.comment(id: "reply1", content: "Trả lời"))
     ) {
         self.seriesComments = seriesComments
         self.chapterComments = chapterComments
+        self.postResult = postResult
+        self.likeFailure = likeFailure
+        self.replyResult = replyResult
     }
 
     func fetchSeriesComments(seriesId: String, page: Int) async throws -> [Comment] { try seriesComments.get() }
     func fetchChapterComments(chapterId: String, page: Int) async throws -> [Comment] { try chapterComments.get() }
 
     func postSeriesComment(seriesId: String, content: String) async throws -> Comment {
-        throw AppError.unknown("FakeCommentRepository: postSeriesComment chưa được stub")
+        postSeriesCalls.append(content)
+        return try postResult.get()
     }
 
     func postChapterComment(chapterId: String, content: String) async throws -> Comment {
-        throw AppError.unknown("FakeCommentRepository: postChapterComment chưa được stub")
+        postChapterCalls.append(content)
+        return try postResult.get()
     }
 
-    func toggleLike(commentId: String, isLiked: Bool) async throws {}
+    func toggleLike(commentId: String, isLiked: Bool) async throws {
+        likeCalls.append(LikeCall(commentId: commentId, isLiked: isLiked))
+        if let likeFailure { throw likeFailure }
+    }
 
     func postReply(parentCommentId: String, content: String) async throws -> Comment {
-        throw AppError.unknown("FakeCommentRepository: postReply chưa được stub")
+        replyCalls.append(ReplyCall(parentCommentId: parentCommentId, content: content))
+        return try replyResult.get()
     }
 }

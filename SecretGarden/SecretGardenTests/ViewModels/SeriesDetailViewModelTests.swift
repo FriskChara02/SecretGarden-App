@@ -324,4 +324,120 @@ final class SeriesDetailViewModelTests: XCTestCase {
         let removals = await repository.removeStatusCalls
         XCTAssertTrue(favorites.isEmpty && notifies.isEmpty && statuses.isEmpty && removals.isEmpty)
     }
+
+    // MARK: - Comment CRUD
+
+    private func makeLoadedSUTWithComments(
+        comments: [Comment],
+        commentRepository: FakeCommentRepository? = nil
+    ) async -> (sut: SeriesDetailViewModel, comments: FakeCommentRepository) {
+        let commentRepo = commentRepository ?? FakeCommentRepository(seriesComments: .success(comments))
+        let sut = SeriesDetailViewModel(
+            seriesId: "s1",
+            seriesRepository: FakeSeriesRepository(chapters: .success(TestFixtures.chapters(count: 1))),
+            commentRepository: commentRepo
+        )
+        sut.onAppear()
+        await waitUntil { sut.commentsState.value != nil }
+        return (sut, commentRepo)
+    }
+
+    func test_postComment_success_prependsNewCommentAndClearsDraft() async {
+        let newComment = TestFixtures.comment(id: "new1", content: "Bình luận mới")
+        let repo = FakeCommentRepository(seriesComments: .success([TestFixtures.comment(id: "old1")]), postResult: .success(newComment))
+        let (sut, commentRepo) = await makeLoadedSUTWithComments(comments: [], commentRepository: repo)
+        sut.commentDraft = "Bình luận mới"
+
+        sut.postComment()
+
+        await waitUntil { sut.commentsState.value?.count == 2 }
+        XCTAssertEqual(sut.commentsState.value?.first?.id, "new1", "Bình luận mới phải nằm đầu danh sách")
+        XCTAssertEqual(sut.commentDraft, "")
+        let calls = await commentRepo.postSeriesCalls
+        XCTAssertEqual(calls, ["Bình luận mới"])
+    }
+
+    func test_postComment_blank_doesNotCallRepository() async {
+        let (sut, commentRepo) = await makeLoadedSUTWithComments(comments: [])
+        sut.commentDraft = "   "
+
+        sut.postComment()
+
+        let calls = await commentRepo.postSeriesCalls
+        XCTAssertTrue(calls.isEmpty)
+    }
+
+    func test_toggleCommentLike_topLevel_updatesOptimisticallyAndLeavesOthersUnchanged() async {
+        let target = TestFixtures.comment(id: "cm1", likeCount: 3, isLikedByMe: false)
+        let other = TestFixtures.comment(id: "cm2", likeCount: 5, isLikedByMe: true)
+        let (sut, commentRepo) = await makeLoadedSUTWithComments(comments: [target, other])
+
+        sut.toggleCommentLike(commentId: "cm1")
+
+        let liked = sut.commentsState.value?.first { $0.id == "cm1" }
+        XCTAssertEqual(liked?.isLikedByMe, true)
+        XCTAssertEqual(liked?.likeCount, 4)
+        let untouched = sut.commentsState.value?.first { $0.id == "cm2" }
+        XCTAssertEqual(untouched, other, "Comment không liên quan phải giữ nguyên")
+
+        try? await Task.sleep(nanoseconds: 100_000_000)
+        let calls = await commentRepo.likeCalls
+        XCTAssertEqual(calls, [FakeCommentRepository.LikeCall(commentId: "cm1", isLiked: true)])
+    }
+
+    func test_toggleCommentLike_reply_updatesOnlyThatReply() async {
+        let reply = TestFixtures.comment(id: "r1", likeCount: 0, isLikedByMe: false)
+        let parent = TestFixtures.comment(id: "cm1", replies: [reply])
+        let (sut, _) = await makeLoadedSUTWithComments(comments: [parent])
+
+        sut.toggleCommentLike(commentId: "r1")
+
+        let updatedReply = sut.commentsState.value?.first?.replies?.first
+        XCTAssertEqual(updatedReply?.isLikedByMe, true)
+        XCTAssertEqual(updatedReply?.likeCount, 1)
+    }
+
+    func test_toggleCommentLike_failure_rollsBackToOriginalList() async {
+        let error = AppError.network(.timeout)
+        let original = [TestFixtures.comment(id: "cm1", likeCount: 3, isLikedByMe: false)]
+        let repo = FakeCommentRepository(seriesComments: .success(original), likeFailure: error)
+        let (sut, _) = await makeLoadedSUTWithComments(comments: [], commentRepository: repo)
+
+        sut.toggleCommentLike(commentId: "cm1")
+        await waitUntil { sut.actionErrorMessage != nil }
+
+        XCTAssertEqual(sut.commentsState.value, original)
+        XCTAssertEqual(sut.actionErrorMessage, error.errorDescription)
+    }
+
+    func test_submitReply_success_appendsToCorrectParentAndClearsComposer() async {
+        let parent = TestFixtures.comment(id: "cm1", replies: nil)
+        let newReply = TestFixtures.comment(id: "r-new", content: "Reply mới")
+        let repo = FakeCommentRepository(seriesComments: .success([parent]), replyResult: .success(newReply))
+        let (sut, commentRepo) = await makeLoadedSUTWithComments(comments: [], commentRepository: repo)
+        sut.startReplying(to: "cm1")
+        sut.replyDraft = "Reply mới"
+
+        sut.submitReply()
+
+        await waitUntil { sut.commentsState.value?.first?.replies?.count == 1 }
+        XCTAssertEqual(sut.commentsState.value?.first?.replies?.first?.id, "r-new")
+        XCTAssertNil(sut.replyingToCommentId)
+        XCTAssertEqual(sut.replyDraft, "")
+        let calls = await commentRepo.replyCalls
+        XCTAssertEqual(calls, [FakeCommentRepository.ReplyCall(parentCommentId: "cm1", content: "Reply mới")])
+    }
+
+    func test_cancelReplying_clearsComposerWithoutCallingRepository() async {
+        let (sut, commentRepo) = await makeLoadedSUTWithComments(comments: [TestFixtures.comment(id: "cm1")])
+        sut.startReplying(to: "cm1")
+        sut.replyDraft = "Chưa gửi"
+
+        sut.cancelReplying()
+
+        XCTAssertNil(sut.replyingToCommentId)
+        XCTAssertEqual(sut.replyDraft, "")
+        let calls = await commentRepo.replyCalls
+        XCTAssertTrue(calls.isEmpty)
+    }
 }

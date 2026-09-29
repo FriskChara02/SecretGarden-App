@@ -193,4 +193,62 @@ final class ChapterReaderViewModelTests: XCTestCase {
             "Lần đọc cuối (trang 10) của chương c1 phải được ghi lại trước khi rời sang chương khác"
         )
     }
+
+    // MARK: - Comment CRUD (chapter-level — same logic as SeriesDetailViewModel)
+
+    func test_postComment_success_prependsNewCommentAndClearsDraft() async {
+        let newComment = TestFixtures.comment(id: "new1", content: "Bình luận chương")
+        let commentRepo = FakeCommentRepository(chapterComments: .success([]), postResult: .success(newComment))
+        let repository = FakeSeriesRepository(chapters: .success(TestFixtures.chapters(count: 1, seriesId: "s1")))
+        let sut = ChapterReaderViewModel(
+            seriesId: "s1", initialChapterId: "c1", seriesRepository: repository, commentRepository: commentRepo
+        )
+        sut.onAppear()
+        await waitUntil { sut.commentsState.value != nil }
+        sut.commentDraft = "Bình luận chương"
+
+        sut.postComment()
+
+        await waitUntil { sut.commentsState.value?.count == 1 }
+        XCTAssertEqual(sut.commentsState.value?.first?.id, "new1")
+        XCTAssertEqual(sut.commentDraft, "")
+        let calls = await commentRepo.postChapterCalls
+        XCTAssertEqual(calls, ["Bình luận chương"])
+    }
+
+    func test_toggleCommentLike_failure_rollsBackToOriginalList() async {
+        let error = AppError.unauthorized
+        let original = [TestFixtures.comment(id: "cm1", likeCount: 2, isLikedByMe: false)]
+        let commentRepo = FakeCommentRepository(chapterComments: .success(original), likeFailure: error)
+        let repository = FakeSeriesRepository(chapters: .success(TestFixtures.chapters(count: 1, seriesId: "s1")))
+        let sut = ChapterReaderViewModel(
+            seriesId: "s1", initialChapterId: "c1", seriesRepository: repository, commentRepository: commentRepo
+        )
+        sut.onAppear()
+        await waitUntil { sut.commentsState.value != nil }
+
+        sut.toggleCommentLike(commentId: "cm1")
+        await waitUntil { sut.actionErrorMessage != nil }
+
+        XCTAssertEqual(sut.commentsState.value, original)
+    }
+
+    func test_submitReply_success_appendsToCorrectParent() async {
+        let parent = TestFixtures.comment(id: "cm1", replies: nil)
+        let newReply = TestFixtures.comment(id: "r-new", content: "Reply chương")
+        let commentRepo = FakeCommentRepository(chapterComments: .success([parent]), replyResult: .success(newReply))
+        let repository = FakeSeriesRepository(chapters: .success(TestFixtures.chapters(count: 1, seriesId: "s1")))
+        let sut = ChapterReaderViewModel(
+            seriesId: "s1", initialChapterId: "c1", seriesRepository: repository, commentRepository: commentRepo
+        )
+        sut.onAppear()
+        await waitUntil { sut.commentsState.value != nil }
+        sut.startReplying(to: "cm1")
+        sut.replyDraft = "Reply chương"
+
+        sut.submitReply()
+
+        await waitUntil { sut.commentsState.value?.first?.replies?.count == 1 }
+        XCTAssertEqual(sut.commentsState.value?.first?.replies?.first?.id, "r-new")
+    }
 }
