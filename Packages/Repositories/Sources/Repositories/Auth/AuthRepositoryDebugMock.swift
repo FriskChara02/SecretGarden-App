@@ -12,6 +12,7 @@
 // MainTabView avatar, etc.) without requiring a server.
 
 import CoreModels
+import CoreArchitecture
 import CoreStorage
 import Foundation
 
@@ -24,12 +25,18 @@ public final class AuthRepositoryDebugMock: AuthRepositoryProtocol, Sendable {
     }
 
     public func login(_ request: LoginRequest) async throws -> AuthResponse {
+        if UITestLaunchArguments.mockAuthOutcome == .failure {
+            throw AppError.validation("Email hoặc mật khẩu không đúng.")
+        }
         let response = Self.makeResponse(email: request.email)
         try await saveTokens(from: response)
         return response
     }
 
     public func register(_ request: RegisterRequest) async throws -> AuthResponse {
+        if UITestLaunchArguments.mockAuthOutcome == .failure {
+            throw AppError.validation("Email đã được sử dụng.")
+        }
         let response = Self.makeResponse(email: request.email, username: request.username)
         try await saveTokens(from: response)
         return response

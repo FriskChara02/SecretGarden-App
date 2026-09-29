@@ -12,6 +12,7 @@
 import Combine
 import CoreModels
 import CoreStorage
+import CoreArchitecture
 import Foundation
 import Repositories
 
@@ -36,6 +37,9 @@ final class AppRootViewModel: ObservableObject {
 
     func checkSession() {
         Task {
+            if UITestLaunchArguments.shouldResetState {
+                try? await keychainManager.clearTokens()
+            }
             let token = await keychainManager.readAccessToken()
             if token != nil {
                 sessionState = .authenticated

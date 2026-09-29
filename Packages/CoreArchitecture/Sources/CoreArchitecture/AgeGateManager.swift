@@ -42,3 +42,12 @@ public final class AgeGateManager: ObservableObject {
         isDeclined = true
     }
 }
+
+public extension AgeGateManager {
+    /// Called by SecretGardenApp at startup when UITestLaunchArguments.shouldResetState is enabled,
+    /// clears the saved flag BEFORE the current AgeGateManager instance is initialized,
+    /// because init() reads UserDefaults synchronously and immediately (setting it later would have no effect).
+    static func resetPersistedStateForUITesting(defaults: UserDefaults = .standard) {
+        defaults.removeObject(forKey: Keys.hasConfirmedAge)
+    }
+}
