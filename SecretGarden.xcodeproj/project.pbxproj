@@ -72,6 +72,7 @@
 				SecretGardenTests/Networking/AuthInterceptorTests.swift,
 				SecretGardenTests/Repositories/AuthRepositoryTests.swift,
 				SecretGardenTests/Repositories/SeriesRepositoryTests.swift,
+				SecretGardenTests/Storage/SearchHistoryLocalStoreTests.swift,
 				SecretGardenTests/ViewModels/ChapterReaderViewModelTests.swift,
 				SecretGardenTests/ViewModels/SeriesDetailViewModelTests.swift,
 			);
@@ -102,6 +103,7 @@
 				SecretGardenTests/Networking/AuthInterceptorTests.swift,
 				SecretGardenTests/Repositories/AuthRepositoryTests.swift,
 				SecretGardenTests/Repositories/SeriesRepositoryTests.swift,
+				SecretGardenTests/Storage/SearchHistoryLocalStoreTests.swift,
 				SecretGardenTests/ViewModels/ChapterReaderViewModelTests.swift,
 				SecretGardenTests/ViewModels/SeriesDetailViewModelTests.swift,
 			);

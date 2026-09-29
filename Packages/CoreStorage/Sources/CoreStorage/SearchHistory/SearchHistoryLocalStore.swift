@@ -21,9 +21,9 @@ public actor SearchHistoryLocalStore {
     /// Limit the maximum number of stored history items — to prevent infinite data growth over time.
     private let maxItems: Int
 
-    public init(maxItems: Int = 25) throws {
+    public init(maxItems: Int = 25, container: ModelContainer? = nil) throws {
         self.maxItems = maxItems
-        self.container = try ModelContainer(for: SearchHistoryEntity.self)
+        self.container = try container ?? ModelContainer(for: SearchHistoryEntity.self)
     }
 
     // MARK: - Fetch (newest first)
@@ -89,5 +89,16 @@ public actor SearchHistoryLocalStore {
             context.delete(entity)
         }
         try context.save()
+    }
+}
+
+// MARK: - Testing support
+
+public extension SearchHistoryLocalStore {
+    /// Creates a store entirely in RAM (avoiding actual disk I/O), intended solely for testing.
+    static func makeInMemoryForTesting(maxItems: Int = 25) throws -> SearchHistoryLocalStore {
+        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        let container = try ModelContainer(for: SearchHistoryEntity.self, configurations: config)
+        return try SearchHistoryLocalStore(maxItems: maxItems, container: container)
     }
 }
