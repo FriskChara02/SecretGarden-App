@@ -14,15 +14,17 @@ import Foundation
 public final class ThemeManager: ObservableObject {
 
     private static let storageKey = "isDarkModeEnabled"
+    private let defaults: UserDefaults
 
     @Published public var isDarkMode: Bool {
         didSet {
-            UserDefaults.standard.set(isDarkMode, forKey: Self.storageKey)
+            defaults.set(isDarkMode, forKey: Self.storageKey)
         }
     }
 
-    public init() {
-        self.isDarkMode = UserDefaults.standard.bool(forKey: Self.storageKey)
+    public init(defaults: UserDefaults = .standard) {
+        self.defaults = defaults
+        self.isDarkMode = defaults.bool(forKey: Self.storageKey)
     }
 
     public func toggle() {

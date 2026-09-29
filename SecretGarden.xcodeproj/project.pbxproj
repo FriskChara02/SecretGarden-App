@@ -50,7 +50,10 @@
 				Configs/Production.xcconfig,
 				Configs/Staging.xcconfig,
 				Info.plist,
+				SecretGardenTests/Architecture/AgeGateManagerTests.swift,
 				SecretGardenTests/Architecture/ArchitectureBaseTests.swift,
+				SecretGardenTests/Architecture/CoordinatorTests.swift,
+				SecretGardenTests/Architecture/ThemeManagerTests.swift,
 				SecretGardenTests/Auth/AuthValidatorTests.swift,
 				SecretGardenTests/Auth/AuthViewModelTests.swift,
 				SecretGardenTests/Helpers/FakeAPIClient.swift,
@@ -63,6 +66,7 @@
 				"SecretGardenTests/Helpers/XCTestCase+Async.swift",
 				"SecretGardenTests/Helpers/XCTestCase+Helpers.swift",
 				SecretGardenTests/KeychainManagerTests.swift,
+				SecretGardenTests/Navigation/AuthCoordinatorTests.swift,
 				SecretGardenTests/Networking/APIClientTests.swift,
 				SecretGardenTests/Networking/APIEndpointBuilderTests.swift,
 				SecretGardenTests/Networking/AuthInterceptorTests.swift,
@@ -76,7 +80,10 @@
 		7A4EFDF73069F57000E119FB /* Exceptions for "SecretGarden" folder in "SecretGardenTests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				SecretGardenTests/Architecture/AgeGateManagerTests.swift,
 				SecretGardenTests/Architecture/ArchitectureBaseTests.swift,
+				SecretGardenTests/Architecture/CoordinatorTests.swift,
+				SecretGardenTests/Architecture/ThemeManagerTests.swift,
 				SecretGardenTests/Auth/AuthValidatorTests.swift,
 				SecretGardenTests/Auth/AuthViewModelTests.swift,
 				SecretGardenTests/Helpers/FakeAPIClient.swift,
@@ -89,6 +96,7 @@
 				"SecretGardenTests/Helpers/XCTestCase+Async.swift",
 				"SecretGardenTests/Helpers/XCTestCase+Helpers.swift",
 				SecretGardenTests/KeychainManagerTests.swift,
+				SecretGardenTests/Navigation/AuthCoordinatorTests.swift,
 				SecretGardenTests/Networking/APIClientTests.swift,
 				SecretGardenTests/Networking/APIEndpointBuilderTests.swift,
 				SecretGardenTests/Networking/AuthInterceptorTests.swift,
