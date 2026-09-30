@@ -40,7 +40,10 @@ struct MainTabView: View {
                 .tag(MainTab.notifications)
 
             profileTab
-                .tabItem { profileTabLabel }
+                .tabItem {
+                    profileTabLabel
+                        .accessibilityIdentifier("tabBar.profile")
+                }
                 .tag(MainTab.profile)
         }
         .tint(DSColor.brandPrimary)

@@ -50,6 +50,7 @@ public struct LoginView: View {
                     .keyboardType(.emailAddress)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
+                    .accessibilityIdentifier("login.emailField")
 
                     DSTextField(
                         label: "Mật khẩu",
@@ -58,6 +59,7 @@ public struct LoginView: View {
                         isSecure: true,
                         errorMessage: viewModel.loginPasswordError
                     )
+                    .accessibilityIdentifier("login.passwordField")
                 }
                 .disabled(viewModel.loginState.isSubmitting)
 
@@ -71,15 +73,18 @@ public struct LoginView: View {
                         .dsFont(.footnote)
                         .foregroundStyle(DSColor.statusError)
                         .frame(maxWidth: .infinity, alignment: .leading)
+                        .accessibilityIdentifier("login.errorText")
                 }
 
                 DSButton("Đăng nhập", variant: .primary, isLoading: viewModel.loginState.isSubmitting) {
                     viewModel.login()
                 }
+                .accessibilityIdentifier("login.submitButton")
 
                 DSButton("Khôi phục mật khẩu?", variant: .text, size: .medium) {
                     onNavigateToForgotPassword()
                 }
+                .accessibilityIdentifier("login.forgotPasswordButton")
 
                 Divider()
 
@@ -97,6 +102,7 @@ public struct LoginView: View {
                     }
                     .dsFont(.subheadline)
                     .foregroundStyle(DSColor.brandPrimary)
+                    .accessibilityIdentifier("login.registerLink")
                 }
             }
             .padding(DSSpacing.lg)

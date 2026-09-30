@@ -49,6 +49,7 @@ public struct RegisterView: View {
                     )
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
+                    .accessibilityIdentifier("register.usernameField")
 
                     DSTextField(
                         label: "Email",

@@ -81,7 +81,9 @@ public struct AgeGateView: View {
 
             VStack(spacing: DSSpacing.sm) {
                 DSButton("Tôi đủ 16 tuổi", variant: .primary, action: onConfirm)
+                    .accessibilityIdentifier("ageGate.confirmButton")
                 DSButton("Tôi chưa đủ 16 tuổi", variant: .outline, action: onDecline)
+                    .accessibilityIdentifier("ageGate.declineButton")
             }
             .padding(.horizontal, DSSpacing.lg)
             .padding(.bottom, DSSpacing.xl)

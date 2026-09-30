@@ -91,6 +91,7 @@ struct ProfileMenuContentView: View {
                     .dsFont(.subheadline).fontWeight(.bold)
                     .foregroundStyle(DSColor.brandPrimary)
                 }
+                .accessibilityIdentifier(currentUser == nil ? "profile.loginButton" : "profile.logoutButton")
                 Toggle("", isOn: Binding(
                         get: { themeManager.isDarkMode },
                         set: { _ in themeManager.toggle() }
