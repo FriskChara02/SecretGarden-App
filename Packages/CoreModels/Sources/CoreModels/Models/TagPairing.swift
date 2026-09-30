@@ -9,7 +9,7 @@
 
 import Foundation
 
-public struct Tag: Codable, Identifiable, Equatable {
+public struct Tag: Codable, Identifiable, Equatable, Sendable {
     public let id: String
     public var name: String
     public var category: String?
@@ -21,7 +21,7 @@ public struct Tag: Codable, Identifiable, Equatable {
     }
 }
 
-public struct Pairing: Codable, Identifiable, Equatable {
+public struct Pairing: Codable, Identifiable, Equatable, Sendable {
     public let id: String
     public var name: String
 
@@ -32,7 +32,7 @@ public struct Pairing: Codable, Identifiable, Equatable {
 }
 
 /// Request body for `POST /search/advanced` — supports two-way Include/Exclude filtering (emphasizing that this is a multi-faceted filter, not a simple AND operation).
-public struct AdvancedFilterRequest: Codable, Equatable {
+public struct AdvancedFilterRequest: Codable, Equatable, Sendable {
     public var includeTags: [String]
     public var excludeTags: [String]
     public var includeAuthors: [String]

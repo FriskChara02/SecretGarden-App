@@ -9,7 +9,7 @@
 
 import Foundation
 
-public struct Chapter: Codable, Identifiable, Equatable {
+public struct Chapter: Codable, Identifiable, Equatable, Sendable {
     public let id: String
     public var seriesId: String
     public var chapterNumber: Double
@@ -40,7 +40,7 @@ public struct Chapter: Codable, Identifiable, Equatable {
     }
 }
 
-public struct ChapterPage: Codable, Identifiable, Equatable {
+public struct ChapterPage: Codable, Identifiable, Equatable, Sendable {
     public let id: String
     public var pageNumber: Int
     public var imageURL: URL

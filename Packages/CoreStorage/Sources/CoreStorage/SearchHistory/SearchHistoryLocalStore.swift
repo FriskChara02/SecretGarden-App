@@ -80,7 +80,7 @@ public actor SearchHistoryLocalStore {
     // MARK: - Keep the number of items within the maxItems limit (remove the oldest item if exceeded).
 
     private func trimIfNeeded(context: ModelContext) throws {
-        var descriptor = FetchDescriptor<SearchHistoryEntity>(
+        let descriptor = FetchDescriptor<SearchHistoryEntity>(
             sortBy: [SortDescriptor(\.searchedAt, order: .reverse)]
         )
         let all = try context.fetch(descriptor)

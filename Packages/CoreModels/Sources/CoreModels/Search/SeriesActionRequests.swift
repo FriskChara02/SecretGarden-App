@@ -10,7 +10,7 @@
 
 import Foundation
 
-public struct RecordReadingProgressRequest: Codable, Equatable {
+public struct RecordReadingProgressRequest: Codable, Equatable, Sendable {
     public var page: Int
 
     public init(page: Int) {
@@ -18,7 +18,7 @@ public struct RecordReadingProgressRequest: Codable, Equatable {
     }
 }
 
-public struct UpdateReadingStatusRequest: Codable, Equatable {
+public struct UpdateReadingStatusRequest: Codable, Equatable, Sendable {
     public var status: ReadingStatus
     public var notifyNewChapter: Bool
 
@@ -28,7 +28,7 @@ public struct UpdateReadingStatusRequest: Codable, Equatable {
     }
 }
 
-public struct ToggleNotifyRequest: Codable, Equatable {
+public struct ToggleNotifyRequest: Codable, Equatable, Sendable {
     public var enabled: Bool
 
     public init(enabled: Bool) {

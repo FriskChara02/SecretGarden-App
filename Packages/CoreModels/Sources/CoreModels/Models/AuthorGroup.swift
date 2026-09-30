@@ -9,7 +9,7 @@
 
 import Foundation
 
-public struct AuthorGroupCommon: Codable, Identifiable, Equatable {
+public struct AuthorGroupCommon: Codable, Identifiable, Equatable, Sendable {
     public let id: String
     public var name: String
     public var avatarURL: URL?
@@ -37,7 +37,7 @@ public struct AuthorGroupCommon: Codable, Identifiable, Equatable {
     }
 }
 
-public struct TranslationGroup: Codable, Identifiable, Equatable {
+public struct TranslationGroup: Codable, Identifiable, Equatable, Sendable {
     public let id: String
     public var name: String
     public var avatarURL: URL?
@@ -74,7 +74,7 @@ public struct TranslationGroup: Codable, Identifiable, Equatable {
     }
 }
 
-public struct GroupMember: Codable, Identifiable, Equatable {
+public struct GroupMember: Codable, Identifiable, Equatable, Sendable {
     public let id: String
     public var user: User
     /// "leader" / "admin" / "member"

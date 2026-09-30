@@ -9,7 +9,7 @@
 
 import Foundation
 
-public enum ReadingStatus: String, Codable, CaseIterable {
+public enum ReadingStatus: String, Codable, CaseIterable, Sendable {
     /// Plan to read
     case planToRead
     /// Currently reading

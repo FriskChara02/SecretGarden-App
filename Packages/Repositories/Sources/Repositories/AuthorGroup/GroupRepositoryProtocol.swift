@@ -42,7 +42,7 @@ public protocol GroupRepositoryProtocol {
 }
 
 /// Sorting for Discover Groups - 4 dropdown options.
-public enum GroupDiscoverSort: String, CaseIterable, Identifiable {
+public enum GroupDiscoverSort: String, Codable, CaseIterable, Sendable, Identifiable {
     case newest
     case oldest
     case mostFollowed

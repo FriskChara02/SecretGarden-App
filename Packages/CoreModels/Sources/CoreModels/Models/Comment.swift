@@ -11,7 +11,7 @@
 
 import Foundation
 
-public struct Comment: Codable, Identifiable, Equatable {
+public struct Comment: Codable, Identifiable, Equatable, Sendable {
     public let id: String
     public var user: User
     public var content: String

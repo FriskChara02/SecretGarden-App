@@ -39,6 +39,6 @@ public struct AppNotification: Codable, Identifiable, Equatable {
     }
 }
 
-public enum NotificationType: String, Codable {
+public enum NotificationType: String, Codable, Sendable {
     case newChapter, commentReply, commentLike, mention
 }

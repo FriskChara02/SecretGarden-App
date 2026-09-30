@@ -9,7 +9,7 @@
 
 import Foundation
 
-public struct User: Codable, Identifiable, Equatable {
+public struct User: Codable, Identifiable, Equatable, Sendable {
     public let id: String
     public var username: String
     public var displayName: String?
@@ -64,11 +64,11 @@ public struct User: Codable, Identifiable, Equatable {
     }
 }
 
-public enum UserRole: String, Codable {
+public enum UserRole: String, Codable, Sendable {
     case user, translator, admin
 }
 
-public enum AuthProvider: String, Codable {
+public enum AuthProvider: String, Codable, Sendable {
     case email
     case google
 }

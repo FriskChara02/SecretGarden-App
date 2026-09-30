@@ -9,7 +9,7 @@
 
 import Foundation
 
-public struct ReportRequest: Codable, Equatable {
+public struct ReportRequest: Codable, Equatable, Sendable {
     public var seriesId: String
     public var chapterId: String?
     public var reason: String

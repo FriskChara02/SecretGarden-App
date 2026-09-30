@@ -9,7 +9,7 @@
 
 import Foundation
 
-public struct Series: Codable, Identifiable, Equatable {
+public struct Series: Codable, Identifiable, Equatable, Sendable {
     public let id: String
     public var title: String
     public var originalTitle: String?
@@ -73,18 +73,18 @@ public struct Series: Codable, Identifiable, Equatable {
     }
 }
 
-public enum SeriesType: String, Codable {
+public enum SeriesType: String, Codable, Sendable {
     case manga, novel, doujinshi
 }
 
-public enum SeriesStatus: String, Codable, CaseIterable {
+public enum SeriesStatus: String, Codable, CaseIterable, Sendable {
     case ongoing        // In progress
     case completed      // Completed
     case upcoming        // Coming soon
     case dropped         // Stop translating
 }
 
-public struct Genre: Codable, Identifiable, Equatable {
+public struct Genre: Codable, Identifiable, Equatable, Sendable {
     public let id: String
     public var name: String
 
