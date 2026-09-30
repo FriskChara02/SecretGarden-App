@@ -66,7 +66,7 @@ public struct SearchView: View {
     // MARK: - Search bar (only input field + "Search" button)
 
     private var searchBarRow: some View {
-        DSSearchBar(text: $viewModel.queryText, onSubmit: { viewModel.submitSearch() })
+        DSSearchBar(text: $viewModel.queryText, identifierPrefix: "search.bar", onSubmit: { viewModel.submitSearch() })
             .onChange(of: viewModel.queryText) { _, newValue in
                 viewModel.handleQueryChange(newValue)
             }
@@ -117,6 +117,7 @@ public struct SearchView: View {
                     Button("Xoá lịch sử", role: .destructive) { viewModel.clearAllHistory() }
                         .dsFont(.subheadline)
                         .foregroundStyle(DSColor.statusError)
+                        .accessibilityIdentifier("search.clearHistoryButton")
                 }
 
                 ForEach(items) { item in
@@ -147,6 +148,7 @@ public struct SearchView: View {
             .padding(.vertical, DSSpacing.xs)
         }
         .buttonStyle(.plain)
+        .accessibilityIdentifier("search.historyRow.\(item.query)")
     }
 
     // MARK: - Results section
@@ -167,6 +169,7 @@ public struct SearchView: View {
                             layout: .grid,
                             onTap: { onSeriesSelected(item.id) }
                         )
+                        .accessibilityIdentifier("search.resultCard.\(item.id)")
                     }
                 }
             case .list:
@@ -177,6 +180,7 @@ public struct SearchView: View {
                             layout: .list,
                             onTap: { onSeriesSelected(item.id) }
                         )
+                        .accessibilityIdentifier("search.resultCard.\(item.id)")
                     }
                 }
             }

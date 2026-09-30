@@ -13,11 +13,18 @@ import SwiftUI
 public struct DSSearchBar: View {
     @Binding private var text: String
     private let placeholder: String
+    private let identifierPrefix: String
     private let onSubmit: () -> Void
 
-    public init(text: Binding<String>, placeholder: String = "Tìm kiếm", onSubmit: @escaping () -> Void) {
+    public init(
+        text: Binding<String>,
+        placeholder: String = "Tìm kiếm",
+        identifierPrefix: String = "searchBar",
+        onSubmit: @escaping () -> Void
+    ) {
         self._text = text
         self.placeholder = placeholder
+        self.identifierPrefix = identifierPrefix
         self.onSubmit = onSubmit
     }
 
@@ -32,6 +39,7 @@ public struct DSSearchBar: View {
                     .foregroundStyle(DSColor.textPrimary)
                     .submitLabel(.search)
                     .onSubmit(onSubmit)
+                    .accessibilityIdentifier("\(identifierPrefix).field")
 
                 if !text.isEmpty {
                     Button {
@@ -40,6 +48,7 @@ public struct DSSearchBar: View {
                         Image(systemName: "xmark.circle.fill")
                             .foregroundStyle(DSColor.textSecondary.opacity(0.6))
                     }
+                    .accessibilityIdentifier("\(identifierPrefix).clearButton")
                 }
             }
             .padding(.horizontal, DSSpacing.md)
@@ -49,6 +58,7 @@ public struct DSSearchBar: View {
             Button("Tìm", action: onSubmit)
                 .dsFont(.headline)
                 .foregroundStyle(DSColor.brandPrimary)
+                .accessibilityIdentifier("\(identifierPrefix).submitButton")
         }
     }
 }
