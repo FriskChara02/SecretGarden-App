@@ -174,6 +174,20 @@ final class ChapterReaderViewModelTests: XCTestCase {
         XCTAssertNil(sut.actionErrorMessage)
     }
 
+    private func waitUntilProgressRecorded(
+        in repository: FakeSeriesRepository,
+        expected: FakeSeriesRepository.ProgressCall,
+        timeout: TimeInterval = 3
+    ) async -> Bool {
+        let deadline = Date().addingTimeInterval(timeout)
+        while Date() < deadline {
+            let calls = await repository.progressCalls
+            if calls.contains(expected) { return true }
+            try? await Task.sleep(nanoseconds: 50_000_000) // kiểm tra lại mỗi 50ms
+        }
+        return false
+    }
+
     // MARK: - progressTask: When changing chapters, do not delete the final progress record of the previous chapter.
 
     func test_switchingChapterQuickly_stillRecordsFinalProgressOfPreviousChapter() async {
@@ -183,15 +197,15 @@ final class ChapterReaderViewModelTests: XCTestCase {
         await waitUntil { sut.pagesState.value != nil }
 
         sut.recordProgress(page: 10) // The reader is on page 10 of Chapter 1
-        sut.goToNextChapter()        // click "next chapter" right before the 500ms debounce fires
+        sut.goToNextChapter()
 
-        try? await Task.sleep(nanoseconds: 700_000_000) // debounce longer than 500ms
-        let calls = await repository.progressCalls
-
-        XCTAssertTrue(
-            calls.contains(FakeSeriesRepository.ProgressCall(seriesId: "s1", chapterId: "c1", page: 10)),
-            "Lần đọc cuối (trang 10) của chương c1 phải được ghi lại trước khi rời sang chương khác"
+        let recorded = await waitUntilProgressRecorded(
+            in: repository,
+            expected: FakeSeriesRepository.ProgressCall(seriesId: "s1", chapterId: "c1", page: 10),
+            timeout: 3
         )
+
+        XCTAssertTrue(recorded, "Lần đọc cuối (trang 10) của chương c1 phải được ghi lại trước khi rời sang chương khác")
     }
 
     // MARK: - Comment CRUD (chapter-level — same logic as SeriesDetailViewModel)

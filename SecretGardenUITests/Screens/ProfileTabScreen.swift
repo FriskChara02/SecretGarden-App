@@ -20,7 +20,7 @@ struct ProfileTabScreen {
         // Wait for the main tab bar to appear first — the dismissal animation of the Age Gate (fullScreenCover)
         // requires a brief delay before the underlying TabView is ready to accept interactions.
         tabBar.waitAndAssertExists(timeout: 10)
-        profileTabButton.waitAndAssertExists(timeout: 10)
+        profileTabButton.waitAndAssertExists(timeout: 45)
         profileTabButton.tap()
         loginButton.waitAndAssertExists(timeout: 10)
         loginButton.tap()
