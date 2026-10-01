@@ -3,7 +3,9 @@ name: CI
 on:
   push:
     branches: [main]
+    paths-ignore: ['**.md', 'docs/**']
   pull_request:
+    paths-ignore: ['**.md', 'docs/**']
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -13,36 +15,52 @@ env:
   DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
 
 jobs:
-  build:
-    name: Build (Debug-Dev)
+  test:
+    name: Build & Test (Debug-Dev)
     runs-on: macos-26
-    timeout-minutes: 30
+    timeout-minutes: 45
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Toolchain
         run: |
           xcodebuild -version
           swift --version
 
-      - name: Build
+      - name: Test
         run: |
           set -o pipefail
-          xcodebuild build \
+          xcodebuild test \
             -project SecretGarden.xcodeproj \
             -scheme SecretGarden-Dev \
-            -configuration Debug-Dev \
+            -testPlan SecretGarden-Dev \
             -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=latest' \
+            -enableCodeCoverage YES \
+            -resultBundlePath TestResults.xcresult \
+            -retry-tests-on-failure -test-iterations 2 \
             -onlyUsePackageVersionsFromResolvedFile \
             -skipPackagePluginValidation \
             -skipMacroValidation \
             CODE_SIGNING_ALLOWED=NO \
-            2>&1 | tee build.log
+            2>&1 | tee test.log
 
-      - name: Upload build log
-        if: failure()
+      - name: Coverage summary
+        if: always()
+        run: |
+          if [ -d TestResults.xcresult ]; then
+            echo '### Coverage by target' >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            xcrun xccov view --report --only-targets TestResults.xcresult >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload test results
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: build-log
-          path: build.log
+          name: test-results
+          path: |
+            TestResults.xcresult
+            test.log
+          retention-days: 7
