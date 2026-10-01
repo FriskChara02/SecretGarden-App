@@ -19,7 +19,6 @@ xcuserdata/
 # Swift Package Manager
 .build/
 .swiftpm/
-Package.resolved
 
 # CocoaPods
 Pods/
@@ -29,7 +28,9 @@ Pods/
 
 # Environment / Secrets
 # *.xcconfig
-!Config/Base.xcconfig.example
+# xcconfig: chỉ chứa placeholder, không có secret.
+# Khi có giá trị thật → dùng Secrets.xcconfig (ignore) + GitHub Secrets.
+Secrets.xcconfig
 Secrets.swift
 GoogleService-Info.plist
 

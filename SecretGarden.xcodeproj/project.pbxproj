@@ -957,7 +957,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SecretGarden/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "$(APP_DISPLAY_NAME)";
+				INFOPLIST_KEY_CFBundleDisplayName = SecretGarden;
 				INFOPLIST_KEY_NSCameraUsageDescription = "SecretGarden cần quyền truy cập camera để bạn chụp ảnh đại diện";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "SecretGarden cần quyền truy cập thư viện ảnh để bạn chọn ảnh đại diện";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -1066,7 +1066,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SecretGarden/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "$(APP_DISPLAY_NAME)";
+				INFOPLIST_KEY_CFBundleDisplayName = SecretGarden;
 				INFOPLIST_KEY_NSCameraUsageDescription = "SecretGarden cần quyền truy cập camera để bạn chụp ảnh đại diện";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "SecretGarden cần quyền truy cập thư viện ảnh để bạn chọn ảnh đại diện";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -1175,7 +1175,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SecretGarden/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "$(APP_DISPLAY_NAME)";
+				INFOPLIST_KEY_CFBundleDisplayName = SecretGarden;
 				INFOPLIST_KEY_NSCameraUsageDescription = "SecretGarden cần quyền truy cập camera để bạn chụp ảnh đại diện";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "SecretGarden cần quyền truy cập thư viện ảnh để bạn chọn ảnh đại diện";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -1277,7 +1277,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SecretGarden/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "$(APP_DISPLAY_NAME)";
+				INFOPLIST_KEY_CFBundleDisplayName = SecretGarden;
 				INFOPLIST_KEY_NSCameraUsageDescription = "SecretGarden cần quyền truy cập camera để bạn chụp ảnh đại diện";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "SecretGarden cần quyền truy cập thư viện ảnh để bạn chọn ảnh đại diện";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -1379,7 +1379,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SecretGarden/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "$(APP_DISPLAY_NAME)";
+				INFOPLIST_KEY_CFBundleDisplayName = SecretGarden;
 				INFOPLIST_KEY_NSCameraUsageDescription = "SecretGarden cần quyền truy cập camera để bạn chụp ảnh đại diện";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "SecretGarden cần quyền truy cập thư viện ảnh để bạn chọn ảnh đại diện";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -1481,7 +1481,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SecretGarden/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "$(APP_DISPLAY_NAME)";
+				INFOPLIST_KEY_CFBundleDisplayName = SecretGarden;
 				INFOPLIST_KEY_NSCameraUsageDescription = "SecretGarden cần quyền truy cập camera để bạn chụp ảnh đại diện";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "SecretGarden cần quyền truy cập thư viện ảnh để bạn chọn ảnh đại diện";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
