@@ -51,7 +51,7 @@ jobs:
           if [ -d TestResults.xcresult ]; then
             echo '### Coverage by target' >> "$GITHUB_STEP_SUMMARY"
             echo '```' >> "$GITHUB_STEP_SUMMARY"
-            xcrun xccov view --report --only-targets TestResults.xcresult >> "$GITHUB_STEP_SUMMARY"
+            xcrun xccov view --report --only-targets TestResults.xcresult >> "$GITHUB_STEP_SUMMARY" || echo "No coverage data" >> "$GITHUB_STEP_SUMMARY"
             echo '```' >> "$GITHUB_STEP_SUMMARY"
           fi
 
