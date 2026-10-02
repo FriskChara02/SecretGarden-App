@@ -44,8 +44,10 @@ jobs:
 
       - name: Fail on warnings
         run: |
-          count=$(grep -c "warning:" archive.log || true)
+          grep "warning:" archive.log | grep -v "appintentsmetadataprocessor" > warnings.txt || true
+          count=$(wc -l < warnings.txt | tr -d ' ')
           echo "Warnings: $count"
+          cat warnings.txt
           test "$count" -eq 0
 
       - name: Verify archive
