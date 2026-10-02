@@ -23,6 +23,13 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      - name: Cache SPM
+        uses: actions/cache@v4
+        with:
+          path: SourcePackages
+          key: spm-${{ runner.os }}-${{ hashFiles('**/Package.resolved') }}
+          restore-keys: spm-${{ runner.os }}-
+
       - name: Toolchain
         run: |
           xcodebuild -version
@@ -36,6 +43,7 @@ jobs:
             -scheme SecretGarden-Dev \
             -testPlan SecretGarden-Dev \
             -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=latest' \
+            -clonedSourcePackagesDirPath SourcePackages \
             -enableCodeCoverage YES \
             -resultBundlePath TestResults.xcresult \
             -retry-tests-on-failure -test-iterations 2 \

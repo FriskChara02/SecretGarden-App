@@ -1,0 +1,73 @@
+name: Release Build
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+
+env:
+  DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
+
+jobs:
+  archive:
+    name: Archive (Release-Production, unsigned)
+    runs-on: macos-26
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Cache SPM
+        uses: actions/cache@v4
+        with:
+          path: SourcePackages
+          key: spm-${{ runner.os }}-${{ hashFiles('**/Package.resolved') }}
+          restore-keys: spm-${{ runner.os }}-
+
+      - name: Archive
+        run: |
+          set -o pipefail
+          xcodebuild archive \
+            -project SecretGarden.xcodeproj \
+            -scheme SecretGarden-Production \
+            -configuration Release-Production \
+            -destination 'generic/platform=iOS' \
+            -archivePath build/SecretGarden.xcarchive \
+            -clonedSourcePackagesDirPath SourcePackages \
+            -onlyUsePackageVersionsFromResolvedFile \
+            -skipPackagePluginValidation \
+            -skipMacroValidation \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            2>&1 | tee archive.log
+
+      - name: Fail on warnings
+        run: |
+          count=$(grep -c "warning:" archive.log || true)
+          echo "Warnings: $count"
+          test "$count" -eq 0
+
+      - name: Verify archive
+        run: |
+          APP=$(find build/SecretGarden.xcarchive/Products/Applications -maxdepth 1 -name "*.app" | head -1)
+          PLIST="$APP/Info.plist"
+          pb=/usr/libexec/PlistBuddy
+          env_name=$($pb -c "Print :EnvironmentName" "$PLIST")
+          bundle_id=$($pb -c "Print :CFBundleIdentifier" "$PLIST")
+          version=$($pb -c "Print :CFBundleShortVersionString" "$PLIST")
+          build=$($pb -c "Print :CFBundleVersion" "$PLIST")
+          {
+            echo '### Archive summary'
+            echo "- Environment: $env_name"
+            echo "- Bundle ID: $bundle_id"
+            echo "- Version: $version ($build)"
+          } >> "$GITHUB_STEP_SUMMARY"
+          test "$env_name" = "production"
+
+      - name: Upload log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: archive-log
+          path: archive.log
